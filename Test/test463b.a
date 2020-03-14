@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 463b
+; Program Listing\Change Header
+; ok: "TITLE" psop (w/ optional non-string argument)
+
+; by Anton Treuenfels
+
+; first created: 04/30/11
+; last revised:  05/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .title  Trivial or genius? You decide!
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

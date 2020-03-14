@@ -1,0 +1,47 @@
+; Hobby Cross-Assembler Error Test 402e
+; Program Counter Manipulation\Fill Block With Constant Data
+; error: malformed "FILL" psop
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  09/27/09
+
+; warning(s): 3
+; - token ignored
+
+; error(s): 3
+; - expecting number
+; - unknown label
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no argument (with or without label)
+
+label1  .fill
+        .fill
+
+; too many arguments
+
+        .fill   1,02,"ignored"
+        .fill   1, 03, "ignored1", "ignored2"
+
+; forward reference
+
+label2  .fill     unknown_label
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Error Test 400l
+; Program Counter Manipulation\Define Uninitialized Storage
+; error: 32-bit program counter out of range (too big)
+
+; by Anton Treuenfels
+
+; first created: 06/28/05
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 1
+; - too big
+
+; fatal: 1
+; - pc invalid
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop
+        .org    $10000000   ; required psop
+
+; -------------------------------
+
+; 32-bit program counter
+
+        .ds     $f0000000+1 ; pc invalid (just barely)
+
+; -------------------------------
+
+        .end

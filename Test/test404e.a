@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 404e
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; warn\error: boundary value out of range
+
+; by Anton Treuenfels
+
+; first created: 07/20/05
+; last revised:  05/28/11
+
+; warning(s): 2
+; - odd value
+
+; error(s): 5
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .padto  0           ; silently ignored...
+        .padto  -1          ; ...all other complained about
+
+        .padto  $0ffff + 2
+        .padto  $10000 + 1
+
+        .padto  * + $10000
+        .padto  600 - 1000
+
+; -------------------------------
+
+        .end

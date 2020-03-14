@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 404m
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; fatal: cannot use PADTO in uninitialized segment
+
+; by Anton Treuenfels
+
+; first created: 10/11/09
+; last revised:  03/14/10
+
+; warning(s):
+
+; error(s): 1
+; - uninitialized
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .nodata         ; explicitly "no data"...
+
+        .padto  32      ; ...so this doesn't work
+
+        .ends
+
+; -------------------------------
+
+        .end

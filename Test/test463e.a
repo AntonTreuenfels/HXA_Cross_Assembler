@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 463e
+; Program Listing\Change Header
+; error: bad arguments
+
+; by Anton Treuenfels
+
+; first created: 04/30/11
+; last revised:  04/30/11
+
+; warning(s): 0
+
+; error(s): 2
+; - need string op
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .title  1234        ; numeric argument ( accepted "as-is" )
+
+        .include "ilisting.a"
+
+        .title  unknown$()  ; unknown function
+
+        .title  "First the version: " VER$() then an error
+
+; -------------------------------
+
+        .end

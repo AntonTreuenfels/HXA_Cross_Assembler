@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Test 400b
+; Program Counter Manipulation\Define Uninitialized Storage
+; ok: "DS" psop (segmented)
+
+; by Anton Treuenfels
+
+; first created: 09/30/09
+; last revised:  09/30/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .ds  16             ; implicitly uninitialized
+
+        .ends
+
+        ; a relative segment
+
+        .segment    rel1_1
+
+        .ds  32             ; implicitly uninitialized
+
+        .ends
+
+        ; another relative segment
+
+        .segment    rel1_2
+
+        .uninitialized      ; explicitly uninitialized
+
+        .ds 32              ; does this still function properly ?
+
+        .ends
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 457
+; Program Listing\Change Left Margin
+; ok: "MARGIN" psop (left margin=2, w/o line numbers)
+
+; by Anton Treuenfels
+
+; first created: 03/27/10
+; last revised:  04/03/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; "MARGIN" arguments begin "top, left" - we won't change default top margin
+
+        .margins    0,2     ; indent each line in listing
+
+        .include    "ilisting.a"
+
+; -------------------------------
+
+        .end

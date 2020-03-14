@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 459
+; Program Listing\Pagination
+; ok: "PAGESIZE" and "MARGIN" psops (w/o line numbers)
+
+; by Anton Treuenfels
+
+; first created: 04/03/10
+; last revised:  04/03/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .pagesize   75, 66      ; width, height
+
+        .margins    6, 5, 6, 5  ; top, left, bot, rgt
+
+        .include    "ilisting.a"
+
+; -------------------------------
+
+        .end

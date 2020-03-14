@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 455d
+; Program Listing\Change Page Width
+; ok: "PAGESIZE" psop (page width=0; no right edge)
+
+; by Anton Treuenfels
+
+; first created: 04/25/11
+; last revised:  04/25/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+        .liston linenums    ; turn on line number display
+
+        .pagesize   0       ; no right edge
+
+; -------------------------------
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

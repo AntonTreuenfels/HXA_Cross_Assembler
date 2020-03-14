@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Test 461c
+; Program Listing\Change Line Spacing
+; ok: "LINESPACE" psop (each line on its own page)
+
+; by Anton Treuenfels
+
+; first created: 04/10/10
+; last revised:  04/10/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+        .liston linenums    ; turn on line number display
+
+        .pagesize   75, 66  ; pagination
+
+        .margins    5, 3, 5, 3
+
+        .linespace  100     ; more than lines on a page
+
+; -------------------------------
+
+; we should see a line every 6+66*n lines, n=0,1,2,3... (6,72,138,204,...)
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 457b
+; Program Listing\Change Left Margin
+; ok: "MARGIN" psop (left margin=5, w/ line numbers)
+
+; by Anton Treuenfels
+
+; first created: 03/27/10
+; last revised:  04/09/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum width)
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .margins    0,5     ; indent each line in listing
+
+        .liston linenums    ; number each line in listing
+
+        .include    "ilisting.a"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 461
+; Program Listing\Change Line Spacing
+; warn\error: bad values
+
+; by Anton Treuenfels
+
+; first created: 04/03/10
+; last revised:  04/03/10
+
+; warning(s): 2
+; - already set
+; - odd value
+
+; error(s): 5
+; - need number
+; - too small
+; - too big
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .linespace          ; error (no argument)
+
+        .linespace  0       ; error (illegal)
+
+        .linespace  80      ; okay
+
+        .linespace  40*2    ; okay (same value)
+
+        .linespace  100     ; warn (not same value)
+
+        .linespace  -1      ; warn\error
+
+        .linespace  1000    ; error (illegal)
+
+        .linespace  "abc"   ; error (bad type)
+
+; -------------------------------
+
+        .end

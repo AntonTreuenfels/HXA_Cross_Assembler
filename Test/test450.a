@@ -1,0 +1,95 @@
+; Hobby Cross-Assembler Test 450
+; Program Listing\Listing
+; ok: "LIST--" psops 
+
+; by Anton Treuenfels
+
+; first created: 05/01/04
+; last revised:  06/11/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .if !defined(SETFLAG)
+
+        ; we can get by with only one test file by using self-inclusion
+        ; (probably not a trick of much use in any other context!)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+        .if ver() < $0150
+        .fatal  "HXA version 0.150 or higher required"
+        .endif
+
+; -------------------------------
+
+        .macro  SHWFLAG, ?name, ]mask
+        .if ]loopnum & ]mask
+        .string "  ON"
+        .else
+        .string " OFF"
+        .endif
+        .endm
+
+        .macro  SETFLAG, ?name,]mask
+        .if ]loopnum & ]mask
+        .liston ?name
+        .else
+        .listoff ?name
+        .endif
+        .endm
+
+]loopnum = 31           ; all flags on
+
+; -------------------------------
+
+        .endif      ; defined(SETFLAG)
+
+; -------------------------------
+
+; here we go...
+
+        .byte   ]loopnum            ; "flags" value
+
+        SHWFLAG object, $10
+        SHWFLAG source, $08
+        SHWFLAG includes, $04
+        SHWFLAG macros, $02
+        SHWFLAG untaken, $01
+
+        SETFLAG object, $10
+        SETFLAG source, $08
+        SETFLAG includes, $04
+        SETFLAG macros, $02
+        SETFLAG untaken, $01
+
+        ; reset default list options
+
+        .liston     object, source, includes
+        .listoff    macros, untaken
+
+        .byte   ]loopnum
+
+        .if ]loopnum > 0
+]loopnum = ]loopnum - 1
+        .include "test450.a"
+        .endif
+
+; if we use the "END" psop at the end of this file, it will be executed
+; the first time the conditional block is completed. That's not what we
+; want, though, since the block has to complete several more times
+; before the include stack is completely unwound. Fortunately "END" is
+; not a required psop because its effects happen automatically at the
+; end of source anyway.
+
+;       .end
+

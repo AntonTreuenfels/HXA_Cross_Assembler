@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 459e
+; Program Listing\Pagination
+; warn\fatal: "PAGESIZE" and "MARGIN" psops (no printable length)
+
+; by Anton Treuenfels
+
+; first created: 04/30/10
+; last revised:  05/28/11
+
+; warning(s): 2
+; - bad length
+
+; error(s): 0
+
+; fatal: 1
+; - bad format
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; built-in page format values
+
+        .include "ipagsize.a"
+
+; non-zero page length means top and bottom margins matter
+
+        .pagesize   75, 66                  ; width, length
+
+; setting max allowed margins should cause conflict
+
+        .margins    maxtop, 0, maxbot, 0    ; top, left, bottom, right
+
+        .include    "ilisting.a"
+
+; -------------------------------
+
+        .end

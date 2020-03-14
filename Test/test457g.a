@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 457g
+; Program Listing\Change Left Margin
+; warn: no printable width (recovers by changing page size)
+
+; by Anton Treuenfels
+
+; first created: 04/30/11
+; last revised:  04/30/11
+
+; warning(s): 1
+; - bad width
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; built-in page format values
+
+        .include "ipagsize.a"
+
+; setting left margin greater than page size should cause conflict
+
+        .margins    0, pagwid+1
+
+        .include    "ilisting.a"
+
+; changing page width should eliminate conflict and permit listing
+; - listing will be far, far to right
+
+        .pagesize   pagwid+25
+
+; -------------------------------
+
+        .end

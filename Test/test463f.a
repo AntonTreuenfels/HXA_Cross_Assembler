@@ -1,0 +1,45 @@
+; Hobby Cross-Assembler Error Test 463f
+; Program Listing\Change Header
+; warn: title is unique
+
+; by Anton Treuenfels
+
+; first created: 04/30/11
+; last revised:  05/05/11
+
+; warning(s): 2
+; - already set
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .title  "This is my nifty new header"               ; ok
+
+        .include "ilisting.a"
+
+        .title  This is my nifty new header                 ; ok
+
+        .title  "This is " "NOT" " my nifty new header"     ; warn
+
+t$      .equ    "This is my nifty new header"
+
+        .title  t$                                          ; ok
+
+        .title  t$ " NOT"                                   ; warn
+
+; -------------------------------
+
+        .end

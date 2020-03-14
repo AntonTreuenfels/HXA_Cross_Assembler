@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Error Test 404k
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; error\fatal: PADTO before first ORG (monolithic)
+
+; by Anton Treuenfels
+
+; first created: 03/12/07
+; last revised:  03/18/07
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+        .padto  30
+
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $ff
+
+        .padto  16
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Error Test 402o
+; Program Counter Manipulation\Fill Block With Constant Data
+; error\fatal: segmented 16-bit pc pushed out of range (too big)
+
+; by Anton Treuenfels
+
+; first created: 03/20/10
+; last revised:  05/28/11
+
+; warning(s): 
+
+; error(s): 2
+; - too big
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $FFF0       ; required psop
+
+; -------------------------------
+
+        ; error detected before any filling attempted (non-fatal)
+
+        .segment    i_can_eat_whatever_i_want_all_at_once
+
+        .relorg             ; default anyway...
+
+        .fill   70000       ; more than segment size
+
+        .ends
+
+        ; error detected while filling (fatal)
+
+        .segment    i_can_eat_whatever_i_want_in_tiny_bits
+
+        .relorg             ; default anyway...
+
+        .repeat 300
+        .fill   256
+        .endr
+
+        .ends
+
+; -------------------------------
+
+        .end

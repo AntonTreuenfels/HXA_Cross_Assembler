@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Test 402
+; Program Counter Manipulation\Fill Block With Constant Data
+; ok: "FILL" psop
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  10/11/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston autos
+
+; -------------------------------
+
+        .cpu    "T_16_L"   ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; expressions must have no forward reference
+; - optional fill values are hexidecimal opt-strings
+
+global1     .fill 2
+global2:    .fill 62, 01
+]var1       .fill 64
+]var2:      .fill 128, 0001
+@local1     .fill 256
+@local2:    .fill 512, "$AA55"
+
+; a label is optional
+
+            .fill 1024
+whereami:
+            .fill 1024, 0011223344556677
+
+; -------------------------------
+
+endpc       .end

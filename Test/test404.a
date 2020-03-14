@@ -1,0 +1,155 @@
+; Hobby Cross-Assembler Test 404
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; ok: "PADTO" pseudo op (monolithic)
+
+; by Anton Treuenfels
+
+; first created: 07/20/05
+; last revised:  09/27/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org     $1000      ; required psop
+
+; ---------------
+
+; a test macro built to force padding to happen
+
+        .macro  TEST_PADTO, ?boundary
+
+        .byte   ?boundary           ; pad to this
+
+        .if !(* % ?boundary)        ; make sure there's something to do
+        .byte   $ff                 ; (if we're on boundary now, get off it)
+        .endif
+
+        .padto  ?boundary
+
+        .byte   * % ?boundary       ; should be zero
+
+        .endm
+
+; ---------------
+
+; we're currently at $1000 (evenly divisible by all powers of two up to 2^9),
+; so these shouldn't generate any data at all
+
+]BOUND  = 1                         ; '1' accepted but never does anything
+
+        repeat 9
+        .padto ]BOUND
+]BOUND  = ]BOUND * 2                ; 2, 4, 8, etc
+        .endr
+
+; two to sixteen
+
+]BOUND  = 2
+
+        .repeat 15
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND + 1
+        .endr
+
+; some powers of two we haven't covered yet
+
+]BOUND  = 32
+
+        .repeat 3
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND * 2
+        .endr
+
+; ---------------
+
+; verify modular behavior when pc < boundary
+; - also easier to see if stopped at right byte offset !
+
+; two to sixteen
+
+]BOUND  = 2
+
+        .repeat 15
+        .org $0000                  ; start at zero every time
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND + 1
+        .endr
+
+; ---------------
+
+; pad to a specific addresses
+; - by using a value larger than the value of the program counter,
+; the first boundary occurs at that value
+
+        .org    $1000
+
+        .padto  $1010
+
+        .word   *                   ; let's see where we are !
+
+        .org    $cdef
+
+        .padto  $ce10
+
+        .word   *
+
+        .org    $ff03
+
+        .padto  $10000              ; pad to last legal address
+
+;       .word   *                   ; an error to store past that, though
+
+; ---------------
+
+; pad with specified values
+
+        .macro TEST_GIVEN, ?value
+
+        ; first test
+
+        .org    $1000
+
+        .padto  $1010, ?value
+
+        .word   *                   ; let's see where we are !
+
+        ; second test
+
+        .org    $cdef
+
+        .padto  $ce10, ?value
+
+        .word   *
+
+        ; third test
+
+        .org    $ff63
+
+        .padto  $10000, ?value      ; pad to last legal address
+
+;       .word   *                   ; an error to store past that, though
+
+        .endm
+
+; ---------------
+
+        TEST_GIVEN  $00             ; 8-bit
+
+        TEST_GIVEN  $FF             ; 8-bit
+
+        TEST_GIVEN  $FF00           ; 16-bit
+
+        TEST_GIVEN  $0088FF         ; 24-bit
+
+        TEST_GIVEN  $FFBB7733       ; 32-bit
+
+        TEST_GIVEN  $0022446688     ; 40-bit
+
+; ---------------
+
+        .end

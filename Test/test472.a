@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Test 472
+; Program Listing\Global Label Cross-Reference
+; ok: w/o line numbers (source x-ref only)
+
+; by Anton Treuenfels
+
+; first created: 04/13/11
+; last revised:  04/13/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston xref        ; what we're testing
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+bak01   .org    $1000       ; required psop (can be labeled)
+
+; -------------------------------
+
+bak01a  .word   fwd01       ; "bak01a" has the same value as "bak01"
+
+bak02   .word   fwd04
+
+; -------------------------------
+
+        .include    "ixrefglb.a"
+
+; -------------------------------
+
+f.0.2   .word   b_06_       ; ...but not period char
+
+; -------------------------------
+
+fwd01:       .end                ; optional psop (can be labeled)
+

@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 400r
+; Program Counter Manipulation\Define Uninitialized Storage
+; fatal: cannot use DS in data segment
+
+; by Anton Treuenfels
+
+; first created: 10/11/09
+; last revised:  03/14/10
+
+; warning(s):
+
+; error(s): 1
+; - data segment
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .word   $FFFF   ; now implicitly "all data"...
+
+        .ds  16         ; ...so this doesn't work
+
+        .ends
+
+; -------------------------------
+
+        .end

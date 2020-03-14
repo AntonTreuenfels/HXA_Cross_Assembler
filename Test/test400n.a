@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 400n
+; Program Counter Manipulation\Define Uninitialized Storage
+; error\fatal: DS outside of any segment (explicit segments)
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  09/30/09
+
+; warning(s):
+
+; error(s): 1
+; - outside segment
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .ds  16
+
+        .ends
+
+        ; a relative segment
+
+        .segment    rel1_1
+
+        .ds  32
+
+        .ends
+
+        ; invalid outside of any segment
+
+        .ds  64
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 463c
+; Program Listing\Change Header
+; ok: "TITLE" psop (w/ null expression)
+
+; by Anton Treuenfels
+
+; first created: 05/05/11
+; last revised:  05/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .title              ; no title on listing
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

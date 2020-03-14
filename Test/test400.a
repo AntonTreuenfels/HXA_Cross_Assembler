@@ -1,0 +1,52 @@
+; Hobby Cross-Assembler Test 400
+; Program Counter Manipulation\Define Uninitialized Storage
+; ok: "DS" psop (monolithic)
+
+; by Anton Treuenfels
+
+; first created: 07/01/04
+; last revised:  09/30/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston autos
+
+; -------------------------------
+
+; although no code will be generated, these are necessary
+; because "DS" alters the program counter
+
+        .cpu    "T_16_L"   ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; expression must have no forward reference
+
+global1     .ds 2
+global2:    .ds 62
+]var1       .ds 64
+]var2:      .ds 128
+@local1     .ds 256
+@local2:    .ds 512
+
+; a label is optional
+
+            .ds 1024
+whereami:
+            .ds 1024
+
+; zero size is legal...
+
+equendpc    .ds 0
+
+; ...and has the same effect as:
+
+equendpcalso:
+
+; -------------------------------
+
+endpc       .end

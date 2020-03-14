@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Error Test 400f
+; Program Counter Manipulation\Define Uninitialized Storage
+; warn: odd "DS" psop useage
+
+; by Anton Treuenfels
+
+; first created: 07/16/04
+; last revised:  12/16/04
+
+; warning(s): 2
+; - odd label
+; - odd value
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston autos
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; negative value legal but odd
+
+label1  .ds     -256        ; label1 = $1000
+
+label2  .ds     256         ; label2 = $0F00
+
+; why allow it ? Well there's no real logical contradiction involved,
+; and it's essentially the same thing as:
+
+label3  =   *               ; label3 = $1000
+        .org    * - 256
+
+; branch target label legal but odd
+
+ +      .ds     256         ; autolabel = $0F00
+
+; -------------------------------
+
+        .end

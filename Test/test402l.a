@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 402l
+; Program Counter Manipulation\Fill Block With Constant Data
+; fatal: cannot use FILL in uninitialized segment
+
+; by Anton Treuenfels
+
+; first created: 10/11/09
+; last revised:  10/11/09
+
+; warning(s):
+
+; error(s):
+
+; fatal: 1
+; - no data allowed
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .nodata         ; explicitly "no data"...
+
+        .fill   32      ; ...so this doesn't work
+
+        .ends
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,63 @@
+; Hobby Cross-Assembler Error Test 457e
+; Program Listing\Change Left Margin
+; warn\error: bad values
+
+; by Anton Treuenfels
+
+; first created: 03/27/10
+; last revised:  04/30/11
+
+; warning(s): 3
+; - already set
+; - odd value
+
+; error(s): 8
+; - need number
+; - blank field
+; - too small
+; - too big
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; built-in page format values
+
+            .include "ipagsize.a"
+
+; two arguments required, top and left margins
+; - first argument (top) will always be zero for these tests
+
+        .margins                    ; error (no argument x 2)
+
+        .margins    , 80            ; error (one argument)
+
+        .margins    0, "maxlft"     ; error (bad type)
+
+        .margins    0, minlft-1     ; warn\error (out of range)
+
+        .margins    0, maxlft+1     ; warn\error (out of range)
+
+        .margins    0, pagwid-1     ; ok (based on actual page width)
+
+        .margins    0, 74           ; ok (same value)
+
+        .margins    0, 20           ; warn (not same value)
+
+        .margins    0, -1           ; warn\error
+
+        .margins    0, 1000         ; error (out of range)
+
+; -------------------------------
+
+        .end

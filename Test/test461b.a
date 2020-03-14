@@ -1,0 +1,34 @@
+; Hobby Cross-Assembler Test 461b
+; Program Listing\Change Line Spacing
+; ok: "LINESPACE" psop (w/ pagination)
+
+; by Anton Treuenfels
+
+; first created: 04/03/10
+; last revised:  04/03/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+        .liston linenums    ; turn on line number display
+
+        .pagesize   250, 66 ; source lines on one line
+
+        .margins    6, 3, 6, 3
+
+        .linespace  3       ; doesn't go evenly into printable length
+
+; -------------------------------
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

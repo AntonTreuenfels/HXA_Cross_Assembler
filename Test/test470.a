@@ -1,0 +1,88 @@
+; Hobby Cross-Assembler Test 470
+; Program Listing\Macro Cross-Reference
+; ok: w/o line numbers (source x-ref only)
+
+; by Anton Treuenfels
+
+; first created: 04/09/11
+; last revised:  04/09/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"        ; required psop
+        .org    $1000           ; required psop
+
+        .liston macros, xref    ; we're testing "xref"
+
+; -------------------------------
+
+; largely cribbed from "TEST100.A"
+
+; empty body
+
+        .macro  NO_BODY
+        .endm
+
+; define null-terminated string (a C-style string)
+
+        .macro  STRZ, ?text
+        .str    ?text
+        .byte   0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+        .macro  PSTR, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; expand them here to make sure source cross-reference is okay
+
+        no_body
+
+        strz    "abcdefgh"
+
+        pstr    "ijklmno"
+
+; -------------------------------
+
+        ; make sure listing is correct for include files
+
+        .include "ixrefmac.a"
+
+; -------------------------------
+
+        ; defined in include file, expanded here
+
+        strz_4  "abcdefgh"
+
+        pstr_4  "ijklmno"
+
+; -------------------------------
+
+        ; defined/un-defined in root file
+
+        .undef no_body
+        .undef strz,  pstr
+
+        ; defined in include file, un-defined in root file
+
+        .undef strz_2, pstr_2, strequ
+
+        ; defined/un-defined in the include file
+
+;        .undef strz_3, pstr_3
+
+        ; leave these to make sure no such event is recorded
+
+;       .undef strz_4, pstr_4
+
+; -------------------------------
+
+        .end

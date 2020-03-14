@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Test 450e
+; Program Listing\Listing
+; warn: unrecognized LIST options
+
+; by Anton Treuenfels
+
+; first created: 07/23/05
+; last revised:  08/31/07
+
+; warning(s): 4
+; - ignored
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .liston macros, untaken             ; ok
+
+        .listoff labels, stats              ; ok
+
+        .liston _unknown                    ; warning
+
+        .listoff includes, _unknown, labels   ; 1 warning
+
+        .liston _unknown1, _unknown2        ; 2 warnings
+
+; -------------------------------
+
+        .end

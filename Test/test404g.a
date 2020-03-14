@@ -1,0 +1,34 @@
+; Hobby Cross-Assembler Error Test 404g
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; error\fatal: program counter forced out of range (implicit segments)
+
+; by Anton Treuenfels
+
+; first created: 08/05/05
+; last revised:  08/05/05
+
+; warning(s):
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - invalid pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $ffff       ; required psop
+
+; -------------------------------
+
+        .padto  10          ; error - next mod 10=0 is out of pc range
+
+; -------------------------------
+
+        .end

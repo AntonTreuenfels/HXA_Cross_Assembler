@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 402f
+; Program Counter Manipulation\Fill Block With Constant Data
+; warn: odd "FILL" psop useage
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  05/28/11
+
+; warning(s): 2
+; - odd value
+; - odd label
+
+; error(s): 2
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston autos
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; zero value legal (but silently ignored)
+
+        .fill   0
+
+; negative value odd (and error)
+
+label1  .fill     -256      ; label1 = $1000
+
+; value larger than max program counter (error)
+
+        .fill   $10001      ; pc max+1 = $10000 
+
+; branch target label odd but legal
+
+ +      .fill     256       ; autolabel = $1000
+
+; -------------------------------
+
+        .end

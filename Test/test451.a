@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Test 451
+; Program Listing\No Flags Specified
+; ok: "LIST--" defaults
+
+; by Anton Treuenfels
+
+; first created: 09/07/07
+; last revised:  09/07/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; with no flag specified "LIST--" defaults to OBJECT flag
+; ie., turns whole object listing ON or OFF
+
+loops       =   4
+
+]loopnum    =   loops
+
+        .while ]loopnum
+]cnt        =   loops
+        .byte   ]loopnum        ; turn off listing at
+        .while ]cnt
+        .byte   ]cnt            ; currently at
+        .if ]loopnum == ]cnt
+        .string "OFF"
+        .listoff
+]addr       =   *
+        .endif
+]cnt        =   ]cnt - 1
+        .endw
+]loopnum    =   ]loopnum - 1
+        .liston
+        .byte   * - ]addr       ; skipped listing
+        .string " ON"
+        .endw
+
+; -------------------------------
+
+        .end

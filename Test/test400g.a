@@ -1,0 +1,35 @@
+; Hobby Cross-Assembler Error Test 400g
+; Program Counter Manipulation\Define Uninitialized Storage
+; error: 16-bit program counter out of range (negative)
+
+; by Anton Treuenfels
+
+; first created: 06/28/05
+; last revised:  06/28/05
+
+; warning(s): 1
+; - odd value
+
+; error(s): 1
+; - too small
+
+; fatal: 1
+; - pc invalid
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .ds     -$2000      ; pc invalid
+
+; -------------------------------
+
+        .end

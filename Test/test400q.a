@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 400q
+; Program Counter Manipulation\Define Uninitialized Storage
+; fatal: cannot store data in uninitialized segment
+
+; by Anton Treuenfels
+
+; first created: 10/11/09
+; last revised:  10/11/09
+
+; warning(s):
+
+; error(s):
+
+; fatal: 1
+; - no data allowed
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .ds  16         ; now implicitly "no data"...
+
+        .word   $FFFF   ; ...so this doesn't work
+
+        .ends
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 402h.a
+; Program Counter Manipulation\Fill Block With Constant Data
+; error\fatal: FILL outside of any segment (explicit segments)
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  09/27/09
+
+; warning(s):
+
+; error(s): 1
+; - outside segment
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        ; an absolute segment
+
+        .segment    abs1
+
+        .org    $1000
+
+        .fill  16
+
+        .ends
+
+        ; a relative segment
+
+        .segment    rel1_1
+
+        .fill  32
+
+        .ends
+
+        ; invalid outside of any segment
+
+        .fill  64
+
+; -------------------------------
+
+        .end

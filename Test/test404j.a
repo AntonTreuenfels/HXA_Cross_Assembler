@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Error Test 404j
+; Program Counter Manipulation\Pad To Specific Byte Boundary
+; error\fatal: PADTO before CPU set (monolithic)
+
+; by Anton Treuenfels
+
+; first created: 03/12/07
+; last revised:  03/18/07
+
+; warning(s): 0
+
+; error(s): 1
+; - no cpu
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .padto  30
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $ff
+
+        .padto  16
+
+; -------------------------------
+
+        .end

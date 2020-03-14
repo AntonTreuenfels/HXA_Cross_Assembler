@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 457f
+; Program Listing\Change Left Margin
+; warn\fatal: no printable width
+
+; by Anton Treuenfels
+
+; first created: 04/03/10
+; last revised:  05/28/11
+
+; warning(s): 2
+; - bad width
+
+; error(s): 0
+
+; fatal: 1
+; - bad format
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; built-in page format values
+
+        .include "ipagsize.a"
+
+; setting max allowed margins should cause conflict
+
+        .margins    0, maxlft, 0, maxrgt
+
+        .include    "ilisting.a"
+
+; -------------------------------
+
+        .end

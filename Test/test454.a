@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 454
+; Program Listing\Show Line Numbers
+; ok: prefix line numbers to listing
+
+; by Anton Treuenfels
+
+; first created: 06/28/09
+; last revised:  04/05/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (maximum address width)
+        .org    $1000       ; required psop
+
+        .liston linenums    ; turn on line number display
+
+; -------------------------------
+
+        .include "ilisting.a"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,47 @@
+; Hobby Cross-Assembler Error Test 455e
+; Program Listing\Change Page Width
+; warn\error: bad values
+
+; by Anton Treuenfels
+
+; first created: 03/27/10
+; last revised:  04/03/10
+
+; warning(s): 2
+; - already set
+; - odd value
+
+; error(s): 3
+; - need number
+; - too small
+; - too big
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .pagesize           ; error (no arguments)
+
+        .pagesize   80      ; okay
+
+        .pagesize   40*2    ; okay (same value)
+
+        .pagesize   100     ; warn (not same value)
+
+        .pagesize   -1      ; warn\error
+
+        .pagesize   1000    ; error (illegal)
+
+; -------------------------------
+
+        .end

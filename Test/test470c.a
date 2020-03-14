@@ -1,0 +1,98 @@
+; Hobby Cross-Assembler Test 470c
+; Program Listing\Macro Cross-Reference
+; ok: source and listing x-ref; listed and un-listed macro expansions
+
+; by Anton Treuenfels
+
+; first created: 04/09/11
+; last revised:  04/11/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+        .liston xref        ; we're testing "xref"
+        .liston linenums    ; - to get listing x-ref
+
+; -------------------------------
+
+        ; an unlisted section
+
+        .listoff    object
+
+        ; a macro
+        ; - source line shown, listing line not shown
+
+        .macro  hello
+        .string "Hello, World!\x00"
+        .endm
+
+        ; test it
+        ; - source line shown, listing line not shown
+
+        hello
+
+        ; turn listing back on
+
+        .liston     object
+
+        ; test it
+        ; - both source and listing lines are shown
+
+        hello
+
+; -------------------------------
+
+        ; a wrapper macro
+        ; - both source and listing lines are shown
+
+        .macro  wrapper
+        hello
+        .endm
+
+        ; test it
+        ; source line:  "wrapper" and "hello" both show the same line
+        ; listing line: "wrapper" shows a line, "hello" does not
+        ; - because the source line triggering expansion of "hello" is
+        ; not listed, that expansion can't (easily) be tied to listing
+
+        wrapper
+
+; -------------------------------
+
+        ; the macro in a loop
+        ; - source line shown (once+repeat count), listing line not shown
+        ; - actually the source line triggering the expansion is shown,
+        ; ie., the ".endr" line
+
+        .repeat 4
+        hello
+        .endr
+
+        ; try it again with macro listing turned on
+        ; - both source and listing lines are shown
+
+        .liston macros
+
+        .repeat 4
+        hello
+        .endr
+
+        ; try it again with macro listing turned off
+        ; - source line shown (once+repeat count), listing line not shown
+
+        .listoff macros
+
+        .repeat 4
+        hello
+        .endr
+
+; -------------------------------
+
+        .end

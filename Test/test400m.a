@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Error Test 400m
+; Program Counter Manipulation\Define Uninitialized Storage
+; error: uninitialized program counter
+
+; by Anton Treuenfels
+
+; first created: 09/28/09
+; last revised:  10/03/09
+
+; warning(s): 0
+
+; error(s): 1
+; - no cpu
+
+; fatal: 1
+; - pc invalid
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; required psop
+;        .org    $10000000   ; required psop
+
+; -------------------------------
+
+; pc is uninitialized
+
+        .ds     $100        ; pc invalid
+
+; -------------------------------
+
+        .end

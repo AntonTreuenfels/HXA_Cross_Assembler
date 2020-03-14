@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 400e
+; Program Counter Manipulation\Define Uninitialized Storage
+; error: malformed "DS" psop
+
+; by Anton Treuenfels
+
+; first created: 07/01/04
+; last revised:  01/31/05
+
+; warning(s): 2
+; - token ignored
+
+; error(s): 3
+; - expecting number
+; - unknown label
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no expression (with or without label)
+
+label1  .ds
+        .ds
+
+; multiple expressions
+
+        .ds 1,2,3
+
+; forward reference
+
+label2  .ds     unknown_label
+
+; -------------------------------
+
+        .end

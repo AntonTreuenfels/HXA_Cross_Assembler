@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Error Test 402i
+; Program Counter Manipulation\Fill Block With Constant Data
+; error\fatal: 16-bit program counter pushed out of range (too big)
+
+; by Anton Treuenfels
+
+; first created: 09/27/09
+; last revised:  03/20/10
+
+; warning(s): 0
+
+; error(s): 1
+; - too big
+
+; fatal: 1
+; - pc invalid
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $FFF0       ; required psop
+
+; -------------------------------
+
+; count value is fine, but execution will exceed max pc
+
+        .fill   32          ; pc invalid
+
+; -------------------------------
+
+        .end
