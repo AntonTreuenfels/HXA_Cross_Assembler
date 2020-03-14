@@ -1,0 +1,62 @@
+; Hobby Cross-Assembler Test 610c
+; Miscellaneous\User Stack
+; ok: "PUSHS" pseudo op and "PEEK$()" and "POP$()" functions
+
+; by Anton Treuenfels
+
+; first created: 06/08/13
+; last revised:  08/02/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .echo   " ---------- "
+
+        ; put some entries on stack
+
+]i      = 1
+
+        .repeat  16
+]n$     =   str$( ]i )
+        .echo   "pushing " ]n$
+        .pushs  ]n$
+]i      =   ]i + 1
+        .endr
+
+        .echo   " ---------- "
+
+        ; with no arguments PEEK$() returns top stack entry
+
+        .echo   "Top stack value = " peek$()
+
+        .echo   " ---------- "
+
+        ; peek them top down
+
+]i      = 1
+
+        .repeat  16
+        .echo   "stack entry " str$( ]i ) " = " peek$( ]i )
+]i      =   ]i + 1
+        .endr
+
+        .echo   " ---------- "
+
+        ; remove all stack entries (otherwise assembler complains!)
+
+        .while !empty()
+]dummy$ =   pop$()
+        .endw
+
+; -------------------------------
+
+        .end

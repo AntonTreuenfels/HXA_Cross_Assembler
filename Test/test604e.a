@@ -1,0 +1,45 @@
+; Hobby Cross-Assembler Error Test 604e
+; Miscellaneous\User Messages w/ String Expressions
+; warn: WARN
+
+; by Anton Treuenfels
+
+; first created: 08/22/06
+; last revised:  08/22/06
+
+; warning(s): 3
+; - source fault
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; full string expressions are legal
+
+]text$  .equ    "The value of the program counter is "
+
+        .warn   ]text$ str$($)
+
+; no expression is legal
+
+        .warn
+
+; non-string expression is legal
+
+        .warn   Not a string expression
+
+; -------------------------------
+
+        .end

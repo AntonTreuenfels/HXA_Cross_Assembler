@@ -1,0 +1,66 @@
+; Hobby Cross-Assembler Test 610b
+; Miscellaneous\User Stack
+; ok: "PUSHS" pseudo op and "POP$()" and "EMPTY()" functions
+
+; by Anton Treuenfels
+
+; first created: 06/08/13
+; last revised:  08/02/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .echo   " ---------- "
+
+        ; initial stack condition
+
+        .if     empty()
+        .echo   "user stack empty"
+        .else
+        .echo   "user stack NOT empty"
+        .endif
+
+        .echo   " ---------- "
+
+        ; now put some entries on stack
+
+]i      = 1
+
+        .repeat  16
+]n$     =   str$( ]i )
+        .echo   "pushing " ]n$
+        .pushs  ]n$
+]i      =   ]i + 1
+        .endr
+
+        .echo   " ---------- "
+
+        ; now remove them
+
+        .while !empty()
+        .echo   "user stack NOT empty"
+        .echo   "popping " pop$()
+        .endw
+
+        .echo   " ---------- "
+
+        ; final condition
+
+        .if     empty()
+        .echo   "user stack empty"
+        .else
+        .echo   "user stack NOT empty"
+        .endif
+
+; -------------------------------
+
+        .end

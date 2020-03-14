@@ -1,0 +1,44 @@
+; Hobby Cross-Assembler Error Test 610g
+; Miscellaneous\User Stack
+; fatal: stack overflow ("MAXSTACK" stack size)
+
+; by Anton Treuenfels
+
+; first created: 06/08/13
+; last revised:  06/08/13
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - stack full
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_M"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        ; reduce default stack size
+
+        .maxstack   32
+
+]i      = 1
+
+        .while  1           ; infinite loop
+]n$     =   str$( ]i )
+        .echo   "pushing " ]n$
+        .pushs  ]n$
+]i      =   ]i + 1
+        .endw
+
+; -------------------------------
+
+        .end

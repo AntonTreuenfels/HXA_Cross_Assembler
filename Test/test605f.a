@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 605f
+; Miscellaneous\Reserved Names
+; error: reserved names in expressions (detected second pass)
+
+; by Anton Treuenfels
+
+; first created: 09/01/13
+; last revised:  09/03/13
+
+; warning(s): 0
+
+; error(s): 12
+; - reserved name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; identifier symbols
+
+        .word   __HXA__
+
+        .word   __HXA_T__
+
+        .long   __HXA__, __HXA_T__
+
+        ; pseudo ops
+
+        .word   assert
+
+        .word   long
+
+        .word   macro
+
+        .word   word
+
+        .long   assert, long, macro, word
+
+; -------------------------------
+
+        .end

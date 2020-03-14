@@ -1,0 +1,81 @@
+; Hobby Cross-Assembler Error Test 610j
+; Miscellaneous\User Stack
+; error: "PEEK$()" function and empty stack and out of range arguments
+
+; by Anton Treuenfels
+
+; first created: 06/08/13
+; last revised:  08/07/13
+
+; warning(s): 0
+
+; error(s): 9
+; - stack empty
+; - too big
+; - too small
+; - stack not empty
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_M"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        ; no stack entries to peek
+
+]dummy$ =   peek$()         ; top entry
+
+]dummy$ =   peek$( 1 )      ; top entry
+
+]dummy$ =   peek$( 1012 )   ; some other entry...
+
+        ; make some entries
+
+stacksize = 10
+
+]i      = 1
+
+        .repeat stacksize
+        .pushs  str$( ]i )
+]i      = 1 + ]i
+        .endr
+
+        ; try these again
+
+]dummy$ =   peek$()         ; top entry, OK
+
+]dummy$ =   peek$( 1 )      ; top entry, OK
+
+]dummy$ =   peek$( 1012 )   ; some other entry...not OK...
+
+        ; peek entries top down
+
+]i      = 1
+
+        .repeat stacksize+2
+        .echo   "stack entry " str$( ]i ) " = " peek$( ]i )
+]i      =   ]i + 1
+        .endr
+
+        ; peek entries bottom up
+
+]i      = stacksize
+
+        .repeat stacksize+2
+        .echo   "stack entry " str$( ]i ) " = " peek$( ]i )
+]i      =   ]i - 1
+        .endr
+
+        ; stack never emptied, so there's another error coming up...
+
+; -------------------------------
+
+        .end

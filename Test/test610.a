@@ -1,0 +1,105 @@
+; Hobby Cross-Assembler Test 610
+; Miscellaneous\User Stack
+; ok: "PUSHS" pseudo op and "POP$()" function
+
+; by Anton Treuenfels
+
+; first created: 06/07/13
+; last revised:  06/08/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .echo   " ---------- "
+
+        .pushs  "a literal string"
+
+        .echo   pop$()      ; "a literal string"
+
+gsl$    .equ    "a global string label"
+
+        .pushs  gsl$
+
+        .echo   pop$()      ; "a global string label"
+
+]vsl$   .equ    "a variable string label"
+
+        .pushs  ]vsl$
+
+        .echo   pop$()      ; "a variable string label"
+
+@lsl$   .equ    "a local string label"
+
+        .pushs  @lsl$
+
+        .echo   pop$()      ; "a local string label"
+
+        .echo   " ---------- "
+
+        .pushs  "a literal string"
+        .pushs  gsl$
+        .pushs  ]vsl$
+        .pushs  @lsl$
+
+        .echo   pop$()      ; "a local string label"
+        .echo   pop$()      ; "a variable string label"
+        .echo   pop$()      ; "a global string label"
+        .echo   pop$()      ; "a literal string"
+
+        .echo   " ---------- "
+
+        .pushs  "a literal string"
+        .pushs  gsl$
+        .pushs  ]vsl$
+        .pushs  @lsl$
+
+        ; multiple pops are evaluated left-to-right
+        ; - "a local..a variable..a global..a literal"
+
+        .echo   pop$() " " pop$() " " pop$() " " pop$()
+
+        .echo   " ---------- "
+
+        ; argument is a true string expression
+        ; - "a literal..a global..a variable..a local"
+
+        .pushs  "a literal string" " " gsl$ " " ]vsl$ " " @lsl$
+
+        .echo   pop$()
+
+        .echo   " ---------- "
+
+        ; all arguments are concatenated
+
+        .pushs  0x61, "ll arguments are concatenate", 0x64
+
+        .echo   pop$()
+
+        .echo   " ---------- "
+
+        ; null strings can be stacked
+
+nul$    .equ    ""
+
+        .pushs  "legal"
+        .pushs  ""
+        .pushs  "are-"
+        .pushs  nul$
+        .pushs  "strings-"
+        .pushs  "" nul$ "" nul$
+        .pushs  "null-"
+
+        .echo pop$() pop$() pop$() pop$() pop$() pop$() pop$()
+
+; -------------------------------
+
+        .end

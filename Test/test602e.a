@@ -1,0 +1,72 @@
+; Hobby Cross-Assembler Test 602e
+; Miscellaneous\HEX
+; error: HEX pseudo op
+
+; by Anton Treuenfels
+
+; first created: 03/21/07
+; last revised:  05/08/11
+
+; warning(s): 2
+; - odd value
+
+; error(s): 13
+; - need hex
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no argument supplied
+
+        .hex
+
+        .hex    ""
+
+        .hex    mid$( "012345", 100 )
+
+; an odd number of legal chars
+
+        .hex    123
+
+        .hex    "abcde"
+
+        .hex    $123
+
+        .hex    "abcdeh"
+
+; an even number with illegal chars
+
+        .hex    ic
+
+        .hex    "01ic"
+
+; illegal chars in a string label (even position)
+
+]ic$    .equ    "0123456789--abcdef"
+
+        .hex    ]ic$
+
+; illegal chars in a string label (odd position)
+
+]ic$    .equ    "0123456789a--bcdef"
+
+        .hex    ]ic$
+
+; comma creates an odd number of characters (in both arguments)
+
+        .hex    01234, 567
+
+; -------------------------------
+
+        .end

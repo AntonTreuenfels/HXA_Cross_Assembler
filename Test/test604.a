@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 604
+; Miscellaneous\User Messages w/ String Expressions
+; ok: ECHO
+
+; by Anton Treuenfels
+
+; first created: 07/26/06
+; last revised:  07/26/06
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; full string expressions are legal
+
+]text$  .equ    "The value of the program counter is "
+
+        .echo   ]text$ str$($)
+
+; -------------------------------
+
+        .end

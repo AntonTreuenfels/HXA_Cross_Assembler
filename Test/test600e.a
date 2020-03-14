@@ -1,0 +1,70 @@
+; Hobby Cross-Assembler Error Test 600e
+; Miscellaneous\Timers
+; error: "--TIMER" pseudo ops
+
+; by Anton Treuenfels
+
+; first created: 06/21/04
+; last revised:  06/28/09
+
+; warning(s): 4
+; - token ignored
+; - no effect
+; - odd use
+
+; error(s): 10
+; - expecting name
+; - name not found
+; - name already in use
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; malformed
+
+        .starttimer
+        .stoptimer
+        .showtimer
+
+; illegal names
+
+        .starttimer @local_name
+        .stoptimer ]variable_name
+        .showtimer +
+
+; unknown name
+
+        .starttimer ]unknown$
+        .stoptimer  unknown
+        .showtimer  unknown$
+
+; labels ignored (timer started)
+
+useless .starttimer good1
+
+; can't start again
+
+        .starttimer good1
+
+; labels ignored (timer stopped)
+
+useless .stoptimer  "good" "1"
+
+; can't stop again
+
+        .stoptimer  good1
+
+; -------------------------------
+
+        .end

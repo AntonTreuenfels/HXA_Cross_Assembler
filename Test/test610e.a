@@ -1,0 +1,48 @@
+; Hobby Cross-Assembler Error Test 610e
+; Miscellaneous\User Stack
+; error: bad arguments to "PUSHS" pseudo op
+
+; by Anton Treuenfels
+
+; first created: 06/07/13
+; last revised:  06/09/13
+
+; warning(s): 0
+
+; error(s): 7
+; - need string
+; - name not found
+; - need operator
+; - blank field
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_M"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .pushs                      ; no argument
+
+        .pushs  labelname           ; global numeric label
+
+        .pushs  not a string        ; "not" assumed global numeric label
+
+        .pushs  /123/               ; regex argument
+
+        .pushs  "literal", /123/    ; regex argument
+
+        .pushs  "literal",          ; missing argument
+
+        .pushs  , "literal"         ; missing argument
+
+; -------------------------------
+
+        .end

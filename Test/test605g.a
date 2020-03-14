@@ -1,0 +1,77 @@
+; Hobby Cross-Assembler Error Test 605g
+; Miscellaneous\Reserved Names
+; error: user names which cannot match reserved names
+
+; by Anton Treuenfels
+
+; first created: 09/04/13
+; last revised:  09/05/13
+
+; warning(s): 6
+; - definition ignored
+
+; error(s): 12
+; - reserved name
+; - bad expression
+; - bad block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; PSALIAS pseudo op
+
+; alias to pseudo op name
+
+        .psalias    "word=byte"
+        .psalias    "word=word"
+
+; alias to reserved name
+
+        .psalias    bit16 = __HXA__
+        .psalias    bit16 = __HXA_T__
+
+; alias to built-in function name
+
+        .psalias    "macro = defined"
+        .psalias    "macro = xlate"
+
+        ; MACRO pseudo op
+
+; same as pseudo op name
+
+        .macro  index
+        .endmacro
+
+label   .macro
+        .endmacro
+
+; same as reserved name
+
+        .macro  __HXA_T__
+        .endmacro
+
+__HXA__ .macro
+        .endmacro
+
+; same as built-in function name
+
+        .macro  forward
+        .endmacro
+
+ord     .macro
+        .endmacro
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Error Test 604g
+; Miscellaneous\User Messages w/ String Expressions
+; fatal: FATAL
+
+; by Anton Treuenfels
+
+; first created: 08/22/06
+; last revised:  08/22/06
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - source fault
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; full string expressions are legal
+
+]text$  .equ    "The value of the program counter is "
+
+        .fatal  ]text$ str$($)
+
+; -------------------------------
+
+        .end

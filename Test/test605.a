@@ -1,0 +1,123 @@
+; Hobby Cross-Assembler Test 605
+; Miscellaneous\Reserved Names
+; ok: reserved name detection
+
+; by Anton Treuenfels
+
+; first created: 12/26/11
+; last revised:  09/03/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; reserved names which should be detected
+
+        ; using IFDEF and IFNDEF
+
+        ; __HXA__
+
+        .ifdef __HXA__
+        .echo "__HXA__ symbol detected"
+        .endif
+
+        .ifndef __HXA__
+        .fatal "__HXA__ symbol *NOT* detected"
+        .endif
+
+        ; __HXA_T__
+
+        .ifdef __HXA_T__
+        .echo "__HXA_T__ symbol detected"
+        .endif
+
+        .ifndef __HXA_T__
+        .fatal "__HXA_T__ symbol *NOT* detected"
+        .endif
+
+        ; using LABEL()
+
+        ; __HXA__
+
+        .if label(__HXA__)
+        .echo "__HXA__ symbol detected"
+        .endif
+
+        .if !label(__HXA__)
+        .fatal "__HXA__ symbol *NOT* detected"
+        .endif
+
+        ; __HXA_T__
+
+        .if label("__HXA_T__")
+        .echo "__HXA_T__ symbol detected"
+        .endif
+
+        .if !label("__HXA_T__")
+        .fatal "__HXA_T__ symbol *NOT* detected"
+        .endif
+
+; -------------------------------
+
+        ; reserved names which should not be detected
+        ; - ie., built-in numeric function names
+        ; - string functions do not have numeric names (and so cause error)
+        ; - names must be specified as strings or they will be interpreted
+        ; as part of an (incomplete) expression
+        ; - as strings, they become the result of the string expression
+
+        ; using IFDEF and IFNDEF
+
+        ; defined
+
+        .ifdef "defined"
+        .fatal "DEFINED symbol detected"
+        .endif
+
+        .ifndef "defined"
+        .echo "DEFINED symbol *NOT* detected"
+        .endif
+
+        ; empty
+
+        .ifdef "EMPTY"
+        .fatal "EMPTY symbol detected"
+        .endif
+
+        .ifndef "EMPTY"
+        .echo "EMPTY symbol *NOT* detected"
+        .endif
+
+        ; using LABEL()
+
+        ; label
+
+        .if label("LABEL")
+        .fatal "LABEL symbol detected"
+        .endif
+
+        .if !label("LABEL")
+        .echo "LABEL symbol *NOT* detected"
+        .endif
+
+        ; ver
+
+        .if label("ver")
+        .fatal "VER symbol detected"
+        .endif
+
+        .if !label("ver")
+        .echo "VER symbol *NOT* detected"
+        .endif
+
+; -------------------------------
+
+        .end

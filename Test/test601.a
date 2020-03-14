@@ -1,0 +1,95 @@
+; Hobby Cross-Assembler Test 601
+; Miscellaneous\Numbers and BIT--
+; ok: numbers and "BYTE", "WORD", "REVWORD", "LONG" and "REVLONG" pseudo-ops
+; - macro/repeat definitions used to make testing easier :)
+
+; by Anton Treuenfels
+
+; first created: 06/21/03
+; last revised:  01/24/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org     $1000      ; required psop
+
+; -------------------------------
+
+; - note that "revlong" psop shows entire 32-bit value left-to-right
+
+        .macro  data, ?value
+]LESS   =   ?value - 1
+]MORE   =   ?value + 1
+        .revlong    ]LESS
+        .revlong    ?value
+        .revlong    ]MORE
+        .bit24r     ]LESS
+        .bit24r     ?value
+        .bit24r     ]MORE
+        .revword    ]LESS
+        .revword    ?value
+        .revword    ]MORE
+        .long       ]LESS
+        .long       ?value
+        .long       ]MORE
+        .bit24      ]LESS
+        .bit24      ?value
+        .bit24      ]MORE
+        .word       ]LESS
+        .word       ?value
+        .word       ]MORE
+        .byte       ]LESS
+        .byte       ?value
+        .byte       ]MORE
+        .endm
+
+; --------------------
+
+; selected values
+
+        data    0
+        data    -0
+        data    1
+        data    -1
+        data    16
+        data    -16
+        data    256
+        data    -256
+        data    4096
+        data    -4096
+        data    65536
+        data    -65536
+        data    1048576
+        data    -1048576
+        data    16777216
+        data    -16777216
+        data    268435456
+        data    -268435456
+        data    2147483646      ; $7fffffff - 1 (max val - 1)
+        data   -2147483647      ; $80000000 + 1 (min val + 1)
+
+; slide a one bit from right-to-left
+; - doesn't change 32nd (sign) bit
+
+]VAL    =   $01
+        .repeat 31
+        data    ]VAL
+]VAL    = ]VAL << 1
+        .endr
+
+; convert zero bits to one bits right-to-left
+; doesn't change 32nd (sign) bit
+
+]VAL    =   $01
+        .repeat 30
+        data    ]VAL
+]VAL    =   (]VAL<<1) + 1
+        .endr
+        data    ]VAL - 1        ; $7fffffff - 1 (max value - 1)
+
+        .end

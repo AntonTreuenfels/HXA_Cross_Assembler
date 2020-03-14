@@ -1,0 +1,99 @@
+; Hobby Cross-Assembler Test 602
+; Miscellaneous\HEX
+; ok: HEX pseudo op
+
+; by Anton Treuenfels
+
+; first created: 03/21/07
+; last revised:  09/27/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; using "as-is" text
+; - note commas can be used to separate
+; any group of hex characters with an even count
+
+        .hex    01
+
+        .hex    0203
+
+        .hex    04,0506,070809
+
+        .hex    0a , 0b0c , 0d0e0f
+
+; using literal strings
+
+        .hex    "01"
+
+        .hex    "0203"
+
+        .hex    "04","0506","070809"
+
+        .hex    "0a" , "0b0c" , "0d0e0f"
+
+; using backward referenced strings
+
+hb1$    .equ    "01"
+hb2$    .equ    "0203"
+hb3$    .equ    "040506"
+
+        .hex    "00" hb1$ hb2$ hb3$ "07"
+
+; - because the argument must be constant forward reference will not work
+
+; using a string function
+
+]hex$   .equ    "00102030405060708090A0B0C0D0E0F0"
+
+        .while ]hex$
+        .hex   mid$(]hex$,1,2)
+]hex$   .equ   mid$(]hex$,3)
+        .endw
+
+; -------------------------------
+
+; using radix indicators on "as-is" literals
+
+        .hex    $01
+
+        .hex    0x0203
+
+        .hex    04h,0X0506,070809H
+
+        .hex    $0a , 0x0b0c , 0d0e0fh
+
+        .hex    $00102030405060708090A0B0C0D0E0F0
+
+        .hex    0X00102030405060708090A0B0C0D0E0F0
+
+        .hex    00102030405060708090A0B0C0D0E0F0H
+
+; using radix indicators on string literals
+
+        .hex    "$01"
+
+        .hex    "0x0203"
+
+        .hex    "04h","0X0506","070809H"
+
+        .hex    "$0a" , "0x0b0c" , "0d0e0fh"
+
+        .hex    "$00102030405060708090A0B0C0D0E0F0"
+
+        .hex    "0X00102030405060708090A0B0C0D0E0F0"
+
+        .hex    "00102030405060708090A0B0C0D0E0F0H"
+
+; -------------------------------
+
+        .end

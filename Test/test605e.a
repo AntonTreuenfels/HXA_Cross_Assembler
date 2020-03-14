@@ -1,0 +1,88 @@
+; Hobby Cross-Assembler Error Test 605e
+; Miscellaneous\Reserved Names
+; error: assignment to reserved names
+
+; by Anton Treuenfels
+
+; first created: 09/02/13
+; last revised:  09/03/13
+
+; warning(s): 1
+; - unknown cpu
+
+; error(s): 17 
+; - blank field
+; - need number
+; - reserved name
+; - need hex
+; - need operand
+; - bad cpu
+; - can't open
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; perhaps ideally the assembler should catch all reserved name
+        ; conflicts in a uniform manner
+        ; - however only lines that start with a reserved label or
+        ; built-in function name detect the conflict
+        ; - lines which begin with a pseudo op try to execute the pseudo op,
+        ; which fails for a variety of reasons
+
+        ; implied assignment of program counter
+
+assert                     ; to argument-accepting pseudo op
+
+bit08
+
+chr$                        ; to built-in function name
+
+index
+
+__hxa__                     ; to built-in symbol
+
+__hxa_t__
+
+        ; implied assignment of program counter
+
+hex         .bit16 $ff     ; to argument-accepting pseudo op
+
+string      .bit16 $ff
+
+cpu$        .bit16 $ff     ; to built-in function name
+
+label       .bit16 $ff
+
+__hxa__     .bit16 $ff     ; to built-in symbol
+
+__hxa_t__   .bit16 $ff
+
+        ; explicit assignment of program counter
+
+cpu         = *             ; to argument-accepting pseudo op
+
+include     = $
+
+match$      = *             ; to built-in function name
+
+segbeg      = $
+
+__hxa__     = *             ; to built-in symbol
+
+__hxa_t__   = $
+
+; -------------------------------
+
+        .end

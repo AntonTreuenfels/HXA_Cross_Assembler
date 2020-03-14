@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Test 600
+; Miscellaneous\Timers
+; ok: "--TIMER" pseudo ops
+
+; by Anton Treuenfels
+
+; first created: 06/21/04
+; last revised:  11/28/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .listoff    object  ; don't care
+        .liston     stats
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+COUNT   .equ    512
+
+        .starttimer repeattotal     ; time it all
+        .starttimer "repeat1"       ; time first part
+
+        .repeat COUNT
+        .byte   $01
+        .endr
+
+]R1$    =   "repeat1"
+
+        .stoptimer  ]R1$            ; we'll read it later
+
+        .showtimer  repeattotal     ; how long so far ?
+
+        .starttimer "repeat" "2"    ; time second part
+
+        .repeat COUNT
+        .byte   $02
+        .endr
+
+        .stoptimer  repeat2         ; we'll read it, uh, very soon
+
+        .showtimer  ]R1$            ; how long for first part ?
+        .showtimer  repeat2         ; how long for second part ?
+        .showtimer  repeattotal     ; how long in all ?
+
+; -------------------------------
+
+        .end
