@@ -1,0 +1,109 @@
+; Hobby Cross-Assembler Error Test 104e
+; Macros\EXITIF from Macro
+; warn\error: unconditional "EXIT" outside of macro
+
+; by Anton Treuenfels
+
+; first created: 09/24/07
+; last revised:  07/10/09
+
+; warning(s): 1
+; - token ignored
+
+; error(s): 7
+; - outside expansion
+; - expecting number
+; - name not found
+; - bad EOE
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; "EXITIF" checks to see if it is invoked outside of an
+; expansion block (which is illegal)
+
+        .exitif 1
+
+; labels are ignored by EXITIF
+
+        .macro  testmac0
+        .byte   $00
+label1  .exitif 1
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac0
+
+; EXITIF must have an expression
+
+        .macro  testmac1
+        .byte   $00
+        .exitif
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac1
+
+; EXITIF must have an expression with no forward reference (numeric)
+
+        .macro  testmac2a
+        .byte   $00
+        .exitif unKnownLabel
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac2a
+
+; EXITIF must have an expression with no forward reference (string)
+
+        .macro  testmac2b
+        .byte   $00
+        .exitif unKnownLabel$
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac2b
+
+; EXITIF must have a correct expression (numeric)
+
+        .macro  testmac3
+        .byte   $00
+        .exitif unKnownLabel / unknownLabel$
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac3
+
+; should still be a problem (outside expansion)
+
+        .exitif 0
+
+; should still be a problem (no expression)
+
+        .exitif
+
+; ---------------
+
+        .end
+

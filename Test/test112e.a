@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Error Test 112e
+; Macros\PUTBACK pseudo op
+; warn\error: "PUTBACK" psop
+
+; by Anton Treuenfels
+
+; first created: 06/20/06
+; last revised:  03/15/10
+
+; warning(s): 2
+; - label ignored
+
+; error(s): 1
+; - only inside macro
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; cannot be used outside of a macro expansion
+
+            .onexpand   text doesn't matter here
+
+
+; ONEXPAND ignores labels
+
+            .macro  IGNORE_LABEL
+@a_label    .onexpand   .word *
+            .endm
+
+; try it
+
+        IGNORE_LABEL
+
+; even if the label contains the ONEXPAND pseudo op
+
+            .macro  IGNORE_LABEL2, ?arg
+]onexpand   .onexpand   .word ?arg
+            .endm
+
+; try it
+
+        IGNORE_LABEL2 *
+
+; -------------------------------
+
+        .end

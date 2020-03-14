@@ -1,0 +1,244 @@
+; Hobby Cross-Assembler Test 163
+; Whiles\EXIT from While
+; ok: unconditional "EXIT" psop within while block
+
+; by Anton Treuenfels
+
+; first created: 11/06/04
+; last revised:  11/06/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros  ; show expansions
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+; un-nested
+; -------------------------------
+
+; exit without doing anything
+; - we can ignore proper control expression if we can quit another way !
+
+        .while  10         ; no output
+        .exit
+        .endw
+
+; exit before doing anything
+
+        .while  10         ; no output
+        .exit
+        .byte   $00
+        .endw
+
+; exit while doing something
+
+        .while  10         ; $11
+        .byte   $11
+        .exit
+        .byte   $22
+        .endw
+
+; exit after doing something
+
+        .while  10         ; $33
+        .byte   $33
+        .exit
+        .endw
+
+; -------------------------------
+; nested
+; -------------------------------
+
+; exit from nested while
+
+        .while  3          ; no output
+        .exit
+        .byte   $44
+        .while  2
+        .byte   $55
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44
+        .byte   $44
+        .exit
+        .while  2
+        .byte   $55
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+]COUNT  = 3
+
+        .while  ]COUNT     ; $44 $66 $44 $66 $44 $66
+        .byte   $44
+        .while 2
+        .exit
+        .byte   $55
+        .endw
+        .byte   $66
+]COUNT  = ]COUNT - 1
+        .endw
+
+; exit from nested while
+
+]COUNT  = 3
+
+        .while  ]COUNT      ; $44 $55 $66 $44 $55 $66 $44 $55 $66
+        .byte   $44
+        .while  2
+        .byte   $55
+        .exit
+        .endw
+        .byte   $66
+]COUNT  = ]COUNT - 1
+        .endw
+
+; exit from nested while
+
+        .while  3           ; $44 $55 $55
+        .byte   $44
+
+]COUNT  = 2
+        .while  ]COUNT
+        .byte   $55
+]COUNT  = ]COUNT - 1
+        .endw
+        .exit
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3     ; $44 $55 $55 $66
+        .byte   $44
+]COUNT   = 2
+        .while  ]COUNT
+        .byte   $55
+]COUNT  = ]COUNT - 1
+        .endw
+        .byte   $66
+        .exit
+        .endw
+
+; exit from nested while
+
+        .while  3          ; no output
+        .exit
+        .byte   $44
+        .while  2
+        .exit
+        .byte   $55
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44
+        .byte   $44
+        .exit
+        .while  2
+        .exit
+        .byte   $55
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44
+        .byte   $44
+        .while  2
+        .exit
+        .byte   $55
+        .endw
+        .exit
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3           ; $44 $66
+        .byte   $44
+        .while  2
+        .exit
+        .byte   $55
+        .endw
+        .byte   $66
+        .exit
+        .endw
+
+; exit from nested while
+
+        .while  3          ; no output
+        .exit
+        .byte   $44
+        .while  2
+        .byte   $55
+        .exit
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44
+        .byte   $44
+        .exit
+        .while  2
+        .byte   $55
+        .exit
+        .endw
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44 $55
+        .byte   $44
+        .while  2
+        .byte   $55
+        .exit
+        .endw
+        .exit
+        .byte   $66
+        .endw
+
+; exit from nested while
+
+        .while  3          ; $44 $55 $66
+        .byte   $44
+        .while  2
+        .byte   $55
+        .exit
+        .endw
+        .byte   $66
+        .exit
+        .endw
+
+; --------------------
+; labeled
+; --------------------
+
+        .while 10
+        .word   @local1     ; = current address + 2
+        .exit
+        .word   unknown     ; doesn't matter - completely skipped
+@local1 .endw
+
+; --------------------
+
+        .end

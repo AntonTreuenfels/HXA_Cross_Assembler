@@ -1,0 +1,195 @@
+; Hobby Cross-Assembler Test 105
+; Macros\DEFINED() and UNDEF
+; ok: macro definition existence testing and deletion
+
+; by Anton Treuenfels
+
+; first created: 08/16/03
+; last revised:  03/19/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; is macro defined ?
+
+        .byte   defined( makestr )
+
+; define macro (a C-style string)
+
+        .macro  makestr, ?text
+        .str    ?text
+        .byte   $00
+        .endm
+
+; is macro defined ?
+
+        .byte   defined( makestr )
+
+; use the macro
+
+        makestr "C-style"
+
+; delete macro definition
+
+        .undef  makestr
+
+; is macro defined ?
+
+        .byte   defined( makestr )
+
+; define macro (a Pascal-style string)
+; - use string expression to name
+
+]str$   =   "make"
+
+        .macro  ]str$ "str", ?text
+        .byte   @end-@beg
+ @beg   .str    ?text
+ @end   .endm
+
+; is macro defined ?
+
+        .byte   defined( makestr )
+
+; use the macro
+
+        makestr "Pascal-style"
+
+; test nested parentheses (for completeness, not necessarily utility !)
+; test ternary conditional (for completeness, not necessarily utility! )
+
+m1$     =   ]str$ "str"
+m2$     =   "un" m1$
+m3$     =   m2$ "redux"
+
+; is macro defined ?
+
+        .byte   defined( (makestr) )
+
+        .byte   defined( 0 ? makestr : unmakestr )
+        .byte   defined( 1 ? makestr : unmakestr )
+
+        .byte   defined( 0 ? ]str$ "str" : "un" ]str$ "str" )
+        .byte   defined( 1 ? ]str$ "str" : "un" ]str$ "str" )
+
+        ; ------------------------------------
+        ; test form:    a ? b ? c : d : e
+        ; association:  a ? ( b ? c : d ) : e 
+        ; ------------------------------------
+
+        .byte   defined( 0 ? 0 ? m1$ : m2$ : m3$ )
+        .byte   defined( 0 ? 1 ? m1$ : m2$ : m3$ )
+        .byte   defined( 1 ? 0 ? m1$ : m2$ : m3$ )
+        .byte   defined( 1 ? 1 ? m1$ : m2$ : m3$ )
+
+        ; ------------------------------------
+        ; test form:    a ? b : c ? d : e
+        ; association:  a ? b : ( c ? d : e )
+        ; ------------------------------------
+
+        .byte   defined( 0 ? m1$ : 0 ? m2$ : m3$ )
+        .byte   defined( 0 ? m1$ : 1 ? m2$ : m3$ )
+        .byte   defined( 1 ? m1$ : 0 ? m2$ : m3$ )
+        .byte   defined( 1 ? m1$ : 1 ? m2$ : m3$ )
+
+; delete macro definition
+; - use string expression to name
+; - one created name never was (or will be) a defined macro
+
+        .undef  ]str$ "str"
+
+        .undef  0 ? ]str$ "str" : "un" ]str$ "str"
+        .undef  1 ? ]str$ "str" : "un" ]str$ "str"
+
+; is macro defined ?
+
+        .byte   defined( ( (makestr) ) )
+
+        .byte   defined( 0 ? makestr : unmakestr )
+        .byte   defined( 1 ? makestr : unmakestr )
+
+        .byte   defined( 0 ?]str$ "str" : "un" ]str$ "str" )
+        .byte   defined( 1 ?]str$ "str" : "un" ]str$ "str" )
+
+        ; ------------------------------------
+        ; test form:    a ? b ? c : d : e
+        ; association:  a ? ( b ? c : d ) : e 
+        ; ------------------------------------
+
+        .byte   defined( 0 ? 0 ? m1$ : m2$ : m3$ )
+        .byte   defined( 0 ? 1 ? m1$ : m2$ : m3$ )
+        .byte   defined( 1 ? 0 ? m1$ : m2$ : m3$ )
+        .byte   defined( 1 ? 1 ? m1$ : m2$ : m3$ )
+
+        ; ------------------------------------
+        ; test form:    a ? b : c ? d : e
+        ; association:  a ? b : ( c ? d : e )
+        ; ------------------------------------
+
+        .byte   defined( 0 ? m1$ : 0 ? m2$ : m3$ )
+        .byte   defined( 0 ? m1$ : 1 ? m2$ : m3$ )
+        .byte   defined( 1 ? m1$ : 0 ? m2$ : m3$ )
+        .byte   defined( 1 ? m1$ : 1 ? m2$ : m3$ )
+
+; -----------------
+
+        ; test multiple definition deletions on one line
+
+        .macro  m1
+        .endm
+
+        .macro  m2
+        .endm
+
+        .macro  m3
+        .endm
+
+        .macro  m4
+        .endm
+
+        .byte defined(m1), defined(m2), defined(m3), defined(m4)
+
+        undef   m1, m3
+        
+        .byte defined(m1), defined(m2), defined(m3), defined(m4)
+
+        .undef  m2, m4
+
+        .byte defined(m1), defined(m2), defined(m3), defined(m4)
+
+; -----------------
+
+        ; test undefinition before definition
+
+        .undef  m5
+
+        .macro m5
+        .endm
+
+        .undef  m6, m7
+
+        .macro m6
+        .endm
+
+        .macro m7
+        .endm
+
+        .undef  m5,m6,m7
+
+        ; test a name that never becomes a defined macro
+        ; - a literal name, as opposed to a created name earlier used
+
+        .undef  never_will_be
+
+; -----------------
+
+        .end

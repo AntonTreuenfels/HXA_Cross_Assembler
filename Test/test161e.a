@@ -1,0 +1,113 @@
+; Hobby Cross-Assembler Error Test 161e
+; Whiles\Macros and Whiles
+; error: macro definitions within while blocks
+
+; by Anton Treuenfels
+
+; first created: 11/06/04
+; last revised:  01/08/05
+
+; warning(s):
+
+; error(s): 3
+; - expecting string
+; - expecting operand
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; Summary: While block expansions are a form of macro expansion.
+; During expansions HXA silently ignores the delimiters of any
+; macro definition encountered but does duplicate the actual body of
+; the definition (this is what allows macro definitions to be nested).
+; Attempting to define a macro within a while block can lead to
+; unexpected behavior.
+
+; no error reported; the macro definition is ignored
+
+]FLAG  = 1
+
+        .while ]FLAG
+        .macro  null_1
+        .endm
+]FLAG  = 0
+        .endw
+
+; interpreted as a label, not a macro call
+
+        ignored_1
+
+; no error reported; the definition is repeated twice but also ignored twice
+
+]COUNT  = 2
+
+        .while  ]COUNT
+        .macro  null_2
+        .endm
+]COUNT  = ]COUNT - 1
+        .endw
+
+; interpreted as a label, not a macro call
+
+        null_2
+
+; no error reported; places two zero bytes in output at this point
+
+]COUNT  = 2
+
+        .while  ]COUNT
+        .macro  name_1
+        .byte   $00
+        .endm
+]COUNT  = ]COUNT - 1
+        .endw
+
+; interpreted as a label, not a macro call
+
+        name_1
+
+; error reported when formal argument is not replaced but evaluated anyway
+
+]FLAG   = 1
+
+        .while  ]FLAG
+        .macro  name_2, ?text
+        .str    ?text
+        .byte   0
+        .endm
+]FLAG   = 0
+        .endw
+
+; interpreted as a label, not a macro call
+
+        name_2
+
+; error reported when formal argument is not replaced but evaluated anyway
+
+]COUNT  = 2
+
+        .while  ]COUNT
+        .macro  name_3, ?val
+        .word   2 * ?val
+        .endm
+]COUNT  = ]COUNT - 1
+        .endw
+
+; interpreted as label, not a macro call
+
+        name_3
+
+; -------------------------------
+
+        .end

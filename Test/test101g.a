@@ -1,0 +1,66 @@
+; Hobby Cross-Assembler Error Test 101g
+; Macros\Nested Macros
+; error: unresolved forward reference within nested macro (first pass)
+
+; by Anton Treuenfels
+
+; first created: 07/06/04
+; last revised:  11/12/08
+
+; warning(s): 0
+
+; error(s): 6
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we're interested just in what the error report looks like
+; - how easy is it to tell where to find the error in the source ?
+
+; - during second pass no block structure information is available,
+; so all we see regarding location is the original source line
+; (triggered expansion) and the offset of error line (expansion line)
+
+; a simple definition
+
+        .macro  UNRESOLVED
+        .word   unknownLabel
+        .endm
+
+; multiple unresolved labels
+
+        .macro  UNRESOLVED_2
+        .word   unknownLabel
+        .word   unknownAgain
+        .endm
+
+; now nest them
+
+        .macro  UNRESOLVED_3
+        UNRESOLVED
+        UNRESOLVED_2
+        .endm
+
+; try it
+
+        UNRESOLVED_3
+
+; try it again
+
+        UNRESOLVED_3
+
+; -------------------------------
+
+        .end

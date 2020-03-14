@@ -1,0 +1,79 @@
+; Hobby Cross-Assembler Test 160b
+; Whiles\While Definition
+; ok: basic while block definition and expansion (string control expressions)
+
+; by Anton Treuenfels
+
+; first created: 07/11/09
+; last revised:  07/11/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros, autos   ; show expansions and internal labels
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+; empty body test
+
+NO_BODY_1:
+        .while ""            ; infinite loop if non-null
+        .endw
+
+        .word   *
+
+; ---------------
+
+; unseen body test
+
+UNSEEN:
+        .while ""           ; no warning (body skipped)
+        .fatal "Shouldn't see this!"
+        .endw
+
+        .word   *
+
+; ---------------
+
+; a simple expansion - should loop four times
+; - would be simpler if we allowed use of string functions here :)
+
+]continue$  = ".T."
+
+        .while  ]continue$
+        .word   *
+]continue$   = * < $100C ? ".T." : ""
+        .endw
+
+        .word   *
+
+; ---------------
+
+; a 16 x 16 multiplication table built w/ nested whiles
+
+MULT_4BY4:
+
+]outer$ = "yes"
+]M1     = 0
+        .while ]outer$
+]inner$ = "yes"
+]M2     = 0
+        .while ]inner$
+        .byte   ]M1 * ]M2
+]M2     = ]M2 + 1
+]inner$ = ]M2 < 16 ? "yes" : ""
+        .endw
+]M1     = ]M1 + 1
+]outer$ = ]M1 < 16 ? "yes" : ""
+        .endw
+
+; ---------------
+
+        .end

@@ -1,0 +1,104 @@
+; Hobby Cross-Assembler Error Test 150f
+; Repeats\Repeat Definition
+; warn\error: repeat block expansion errors
+
+; by Anton Treuenfels
+
+; first created: 11/17/08
+; last revised:  05/21/11
+
+; warning(s): 7
+; - odd label
+; - definition ignored
+
+; error(s): 13
+; - duplicate name
+; - need number
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; global label in body of expansion
+; - multiple warnings and errors because of multiple "executions"
+
+IN_BODY_2:
+        .repeat  4
+        .byte   $11
+global3 .byte   $22         ; three warnings + three errors
+        .byte   $33
+        .endr
+
+        .byte   $00
+
+; -------------------------------
+
+; bad expression in first part of outer loop
+
+        .repeat 2
+        .byte   "bad expression"
+        .repeat 2
+        .byte   $02
+        .endr
+        .byte   $03
+        .endr
+
+        .byte   $00
+
+; bad expression in inner loop
+
+        .repeat 2
+        .byte   $01
+        .repeat 2
+        .byte   "bad expression"
+        .endr
+        .byte   $03
+        .endr
+
+; -------------------------------
+
+; bad expression in outer loop control
+
+        .repeat "bad expression"
+        .byte   $01
+        .repeat 2
+        .byte   $02
+        .endr
+        .byte   $03
+        .endr
+
+        .byte   $00
+
+; bad expression in inner loop control
+
+        .repeat 2
+        .byte   $01
+        .repeat "bad expression"
+        .byte   $02
+        .endr
+        .byte   $03
+        .endr
+
+; bad expression in both loop controls
+
+        .repeat "bad expression"
+        .byte   $01
+        .repeat "bad expression"
+        .byte   $02
+        .endr
+        .byte   $03
+        .endr
+
+; -------------------------------
+
+        .end

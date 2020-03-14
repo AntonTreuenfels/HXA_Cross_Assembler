@@ -1,0 +1,232 @@
+; Hobby Cross-Assembler Test 153
+; Repeats\EXIT from Repeat
+; ok: unconditional "EXIT" psop within repeat block
+
+; by Anton Treuenfels
+
+; first created: 01/20/04
+; last revised:  08/08/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros  ; show expansions
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+; un-nested
+; -------------------------------
+
+; exit without doing anything
+
+        .repeat 10          ; no output
+        .exit
+        .endr
+
+; exit before doing anything
+
+        .repeat 10          ; no output
+        .exit
+        .byte   $00
+        .endr
+
+; exit while doing something
+
+        .repeat 10          ; $11
+        .byte   $11
+        .exit
+        .byte   $22
+        .endr
+
+; exit after doing something
+
+        .repeat 10          ; $33
+        .byte   $33
+        .exit
+        .endr
+
+; -------------------------------
+; nested
+; -------------------------------
+
+; exit from nested repeat
+
+        .repeat 3           ; no output
+        .exit
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44
+        .byte   $44
+        .exit
+        .repeat 2
+        .byte   $55
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $66 $44 $66 $44 $66
+        .byte   $44
+        .repeat 2
+        .exit
+        .byte   $55
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $55 $66 $44 $55 $66 $44 $55 $66
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .exit
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $55 $55
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .endr
+        .exit
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $55 $55 $66
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .endr
+        .byte   $66
+        .exit
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; no output
+        .exit
+        .byte   $44
+        .repeat 2
+        .exit
+        .byte   $55
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44
+        .byte   $44
+        .exit
+        .repeat 2
+        .exit
+        .byte   $55
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44
+        .byte   $44
+        .repeat 2
+        .exit
+        .byte   $55
+        .endr
+        .exit
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $66
+        .byte   $44
+        .repeat 2
+        .exit
+        .byte   $55
+        .endr
+        .byte   $66
+        .exit
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; no output
+        .exit
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .exit
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44
+        .byte   $44
+        .exit
+        .repeat 2
+        .byte   $55
+        .exit
+        .endr
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $55
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .exit
+        .endr
+        .exit
+        .byte   $66
+        .endr
+
+; exit from nested repeat
+
+        .repeat 3           ; $44 $55 $66
+        .byte   $44
+        .repeat 2
+        .byte   $55
+        .exit
+        .endr
+        .byte   $66
+        .exit
+        .endr
+
+; --------------------
+; labeled
+; --------------------
+
+        .repeat 10
+        .word   @local1     ; = current address + 2
+        .exit
+        .word   unknown     ; doesn't matter - completely skipped
+@local1 .endr
+
+; --------------------
+
+        .end

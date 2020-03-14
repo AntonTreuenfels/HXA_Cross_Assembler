@@ -1,0 +1,86 @@
+; Hobby Cross-Assembler Error Test 150g
+; Repeats\Repeat Definition
+; error: unresolved forward reference within repeat
+
+; by Anton Treuenfels
+
+; first created: 07/05/04
+; last revised:  07/06/04
+
+; warning(s): 0
+
+; error(s): 20
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a known label
+
+aknownLabel:
+
+; we're interested just in what the error report looks like
+; - how easy is it to tell where to find the error in the source ?
+
+; a simple repeat block
+
+        .repeat 3
+        .word   unknownLabel
+        .word   aknownLabel
+        .word   anotherUnknown
+        .endr
+
+; -------------------------------
+
+; nested repeats, error in outer loop
+
+        .repeat 2
+        .word   unknownLabel
+        .repeat 2
+        .word   aknownLabel
+        .endr
+        .endr
+
+; nested repeats, error in inner loop
+
+        .repeat 2
+        .word   aknownLabel
+        .repeat 2
+        .word   unknownLabel
+        .endr
+        .endr
+
+; nested repeats, error in both loops
+
+        .repeat 2
+        .word   unknownLabel
+        .repeat 2
+        .word   anotherUnknown
+        .endr
+        .endr
+
+; -------------------------------
+
+; a really big expansion...
+
+        .repeat 2
+        .repeat 1000
+        .byte   $ff
+        .endr
+        .word   unknownLabel
+        .endr
+
+; -------------------------------
+
+        .end

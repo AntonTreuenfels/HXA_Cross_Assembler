@@ -1,0 +1,113 @@
+; Hobby Cross-Assembler Test 150
+; Repeats\Repeat Definition
+; ok: basic repeat block definition and expansion
+
+; by Anton Treuenfels
+
+; first created: 05/06/03
+; last revised:  10/28/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros, autos   ; show expansions and internal labels
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+; empty body test
+
+NO_BODY_1:
+        .repeat 10
+        .endr
+
+        .byte   $00
+
+NO_BODY_2:
+        .repeat 0           ; no warning
+        .endr
+
+        .byte   $00
+
+NO_BODY_3:
+        .repeat -1          ; no warning
+        .endr
+
+        .byte   $00
+
+; unseen body tests
+
+UNSEEN_1:
+        .repeat 0           ; no warning (body skipped)
+        .echo "Shouldn't see this!"
+        .endr
+
+        .byte   $00
+
+UNSEEN_2:
+        .repeat -100        ; no warning (body skipped)
+        .echo "Shouldn't see this!"
+        .endr
+
+        .byte   $00
+
+; ---------------
+
+; a simple expansion
+
+        .repeat 4
+        .byte   $ff
+        .endr
+
+; ---------------
+
+; a simple expansion showing label scoping
+; - note that neither "repeat" nor "endr" generate code themselves,
+; so the value assigned to any attached labels is the same as the
+; current value of the program counter (and also the same as the
+; *next* object byte address)
+
+@local1 .repeat 4       ; first "@local1" is outside repeat block scope
+        .word   @local1 ; data = value of second "@local1"
+@local1 .endr           ; second "@local1" is inside repeat block scope
+
+; ]curradr == value of second @local1
+
+]curradr .word   @local1 ; data = value of first "@local1"
+
+; ---------------
+
+; a 16 x 16 multiplication table built w/ nested repeats
+
+]M1     = 0
+
+MULT_4BY4:
+        .repeat 16
+]M2     = 0
+        .repeat 16
+        .byte   ]M1 * ]M2
+]M2     = ]M2 + 1
+        .endr
+]M1     = ]M1 + 1
+        .endr
+
+; ---------------
+
+; a nested repeat with a variable label in the inner control expression
+
+        .repeat 4
+]count  .equ    2
+        .repeat ]count
+        .word   0xAA55
+        .endr
+        .endr
+
+; ---------------
+
+        .end

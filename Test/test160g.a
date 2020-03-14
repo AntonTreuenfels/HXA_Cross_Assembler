@@ -1,0 +1,120 @@
+; Hobby Cross-Assembler Error Test 160g
+; Whiles\While Definition
+; error: unresolved forward reference within while
+
+; by Anton Treuenfels
+
+; first created: 11/06/04
+; last revised:  11/06/04
+
+; warning(s): 0
+
+; error(s): 20
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a known label
+
+aknownLabel:
+
+; we're interested just in what the error report looks like
+; - error not detected until second pass
+; - how easy is it to tell where to find the error in the source ?
+
+; a simple while block
+
+]COUNT  = 3
+
+        .while ]COUNT
+        .word   unknownLabel
+        .word   aknownLabel
+        .word   anotherUnknown
+]COUNT  = ]COUNT - 1
+        .endw
+
+; -------------------------------
+
+; nested whiles, error in outer loop
+
+]COUNT1 = 2
+        .while  ]COUNT1
+        .word   unknownLabel
+
+]COUNT2 = 2
+        .while  ]COUNT2
+        .word   aknownLabel
+]COUNT2 = ]COUNT2 - 1
+        .endw
+
+]COUNT1 = ]COUNT1 - 1
+        .endw
+
+; -------------------------------
+
+; nested whiles, error in inner loop
+
+]COUNT1 = 2
+        .while  ]COUNT1
+        .word   aknownLabel
+
+]COUNT2 = 2
+        .while  ]COUNT2
+        .word   unknownLabel
+]COUNT2 = ]COUNT2 - 1
+        .endw
+
+]COUNT1 = ]COUNT1 - 1
+        .endw
+
+; -------------------------------
+
+; nested whiles, error in both loops
+
+]COUNT1 = 2
+        .while  ]COUNT1
+        .word   unknownLabel
+
+]COUNT2 = 2
+        .while  ]COUNT2
+        .word   unknownLabel
+]COUNT2 = ]COUNT2 - 1
+        .endw
+
+]COUNT1 = ]COUNT1 - 1
+        .endw
+
+; -------------------------------
+
+; a really big expansion...
+
+]COUNT1 = 2
+
+        .while  ]COUNT1
+
+]COUNT2 = 1000
+        .while ]COUNT2
+        .byte   $ff
+]COUNT2 = ]COUNT2 - 1
+        .endw
+
+        .word   unknownLabel
+
+]COUNT1 = ]COUNT1 - 1
+        .endw
+
+; -------------------------------
+
+        .end

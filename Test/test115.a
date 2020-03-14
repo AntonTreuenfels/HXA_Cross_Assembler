@@ -1,0 +1,266 @@
+; Hobby Cross-Assembler Test 115
+; Macros\Assignable Formal Arguments
+; ok: local and variable label names used as formal macro arguments
+
+; by Anton Treuenfels
+
+; first created: 06/02/07
+; last revised:  06/02/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a simple numeric test
+; - these should give equivalent results (if given the same argument)
+
+        .macro  test1a, ?fa
+        .word   ?fa
+        .endm
+
+        .macro  test1b, ?fa
+]fa     .equ    ?fa
+        .word   ]fa
+        .endm
+
+        .macro  test1c, ?fa
+@fa     .equ    ?fa
+        .word   @fa
+        .endm
+
+        .macro  test1d, ]fa
+        .word   ]fa
+        .endm
+
+        .macro  test1e, @fa
+        .word   @fa
+        .endm
+
+; try them
+
+        test1a  $20
+        test1b  $20
+        test1c  $20
+        test1d  $20
+        test1e  $20
+
+; try them with different arguments
+
+        test1a  $10
+        test1b  $20
+        test1c  $30
+        test1d  $40
+        test1e  $50
+
+; -------------------------------
+
+; a simple string test
+; - these should give equivalent results (if given the same argument)
+
+        .macro  test2a, ?fa
+        .string ?fa
+        .endm
+
+        .macro  test2b, ?fa
+]fa$    .equ    ?fa
+        .string ]fa$
+        .endm
+
+        .macro  test2c, ?fa
+@fa$    .equ    ?fa
+        .string @fa$
+        .endm
+
+        .macro  test2d, ]fa$
+        .string ]fa$
+        .endm
+
+        .macro  test2e, @fa$
+        .string @fa$
+        .endm
+
+; try them
+
+        test2a  "20"
+        test2b  "20"
+        test2c  "20"
+        test2d  "20"
+        test2e  "20"
+
+; try them with different arguments
+
+        test2a  "10"
+        test2b  "20"
+        test2c  "30"
+        test2d  "40"
+        test2e  "50"
+
+; -------------------------------
+
+; a simple numeric test w/ default arguments
+; - these should give equivalent results (if given the same argument)
+
+        .macro  test3a, ?fa=-1
+        .word   ?fa
+        .endm
+
+        .macro  test3b, ?fa=-1
+]fa     .equ    ?fa
+        .word   ]fa
+        .endm
+
+        .macro  test3c, ?fa=-1
+@fa     .equ    ?fa
+        .word   @fa
+        .endm
+
+        .macro  test3d, ]fa=-1
+        .word   ]fa
+        .endm
+
+        .macro  test3e, @fa=-1
+        .word   @fa
+        .endm
+
+; try them
+
+        test3a  $20
+        test3b  $20
+        test3c  $20
+        test3d  $20
+        test3e  $20
+
+; try them with different arguments
+
+        test3a  $10
+        test3b  $20
+        test3c  $30
+        test3d  $40
+        test3e  $50     
+
+; try them with no arguments
+
+        test3a
+        test3b
+        test3c
+        test3d
+        test3e
+
+; -------------------------------
+
+; a simple string test w/ default arguments
+; - these should give equivalent results (if given the same argument)
+
+        .macro  test4a, ?fa="**"
+        .string ?fa
+        .endm
+
+        .macro  test4b, ?fa="**"
+]fa$    .equ    ?fa
+        .string ]fa$
+        .endm
+
+        .macro  test4c, ?fa="**"
+@fa$    .equ    ?fa
+        .string @fa$
+        .endm
+
+        .macro  test4d, ]fa$="**"
+        .string ]fa$
+        .endm
+
+        .macro  test4e, @fa$="**"
+        .string @fa$
+        .endm
+
+; try them
+
+        test4a  "20"
+        test4b  "20"
+        test4c  "20"
+        test4d  "20"
+        test4e  "20"
+
+; try them with different arguments
+
+        test4a  "10"
+        test4b  "20"
+        test4c  "30"
+        test4d  "40"
+        test4e  "50"
+
+; try them with no arguments
+
+        test4a
+        test4b
+        test4c
+        test4d
+        test4e
+
+; -------------------------------
+
+; test that assigments occur in order names appear in argument list
+; - these should give equivalent results (if given the same argument)
+
+        .macro  test5a, ?fa
+        .word   ?fa
+        .word   ?fa+1
+        .string str$(?fa+2)
+        .endm
+
+        .macro  test5b, ?fa
+]fa     .equ    ?fa+1
+]fa$    .equ    str$(]fa+1)
+        .word   ?fa
+        .word   ]fa
+        .string ]fa$
+        .endm
+
+        .macro  test5c, ?fa
+@fa     .equ    ?fa+1
+@fa$    .equ    str$(@fa+1)
+        .word   ?fa
+        .word   @fa
+        .string @fa$
+        .endm
+
+        .macro  test5d, ]fa, ]fb=]fa+1, ]fa$=str$(]fb+1)
+        .word   ]fa
+        .word   ]fb
+        .string ]fa$
+        .endm
+
+        .macro  test5e, @fa, @fb=@fa+1, @fa$=str$(@fb+1)
+        .word   @fa
+        .word   @fb
+        .string @fa$
+        .endm
+
+; try them
+
+        test5a  $20
+        test5b  $20
+        test5c  $20
+        test5d  $20
+        test5e  $20
+
+; try them with different arguments
+
+        test5a  $10
+        test5b  $20
+        test5c  $30
+        test5d  $40
+        test5e  $50
+
+
+; -------------------------------
+
+        .end

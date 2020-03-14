@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 105f
+; Macros\DEFINED() and UNDEF
+; error: illegal DEFINED() variable name
+
+; by Anton Treuenfels
+
+; first created: 06/28/09
+; last revised:  06/23/12
+
+; warning(s): 0
+
+; error(s): 6
+; - expecting global name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; illegal names (legal labels, but not global form)
+
+        .byte   defined( ]badname )
+
+        .byte   defined( @badname )
+
+        .byte   defined( :+ )
+
+; same illegal names specified as strings
+
+]badname$   =   "]badname"
+
+        .byte   defined( ]badname$ )
+
+]badname$   =   "@badname"
+
+        .byte   defined( ]badname$ )
+
+]badname$   =   ":+"
+
+        .byte   defined( ]badname$ )
+
+; --------------------
+
+        .end

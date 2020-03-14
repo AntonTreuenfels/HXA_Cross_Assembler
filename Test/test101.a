@@ -1,0 +1,84 @@
+; Hobby Cross-Assembler Test 101
+; Macros\Nested Macros
+; ok: nested macro definitions
+
+; by Anton Treuenfels
+
+; first created: 01/11/04
+; last revised:  06/15/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we'll create a combination C- and Pascal-style string five different ways
+
+; straightforward definition (no nesting)
+
+        .macro  Combo_1, ?text
+        .byte   @end - @beg     ; Pascal length byte
+@beg    .str    ?text           ; string text
+@end    .byte   0               ; C terminating null
+        .endm
+
+; nested definition of a Pascal-style string within the combo definition
+
+        .macro  Combo_2, ?text
+        .macro  PSTR, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm                   ; PSTR
+        .byte   0
+        .endm                   ; Combo_2
+
+; nested definition of a combo string using a previous macro definition
+
+        .macro  Combo_3, ?text
+        PSTR    ?text
+        .byte   0
+        .endm
+
+; nested definition of a combo string using a future macro definition (!)
+
+        .macro  Combo_4, ?text
+@beg    .byte   @end - @beg - 2
+        .onexpand  STRZ ?text
+@end    .endm
+
+; nested definition of a C-style string within a combo definition
+; - note that local scoping prevents '@end' from being recognized by
+; the outer definition if it appears within the inner definition
+
+        .macro  Combo_5, ?text
+@beg    .byte   @end - @beg - 2
+        .macro  STRZ, ?text     ; this macro is forward referenced
+        .str    ?text
+        .byte   0
+        .endm
+@end    .endm
+
+; -------------------------------
+
+; all five should give us the same result...
+
+        Combo_1 "A test string"
+
+        Combo_2 "A test string"
+
+        Combo_3 "A test string"
+
+        Combo_4 "A test string"
+
+        Combo_5 "A test string"
+
+; -------------------------------
+
+        .end

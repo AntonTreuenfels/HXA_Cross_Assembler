@@ -1,0 +1,81 @@
+; Hobby Cross-Assembler Error Test 115e
+; Macros\Assignable Formal Arguments
+; error: definition errors
+
+; by Anton Treuenfels
+
+; first created: 06/02/07
+; last revised:  01/17/09
+
+; warning(s): 8
+; - definition ignored
+
+; error(s): 8
+; - duplicate name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; duplicate arg names
+
+        .macro  nameFine, ]arg, ]arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  ]arg, ]arg
+            .echo   "Still!"
+            .endm
+
+; duplicate arg names
+
+        .macro  nameFine, ]arg, ?otherarg, ]arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  ]arg, ?otherarg, ]arg
+            .echo   "Still!"
+            .endm
+
+; duplicate arg names
+
+        .macro  nameFine, @arg, @arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  @arg, @arg
+            .echo   "Still!"
+            .endm
+
+; duplicate arg names
+
+        .macro  nameFine, @arg, ?otherarg, @arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  @arg, ?otherarg, @arg
+            .echo   "Still!"
+            .endm
+
+
+; -------------------------------
+
+        .end

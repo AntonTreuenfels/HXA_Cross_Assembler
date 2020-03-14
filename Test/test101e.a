@@ -1,0 +1,496 @@
+; Hobby Cross-Assembler Error Test 101e
+; Macros\Nested Macros
+; error: nested macro definition
+
+; by Anton Treuenfels
+
+; first created: 08/01/03
+; last revised:  05/21/11
+
+; warning(s): 40
+; - definition ignored
+
+; error(s): 36
+; - no name
+; - duplicate name
+; - expecting psop
+; - unclosed block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr     50      ; raise limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; missing inner name
+
+        .macro  ok_outer1
+        .echo   "The surrogate for real code in ok_outer1"
+        .macro
+        .echo   "The surrogate for real code in bad_inner1"
+        .endm
+        .endm
+
+; try invoking
+
+        ok_outer1   ; ok, as label
+
+        ok_outer1   ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_outer1   ; error, as label
+
+; -------------------------------
+
+; missing outer name
+
+        .macro
+        .echo   "The surrogate for real code in bad_outer2"
+        .macro  ok_inner2
+        .echo   "The surrogate for real code in ok_inner2"
+        .endm
+        .endm
+
+; try invoking
+
+        ok_inner2   ; ok, as macro
+
+        ok_inner2   ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_inner2   ; ok, as macro
+
+; -------------------------------
+
+; duplicate name of nested definition
+; - a fairly unusual form of the error
+
+        .macro  bad_dup_name
+        .echo   "The surrogate for real code in bad_outer3"
+        .macro  bad_dup_name
+        .echo   "The surrogate for real code in bad_inner3"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_dup_name    ; ok, as label
+
+        bad_dup_name    ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_dup_name    ; error, as label
+
+; -------------------------------
+
+; duplicate name of nested definition
+; - same name as previous legal macro
+
+        .macro  bad_outer4
+        .echo   "The surrogate for real code in bad_outer4"
+        .macro  ok_inner2
+        .echo   "The surrogate for real code in bad_inner4"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_outer4  ; ok, as label
+
+        ok_inner2   ; ok, as macro (original definition)
+
+        bad_outer4  ; ok, as label
+
+        ok_inner2   ; ok, as macro (original definition)
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer4  ; error, as label
+
+        ok_inner2   ; ok, as macro (original definition)
+
+; -------------------------------
+
+; malformed line in outer definition
+
+        .macro  bad_outer5
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_outer5"
+        .macro  ok_inner5
+        .echo   "The surrogate for real code in ok_inner5"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_outer5  ; ok, as label
+
+        ok_inner5   ; ok, as macro
+
+        bad_outer5  ; ok, as label
+
+        ok_inner5   ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer5  ; error, as label
+
+        ok_inner5   ; ok, as macro
+
+; -------------------------------
+
+; malformed line in inner definition
+
+        .macro  ok_outer6
+        .echo   "The surrogate for real code in ok_outer6"
+        .macro  bad_inner6
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_inner6"
+        .endm
+        .endm
+
+; try invoking
+
+        ok_outer6   ; ok, as label
+
+        bad_inner6  ; ok, as label
+
+        ok_outer6   ; ok, as label
+
+        bad_inner6  ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_outer6   ; error, as label
+
+        bad_inner6  ; error, as label
+
+; -------------------------------
+
+; malformed lines in both definitions
+
+        .macro  bad_outer7
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_outer7"
+        .macro  bad_inner7
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_inner7"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_outer7  ; ok, as label
+
+        bad_inner7  ; ok, as label
+
+        bad_outer7  ; ok, as label
+
+        bad_inner7  ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer7  ; error, as label
+
+        bad_inner7  ; error, as label
+
+; -------------------------------
+
+; malformed line in outer definition
+
+        .macro  bad_outer8
+        .echo   "The surrogate for real code in bad_outer8"
+        .macro  ok_inner8
+        .echo   "The surrogate for real code in ok_inner8"
+        .endm
+        .not_a_psop
+        .endm
+
+; try invoking
+
+        bad_outer8  ; ok, as label
+
+        ok_inner8   ; ok, as macro
+
+        bad_outer8  ; ok, as label
+
+        ok_inner8   ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer8  ; error, as label
+
+        ok_inner8   ; ok, as macro
+
+; -------------------------------
+; unusual form of nested definitions
+; -------------------------------
+
+; malformed line in outer definition
+
+        .macro  bad_outer9
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_outer9"
+        .macro  ok_inner9a
+        .echo   "The surrogate for real code in ok_inner9a"
+        .endm
+        .macro  ok_inner9b
+        .echo   "The surrogate for real code in ok_inner9b"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_outer9  ; ok, as label
+
+        ok_inner9a  ; ok, as macro
+
+        ok_inner9b  ; ok, as macro
+
+        bad_outer9  ; ok, as label
+
+        ok_inner9a  ; ok, as macro
+
+        ok_inner9b  ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer9  ; error, as label
+
+        ok_inner9a  ; ok, as macro
+
+        ok_inner9b  ; ok, as macro
+
+; -------------------------------
+
+; malformed line in outer definition
+
+        .macro  bad_outer10
+        .echo   "The surrogate for real code in bad_outer10"
+        .macro  ok_inner10a
+        .echo   "The surrogate for real code in ok_inner10a"
+        .endm
+        .not_a_psop
+        .macro  ok_inner10b
+        .echo   "The surrogate for real code in ok_inner10b"
+        .endm
+        .endm
+
+; try invoking
+
+        bad_outer10 ; ok, as label
+
+        ok_inner10a ; ok, as macro
+
+        ok_inner10b ; ok, as macro
+
+        bad_outer10 ; ok, as label
+
+        ok_inner10a ; ok, as macro
+
+        ok_inner10b ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer10 ; error, as label
+
+        ok_inner10a ; ok, as macro
+
+        ok_inner10b ; ok, as macro
+
+; -------------------------------
+
+; malformed line in outer definition
+
+        .macro  bad_outer11
+        .echo   "The surrogate for real code in bad_outer11"
+        .macro  ok_inner11a
+        .echo   "The surrogate for real code in ok_inner11a"
+        .endm
+        .macro  ok_inner11b
+        .echo   "The surrogate for real code in ok_inner11b"
+        .endm
+        .not_a_psop
+        .endm
+
+; try invoking
+
+        bad_outer11 ; ok, as label
+
+        ok_inner11a ; ok, as macro
+
+        ok_inner11b ; ok, as macro
+
+        bad_outer11 ; ok, as label
+
+        ok_inner11a ; ok, as macro
+
+        ok_inner11b ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        bad_outer11 ; error, as label
+
+        ok_inner11a ; ok, as macro
+
+        ok_inner11b ; ok, as macro
+
+; -------------------------------
+
+; malformed line in first inner definition
+
+        .macro  ok_outer12
+        .echo   "The surrogate for real code in ok_outer12"
+        .macro  bad_inner12a
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_inner12a"
+        .endm
+        .macro  ok_inner12b
+        .echo   "The surrogate for real code in ok_inner12b"
+        .endm
+        .endm
+
+; try invoking
+
+        ok_outer12      ; ok, as label
+
+        bad_inner12a    ; ok, as label
+
+        ok_inner12b     ; ok, as macro
+
+        ok_outer12      ; ok, as label
+
+        bad_inner12a    ; ok, as label
+
+        ok_inner12b     ; ok, as macro
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_outer12      ; error, as label
+
+        bad_inner12a    ; error, as label
+
+        ok_inner12b     ; ok, as macro
+
+; -------------------------------
+
+; malformed line in second inner definition
+
+        .macro  ok_outer13
+        .echo   "The surrogate for real code in ok_outer13"
+        .macro  ok_inner13a
+        .echo   "The surrogate for real code in ok_inner13a"
+        .endm
+        .macro  bad_inner13b
+        .not_a_psop
+        .echo   "The surrogate for real code in bad_inner13b"
+        .endm
+        .endm
+
+; try invoking
+
+        ok_outer13      ; ok, as label
+
+        ok_inner13a     ; ok, as macro
+
+        bad_inner13b    ; ok, as label
+
+        ok_outer13      ; ok, as label
+
+        ok_inner13a     ; ok, as macro
+
+        bad_inner13b    ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_outer13      ; error, as label
+
+        ok_inner13a     ; ok, as macro
+
+        bad_inner13b    ; error, as label
+
+; -------------------------------
+; crossed macro names
+; -------------------------------
+
+        .macro  ok_outer14
+        .echo   "The surrogate for real code in ok_outer14"
+        .macro  ok_inner14
+        .echo   "The surrogate for real code in ok_inner14"
+        .endm   bad_inner14
+        .endm   "bad_outer14"
+
+; try invoking
+
+        ok_outer14  ; ok, as label
+
+        ok_inner14  ; ok, as label
+
+        ok_outer14  ; ok, as label
+
+        ok_inner14  ; ok, as label
+
+; bump pc and invoke again
+
+        .byte   $00
+
+        ok_outer14  ; error, as label
+
+        ok_inner14  ; error, as label
+
+; -------------------------------
+; incomplete (unclosed) definitions
+; -------------------------------
+
+        .macro  no_end1
+        .echo   "This macro definition is not properly closed"
+
+        .macro  has_end1
+        .echo   "This nested macro definition is properly closed"
+        .endm   has_end1
+
+        .macro  no_end2
+        .echo   "This nested macro definition is not properly closed"
+
+; --------------------
+
+        .end

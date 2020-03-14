@@ -1,0 +1,242 @@
+; Hobby Cross-Assembler Test 100
+; Macros\Macro Definition
+; ok: basic macro definition and expansion
+
+; by Anton Treuenfels
+
+; first created: 04/26/03
+; last revised:  12/08/12
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros  ; show macro expansions
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+
+; empty body
+
+        .macro  NO_BODY
+        .endm
+
+; ---------------
+
+; define null-terminated string (a C-style string)
+
+        .macro  STRZ, ?text
+        .str    ?text
+        .byte   0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+        .macro  PSTR, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; ----------------------
+; alternate form of definition
+; ----------------------
+
+; define null-terminated string (a C-style string)
+
+STRZ_2  .macro  ?text
+        .str    ?text
+        .byte   0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+PSTR_2  .macro  ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; ----------------------
+
+; test string equality
+
+        .macro  STREQU, ?s1, ?s2
+        .byte   ?s1 == ?s2
+        .endm
+
+; ---------------
+
+@beg    .word   @end        ; no conflict w/ locals inside macro definitions
+
+; ---------------
+
+; we'll test labeling macro expansions using variable labels because
+; using globals would flush the local label table and screw up the
+; test we just started above (plus it's easier to keep re-using names)
+
+]here   = *    
+
+]beg    NO_BODY             ; no code generated
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STRZ    "Hello, World!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STRZ_2  "Hello, again!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    PSTR    "Hello, World!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    PSTR_2  "Hello, again!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One","One"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One","Two"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One,Two", "Three"
+
+        .byte   ]here == ]beg
+
+; a few unlabeled expansions to show they work too...
+
+        STREQU  "One", "Two,Three"
+
+        .byte   $ff
+
+        STREQU  "One,Two","One,Two"
+
+        .byte   $ff
+
+        STREQU  "One,Two", "Three,Four"
+
+        .byte   $ff
+
+; ---------------
+
+@end    .word   @beg        ; no locals conflict here, either
+
+; ---------------
+
+; lower case macro names in definition and use
+
+; define null-terminated string (a C-style string)
+
+strz_3: .macro  ?text
+        .str    ?text, 0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+pstr_3: .macro  ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; use them
+
+        strz_3  "Hello, World!"
+
+        pstr_3  "Hello, World!"
+
+; ---------------
+
+; define null-terminated string (a C-style string)
+
+        .macro  strz_4:, ?text
+        .str    ?text, 0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+        .macro  pstr_4:, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; use them
+
+        strz_4  "Hello, World!"
+
+        pstr_4  "Hello, World!"
+
+; ---------------
+
+; test name matching
+
+; define null-terminated string (a C-style string)
+
+        .macro  strz_5, ?text
+        .str    ?text "\0"
+        .endm   strz_5
+
+; define string with preceeding length byte (a Pascal-style string)
+
+        .macro  pstr_5, ?text
+]txt$   .equ    ?text
+        .str    len(]txt$), ]txt$
+        .endm   "pstr" "_5"
+
+; use them
+
+        strz_5  "Hello, World!"
+
+        pstr_5  "Hello, World!"
+
+; ---------------
+
+; define null-terminated string (a C-style string)
+
+]name$  .equ    "strz_6"
+
+        .macro  ]name$, ?text
+        .str    ?text "\x0"
+        .endm   ]name$
+
+; define string with preceeding length byte (a Pascal-style string)
+
+]name$  .equ    "pstr_6"
+
+        .macro  ]name$, ?text
+]txt$   .equ    ?text
+        .str    len(]txt$), ]txt$
+        .endm   ]name$
+
+; use them
+
+        strz_6  "Hello, World!"
+
+        pstr_6  "Hello, World!"
+
+; ---------------
+
+        .end

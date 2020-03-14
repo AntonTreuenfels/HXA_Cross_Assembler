@@ -1,0 +1,106 @@
+; Hobby Cross-Assembler Test 112
+; Macros\PUTBACK pseudo op
+; ok: "PUTBACK" psop
+
+; by Anton Treuenfels
+
+; first created: 08/05/04
+; last revised:  03/15/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; - we'll create a macro that does nothing but pass along its single argument
+
+        .macro  PASS_STR, ?arg
+        .onexpand   .string   ?arg
+        .endm
+
+; try it - these should be the same
+
+        .string     "Hello, world!"
+        PASS_STR    "Hello, world!"
+
+; let's try another do-nothing macro. This one passes more than one argument:
+
+        .macro  PASS_TWO, ?arg1, ?arg2
+        .onexpand .byte ?arg1, ?arg2
+        .endm
+
+; try it
+
+        .byte       $01, $02
+        PASS_TWO    $01, $02
+
+; try it again
+
+        .byte       '\n', '\$0D'
+        PASS_TWO    '\n', '\$0D'
+
+; one more - pass three arguments !
+
+        .macro  PASS_3, ?arg1, ?arg2, ?arg3
+        .onexpand   .word ?arg1, ?arg2, ?arg3
+        .endm
+
+; try it
+
+        .word   1, '\,', $80 + 1
+        PASS_3  1, '\,', $80 + 1
+
+; a macro that does absolutely nothing
+
+        .macro  DO_NOTHING
+        .onexpand
+        .endm
+
+; try it
+
+        DO_NOTHING
+
+; try aliasing
+
+        .psalias    onexpand=defer
+
+        .macro  PSEUDO_ECHO, ?arg
+        .defer  .string ?arg
+        .endm
+
+; try it
+
+        PSEUDO_ECHO "Hello, World!"
+
+; try replacing an opcode field
+
+        .macro  STORE_AS, ?type, ?val
+        .defer  ?type ?val
+        .endm
+
+; try it
+
+        STORE_AS byte, $01
+        STORE_AS word, $01+1
+        STORE_AS long, 1*3
+
+; try replacing the label field
+
+        .macro LABEL_F, ?arg
+        .onexpand   ?arg .word ?arg
+        .endm
+
+; try it
+
+        LABEL_F ]here
+
+; -------------------------------
+
+        .end

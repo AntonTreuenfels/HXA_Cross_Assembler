@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 113f
+; Macros\PUTBACKS pseudo op
+; fatal: maximum putback count exceeded
+
+; by Anton Treuenfels
+
+; first created: 09/06/09
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        ; create a string and a macro that causes "PUTBACKS" to go
+        ; into an infinite loop
+
+reflexive$ = ".putbacks reflexive$"
+
+        .macro  infiniteloop
+        .putbacks reflexive$
+        .endm
+
+        ; check to see if guard against infinite looping works
+
+        infiniteloop
+
+; -------------------------------
+
+        .end

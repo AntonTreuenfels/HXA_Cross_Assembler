@@ -1,0 +1,55 @@
+; Hobby Cross-Assembler Error Test 100g
+; Macros\Macro Definition
+; error: error in body of definition (first pass)
+
+; by Anton Treuenfels
+
+; first created: 11/11/08
+; last revised:  06/28/09
+
+; warning(s): 1
+; - definition ignored
+
+; error(s): 5
+; - need opcode
+; - bad EOE
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; malformed lines detected during definition
+
+        .macro  badbody1
+        .echo   "OK: no label, psop okay"
+1234    .echo   "ERR: bad label, psop okay"
+        .bad1   "ERR: no label, bad psop"
+5678    .bad2   "ERR: bad label, bad psop"
+        .endm
+
+; malformed expressions detected at expansion time
+
+        .macro  badbody2
+        .byte   "Bad expression"
+        .string 1234 +
+        .endm
+
+; try to expand it
+
+        badbody2
+
+; -------------------------------
+
+        .end
+

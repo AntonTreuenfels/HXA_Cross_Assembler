@@ -1,0 +1,108 @@
+; Hobby Cross-Assembler Error Test 160e
+; Whiles\While Definition
+; warn\error: while block definition errors
+
+; by Anton Treuenfels
+
+; first created: 11/06/04
+; last revised:  11/22/08
+
+; warning(s): 5
+; - odd label
+; - no effect
+
+; error(s): 11
+; - unmatched block
+; - blank field
+; - name not found
+; - need opcode
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; missing block start
+
+        .endw
+
+        .byte   $00
+
+; missing control expression
+
+        .while
+        .echo   "Causes cascade error at next <ENDW>"
+        .endw
+
+        .byte   $00
+
+; forward reference in control expression
+
+        .while ]unKnown + 45
+        .echo   "Error in expression but *no* cascade error"
+        .endw
+
+        .byte   $00
+
+; malformed input line (bad label)
+
+]COUNT  = 2
+        .while  ]COUNT
+123     .echo   "Bad label!"
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; malformed input line (bad psop)
+
+]COUNT  = 2
+        .while ]COUNT
+        .notapsop ]arg1, ]arg2
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; malformed input line (bad label and bad psop)
+
+]COUNT  = 2
+        .while ]COUNT
+        .echo   "This line is okay! (1)"
+123     .echo   "Bad label!"
+        .echo   "This line is okay! (2)"
+        .notapsop
+        .echo   "This line is okay! (3)"
+456     .notapsop with_arg
+        .echo   "This line is okay! (4)
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; missing block end
+; - if they worked would be infinite loops given these control expressions
+
+        .while 20          ; open block start
+        .echo   "This block is not properly closed!"
+        .while 10
+        .echo   "Nested repeat is properly closed"
+        .endw
+        .echo   "This goes with the outer block!"
+        .while 10          ; open block start (nested)
+        .echo   "Nested block not properly closed!"
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

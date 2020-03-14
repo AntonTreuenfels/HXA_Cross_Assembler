@@ -1,0 +1,102 @@
+; Hobby Cross-Assembler Error Test 113e
+; Macros\PUTBACKS pseudo op
+; warn\error: "PUTBACKS" psop
+
+; by Anton Treuenfels
+
+; first created: 09/19/09
+; last revised:  08/07/13
+
+; warning(s): 4
+; - label ignored
+; - no effect
+
+; error(s): 3
+; - only inside macro
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; cannot be used outside of a macro expansion
+
+            .putbacks   "text doesn't matter here"
+
+; -------------------------------
+
+; PUTBACKS must have a string argument
+
+            .macro NO_ARG
+            .putbacks
+            .endm
+
+; try it
+
+            NO_ARG
+
+; -------------------------------
+
+; PUTBACKS ignores labels
+
+            .macro  IGNORE_LABEL
+@a_label    .putbacks   ".word *"
+            .endm
+
+; try it
+
+        IGNORE_LABEL
+
+; even if the label contains the PUTBACKS pseudo op
+
+            .macro  IGNORE_LABEL2, ?arg
+]putbacks   .putbacks   ".word ?arg"
+            .endm
+
+; try it
+
+        IGNORE_LABEL2 *
+
+; -------------------------------
+
+; the argument must be a string expression
+
+        .macro  STRING_ARG, ?arg
+        .putbacks   ".string \"" ?arg "\""
+        .endm
+
+; try this (should work)
+
+        STRING_ARG  "Hello, World!"
+
+; try this (should not work)
+
+        STRING_ARG  Not a string argument
+
+; -------------------------------
+
+; try this (warning of null argument comes from executing .string psop)
+
+        STRING_ARG ""
+
+; try this (warning of null argument comes from .putbacks psop)
+
+        .macro  NULL_ARG
+        .putbacks ""
+        .endm
+
+        NULL_ARG
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,121 @@
+; Hobby Cross-Assembler Error Test 110e
+; Macros\Default Macro Arguments
+; error: malformed macro defaults
+
+; by Anton Treuenfels
+
+; first created: 03/25/04
+; last revised:  01/17/09
+
+; warning(s): 18
+; - extra ignored
+; - definition ignored
+
+; error(s): 22
+; - expecting equate
+; - expecting default
+; - unexpected blank
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; macro defaults must have form "arg=value"
+; - one arg, one equals sign, one value (arbitrary text, though)
+; - spaces can follow the "=" if desired for clarity
+; - if an arg has a default, so must all following args
+
+; missing value
+
+        .macro  bad_1, ?arg1=
+        .byte   $00
+        .endm
+
+        .macro  bad_1a, ?arg1, ?arg2=
+        .byte   $00
+        .endm
+
+; missing arg
+
+        .macro  bad_2, =value
+        .byte   $00
+        .endm
+
+        .macro  bad_2a, ?arg1, =value
+        .byte   $00
+        .endm
+
+
+; missing both
+
+        .macro  bad_3, =
+        .byte   $00
+        .endm
+
+        .macro  bad_3a, ?arg1, =
+        .byte   $00
+        .endm
+
+; more than one equals sign, outside of quote marks
+
+        .macro  bad_4, ?arg1= Unquoted (=) sign
+        .byte   $00
+        .endm
+
+        .macro  bad_4a, ?arg1, ?arg2= Unquoted (=) sign
+        .byte   $00
+        .endm
+
+; more than one equals sign, outside of quote marks
+
+        .macro  bad_5, ?arg1= Unquoted (=) sign redux (=)
+        .byte   $00
+        .endm
+
+        .macro  bad_5a, ?arg1, ?arg2= Unquoted (=) sign redux (=)
+        .byte   $00
+        .endm
+
+; more than one equals sign, outside of quote marks
+
+        .macro  bad_6, ?arg1=Blank field error if at end of string=
+        .byte   $00
+        .endm
+
+        .macro  bad_6a, ?arg1, ?arg2=Blank field at end of string=
+        .byte   $00
+        .endm
+
+; missing default in following arg
+
+        .macro  bad_7, ?arg1=default, ?arg2
+        .byte   $00
+        .endm
+
+        .macro  bad_7a, ?arg1, ?arg2=default, ?arg3
+        .byte   $00
+        .endm
+
+; missing default in following arg
+
+        .macro  bad_8, ?arg1=default, ?arg2, ?arg3=default
+        .byte   $00
+        .endm
+
+        .macro  bad_8a, ?arg1, ?arg2=default, ?arg3, ?arg4=default
+        .byte   $00
+        .endm
+
+; -------------------------------
+
+        .end

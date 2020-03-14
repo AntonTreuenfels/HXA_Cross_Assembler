@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Test 151
+; Repeats\Macros and Repeats
+; ok: repeats within macros
+
+; by Anton Treuenfels
+
+; first created: 02/01/04
+; last revised:  02/01/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; an alignment macro (not a smart one)
+
+        .macro  ALIGN, ?boundary
+        .repeat ?boundary - (* % ?boundary)
+        .byte   $00
+        .endr
+        .endm
+
+; a macro to test alignment
+
+        .macro TEST_ALIGN, ?boundary
+        .byte   $ff
+        ALIGN   ?boundary
+        .endm
+
+; test it
+
+        TEST_ALIGN  2
+
+        TEST_ALIGN  4
+
+        TEST_ALIGN  8
+
+        TEST_ALIGN  16
+
+        .byte   $ff
+
+; -------------------------------
+
+        .end

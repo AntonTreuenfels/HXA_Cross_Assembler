@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Error Test 105g
+; Macros\DEFINED() and UNDEF
+; error: illegal UNDEF variable name
+
+; by Anton Treuenfels
+
+; first created: 06/28/09
+; last revised:  06/28/09
+
+; warning(s): 0
+
+; error(s): 6
+; - expecting global name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; illegal names (legal variables, but not globals)
+; - detected first pass because must be constant
+
+        .undef  ]badname
+
+        .undef  @badname
+
+        .undef  :+
+
+; ...and specified as strings
+
+]badname$   =   "]badname"
+
+        .undef  ]badname$
+
+]badname$   =   "@badname"
+
+        .undef  ]badname$
+
+]badname$   =   ":+"
+
+        .undef  ]badname$
+
+; --------------------
+
+        .end

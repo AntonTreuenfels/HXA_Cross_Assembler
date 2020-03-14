@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Error Test 161h
+; Whiles\Macros and Whiles
+; error: non-constant while control expression within macro expansion
+
+; by Anton Treuenfels
+
+; first created: 05/06/08
+; last revised:  11/22/08
+
+; warning(s): 2
+; - no effect
+
+; error(s): 2
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; macro definition
+
+        .macro  PAD_BYT, ?count, ?val
+        .while  unknownCond ; non-evaluable (so non-constant)
+        .byte   ?val
+        .endw
+        .endm
+
+; try to expand the little monster
+
+        PAD_BYT 16, $00
+
+; now see what happens if we nest the macro definition
+
+        .macro  CALL_PAD
+        PAD_BYT 32, $01
+        .endm
+
+; try to expand this new little monster
+
+        CALL_PAD
+
+; -------------------------------
+
+        .end

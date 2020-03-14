@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 103e
+; Macros\EXIT from Macro
+; warn\error: unconditional "EXIT" outside of macro
+
+; by Anton Treuenfels
+
+; first created: 01/20/04
+; last revised:  07/10/09
+
+; warning(s): 2
+; - token ignored
+
+; error(s): 2
+; - "EXIT" outside of macro
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; "EXIT" checks to see if it is invoked outside of an
+; expansion block (which is illegal)
+
+        .exit
+
+; labels and expressions are ignored by EXIT
+
+        .macro  testmac
+        .byte   $00
+label1  .exit   expr1
+        .byte   $ff
+        .endm
+
+; test that theory
+
+        testmac
+
+; should still be a problem
+
+        .exit
+
+; ---------------
+
+        .end

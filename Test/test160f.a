@@ -1,0 +1,131 @@
+; Hobby Cross-Assembler Error Test 160f
+; Whiles\While Definition
+; warn\error: while block expansion errors
+
+; by Anton Treuenfels
+
+; first created: 11/22/08
+; last revised:  05/21/11
+
+; warning(s): 7
+; - odd label
+; - definition ignored
+
+; error(s): 13
+; - duplicate name
+; - need number
+; - need operator
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; global label in body of expansion
+; - multiple warnings and errors because of multiple "executions"
+
+]COUNT  =   4
+IN_BODY_2:
+        .while  ]COUNT
+        .byte   $11
+global3 .byte   $22         ; three warnings + three errors
+        .byte   $33
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; -------------------------------
+
+; bad expression in first part of outer loop
+
+]COUNT  = 2
+        .while  ]COUNT
+        .byte   "bad expression"
+]COUNT2 = 2
+        .while  ]COUNT2
+        .byte   $02
+]COUNT2 = ]COUNT2-1
+        .endw
+        .byte   $03
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; bad expression in inner loop
+
+]COUNT  = 2
+        .while  ]COUNT
+        .byte   $01
+]COUNT2 = 2
+        .while  ]COUNT2
+        .byte   "bad expression"
+]COUNT2 = ]COUNT2-1
+        .endw
+        .byte   $03
+]COUNT = ]COUNT-1
+        .endw
+
+; -------------------------------
+
+; bad expression in outer loop control
+
+]COUNT  = 2
+        .while  bad expression
+        .byte   $01
+]COUNT2 = 2
+        .while  ]COUNT2
+        .byte   $02
+]COUNT2 = ]COUNT2-1
+        .endw
+        .byte   $03
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; bad expression in inner loop control
+
+]COUNT  = 2
+        .while  ]COUNT
+        .byte   $01
+]COUNT2 = 2
+        .while  bad expression
+        .byte   $02
+]COUNT2 = ]COUNT2-1
+        .endw
+        .byte   $03
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; bad expression in both loop controls
+
+]COUNT  = 2
+        .while  bad expression
+        .byte   $01
+]COUNT2 = 2
+        .while  bad expression
+        .byte   $02
+]COUNT2 = ]COUNT2-1
+        .endw
+        .byte   $03
+]COUNT  = ]COUNT-1
+        .endw
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Error Test 151f
+; Repeats\Macros and Repeats
+; error: crossed macro/repeat blocks (variation 1)
+
+; by Anton Treuenfels
+
+; first created: 02/01/14
+; last revised:  12/22/07
+
+; warning(s): 0
+
+; error(s): 2
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; variant:
+;   macro   name
+;   repeat
+;   endm
+;   endr
+;   name
+
+; macro definition containing unclosed repeat
+
+        .macro  PAD_BYT, ?count, ?val
+        .repeat ?count
+        .byte   ?val
+        .endm
+
+; the repeat close (crossed block)
+
+        .endr                   ; unmatched (error)
+
+; try to expand the little monster
+
+        PAD_BYT 16, $00
+
+; -------------------------------
+
+        .end

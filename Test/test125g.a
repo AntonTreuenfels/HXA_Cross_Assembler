@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Error Test 125g
+; Local Scope\Nesting Depth
+; warn\fatal: "MAXDEPTH" psop set to one
+
+; by Anton Treuenfels
+
+; first created: 07/24/05
+; last revised:  07/24/05
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - maxdepth
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "6502"      ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .maxdepth    1      ; default is 64
+
+        .macro  depth_1
+        .echo   "Non-fatal at one"
+        .endm
+
+        .macro  depth_2
+        depth_1
+        .endm
+
+; -------------------------------
+
+; try them:
+
+        depth_1             ; ok - 1 nested local scope
+
+        depth_2             ; fatal - 2 nested local scopes
+
+; -------------------------------
+
+        .end

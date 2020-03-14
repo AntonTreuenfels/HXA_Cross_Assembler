@@ -1,0 +1,281 @@
+; Hobby Cross-Assembler Error Test 100f
+; Macros\Macro Definition
+; warn\error: basic macro expansion
+
+; by Anton Treuenfels
+
+; first created: 05/17/03
+; last revised:  05/21/11
+
+; warning(s): 13
+; - token ignored
+; - odd label
+; - definition ignored
+
+; error(s): 52
+; - expecting macro argument
+; - name not found
+; - duplicate name
+; - expecting label (cascade error)
+; - unexpected blank field
+; - unmatched block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 200
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a legal definition
+
+        .macro  name1, ?arg1, ?arg2
+        .echo   "Pointless but not illegal to not actually use formal args!"
+        .echo   "But if specified, must supply them to expansion!"
+        .endm
+
+; actual arg count low
+
+        name1               ; needs two, has none
+
+        .byte   $ff
+
+; actual arg count low
+
+        name1   unused      ; needs two, has one
+
+        .byte   $ff
+
+; actual arg count just right...
+
+        name1   unused1, unused2    ; needs two, has two
+
+        .byte   $ff
+
+; actual arg count high
+
+        name1   unused1, unused2, unused3   ; needs two, has three
+
+       .byte   $ff
+
+; an incorrect definition (which will not be recorded)
+; - define null-terminated string (a C-style string)
+
+        .macro  STRZ, ?text
+        .str    ?txt        ; spelling doesn't match !
+        .byte   0
+        .endm
+
+; assuming no "real" label preceeds it, the first use of a failed
+; definition will be interpreted as a global label
+; - and in this case with an unrecognized following string
+
+        STRZ    "Hello, World!"
+
+        .byte   $ff
+
+; -----------------------------
+
+; a legal definition
+; - define string with preceeding length byte (a Pascal-style string)
+
+        .macro  PSTR, ?text
+        .byte   endp - begp
+begp    .str    ?text
+endp    .endm
+
+; first use is ok...
+
+        PSTR    "This works (no warnings or errors)!"
+
+        .byte   $ff
+
+; ...second isn't (multiple assignment)
+
+        PSTR    "This doesn't (with warnings and errors)!"
+
+        .byte   $ff
+
+; -----------------------------
+
+; a legal definition
+; - it doesn't change behavior to use labels on lines by themselves
+
+        .macro  PSTR2, ?text
+        .byte   endp - begp
+begp2
+        .str    ?text
+endp2
+        .endm
+
+; first use is ok...
+
+        PSTR2   "This works (without warnings or errors)!"
+
+        .byte   $ff
+
+; ...second isn't
+
+        PSTR2   "This doesn't (with warnings and errors)!"
+
+        .byte   $ff
+
+; -----------------------------
+
+; missing formal args (definition not recorded)
+
+accept1 .macro
+        .echo   "?Still!"
+        .endm
+
+; try to invoke it (accepted as global label instead)
+
+        accept1
+
+; ...but can't do it again
+
+        .byte   $ff
+
+        accept1
+
+; missing formal args
+; - rejected by pseudo-op handler so never gets to macro definition handler
+
+accept2 .macro  , , ?still
+        .echo   "?Still!"
+        .endm
+
+; try to invoke it (accepted as global label instead)
+
+        accept2
+
+; ...but can't do it again
+
+        .byte   $ff
+
+        accept2
+
+; missing formal arg (definition not recorded)
+
+        .macro  accept3
+        .echo   "?Still!"
+        .endm
+
+; try to invoke it (accepted as global label instead)
+
+        accept3
+
+; ...but can't do it again
+
+        .byte   $ff
+
+        accept3
+
+; missing formal arg (definition not recorded)
+
+        .macro  accept4, ?arg1
+        .echo   "?Still!"
+        .endm
+
+; try to invoke it (accepted as global label instead)
+
+        accept4
+
+; ...but can't do it again
+
+        .byte   $ff
+
+        accept4
+
+; -----------------------------
+
+ok      .equ    $01         ; for clarity's sake we'll make this equate
+
+; missing actual args
+; - a one-argument test
+
+        .macro  onearg, ?one
+        .byte   ?one
+        .str    "?one"
+        .endm
+
+; invoke it legally...
+
+        onearg  ok
+
+; ...and otherwise
+
+        onearg
+
+        onearg  ,
+
+; missing actual args
+; - a two-argument test
+
+        .macro  twoarg, ?one, ?two
+        .byte   ?one,?two
+        .str    "?one"
+        .str    "?two"
+        .endm
+
+; invoke it legally...
+
+        twoarg  ok, ok
+
+; ...and otherwise
+
+        twoarg
+
+        twoarg  ok
+        twoarg  , ok
+        twoarg  ok,
+        twoarg  ,
+
+        twoarg ok,,ok
+        twoarg ,ok,ok
+        twoarg ok,ok,
+
+        twoarg ok,,
+        twoarg ,ok,
+        twoarg ,,ok
+
+; missing actual args
+; - a three-argument test
+
+        .macro  threearg, ?one, ?two, ?three
+        .byte   ?one
+        .word   ?two
+        .long   ?three
+        .endm
+
+; invoke it legally...
+
+        threearg    ok, ok, ok
+
+; ...and otherwise
+
+        threearg
+
+        threearg    ok
+        threearg    ok,
+        threearg    , ok
+        threearg    ,
+
+        threearg    ok, ok
+        threearg    ok, ok,
+        threearg    ok, , ok
+        threearg    ok, ,
+
+; ------------------
+
+        .end
+

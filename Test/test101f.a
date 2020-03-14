@@ -1,0 +1,84 @@
+; Hobby Cross-Assembler Error Test 101f
+; Macros\Nested Macros
+; error: error in body of definition (first pass)
+
+; by Anton Treuenfels
+
+; first created: 11/11/08
+; last revised:  06/28/09
+
+; warning(s): 0
+
+; error(s): 6
+; - bad EOE
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we're interested just in what the error report looks like
+; - how easy is it to tell where to find the error in the source ?
+
+; - during first pass block structure information is available and
+; we can show all open expansion blocks when an error occurs
+; (the last/most recently opened is probably where we want to look
+; to solve the problem that causes the error)
+
+; malformed expressions detected at expansion time
+
+        .macro  badbody1
+        .byte   "Bad expression"
+        .endm
+
+; try to expand it
+
+        badbody1
+
+; nest it inside another definition
+
+        .macro  badbody2
+        badbody1
+        .endm
+
+; try to expand it
+
+        badbody2
+
+; -------------------------------
+
+; another malformed expression
+
+        .macro  badbody3
+        .string 1234 +
+        .endm
+
+; try to expand it
+
+        badbody3
+
+; nest all previous macros inside another
+
+        .macro  badbody4
+        badbody1
+        badbody2
+        badbody3
+        .endm
+
+; try to expand it
+
+        badbody4
+
+; -------------------------------
+
+        .end

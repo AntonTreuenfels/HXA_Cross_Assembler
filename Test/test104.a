@@ -1,0 +1,272 @@
+; Hobby Cross-Assembler Test 104
+; Macros\EXITIF from Macro
+; ok: conditional exit psop within macro (all TRUE)
+
+; by Anton Treuenfels
+
+; first created: 09/24/07
+; last revised:  07/10/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+TRUE    .equ    1
+FALSE   .equ    0
+
+TRUE$   .equ    ".T."       ; any non-null will do
+FALSE$  .equ    ""          ; null string
+
+; -------------------------------
+; test all TRUE
+; -------------------------------
+
+; exit without doing anything
+
+        .macro  null
+        .exitif TRUE
+        .endm
+
+; test
+
+        null            ; (no output)
+
+; exit before doing anything
+
+        .macro  atbeg
+        .exitif TRUE
+        .byte   $11
+        .endm
+
+; test
+
+        atbeg           ; (no output)
+
+; exit while doing something
+
+        .macro  atmid
+        .byte   $22
+        .exitif TRUE
+        .byte   $33
+        .endm
+
+; test
+
+        atmid           ; $22
+
+; exit after doing something
+
+        .macro  atend
+        .byte   $44
+        .exitif TRUE
+        .endm
+
+; test
+
+        atend           ; $44
+
+; -------------------------------
+; exit from nested macro expansion
+; - note that whenever the "inner1" macro is expanded,
+; a new local scope is created
+; - also note that expanding an "outer--" macro does not always
+; cause "inner1" to be expanded
+; - this results in some subtle differences in the behavior of
+; similar macros created using nested definitions (see below)
+; -------------------------------
+
+; a macro to nest
+
+        .macro inner1
+        .byte   $66
+        .exitif TRUE
+        .byte   $77
+        .endm
+
+; test
+
+        inner1           ; $66
+
+; exit from nested macro
+
+        .macro  outer1a
+        .byte   $99
+        inner1
+        .byte   $aa
+        .endm
+
+; test
+
+        outer1a         ; $99 $66 $aa (compare to "outer2a")
+
+; exit from nested macro
+
+        .macro  outer1b
+        .exitif TRUE
+        .byte   $99
+        inner1
+        .byte   $aa
+        .endm
+
+; test
+
+        outer1b         ; (no output)    
+
+; exit from nested macro
+
+        .macro  outer1c
+        .byte   $99
+        .exitif TRUE
+        inner1
+        .byte   $aa
+        .endm
+
+; test
+
+        outer1c         ; $99
+
+; exit from nested macro
+
+        .macro  outer1d
+        .byte   $99
+        inner1
+        .exitif TRUE
+        .byte   $aa
+        .endm
+
+; test
+
+        outer1d          ; $99 $66
+
+; exit from nested macro
+
+        .macro  outer1e
+        .byte   $99
+        inner1
+        .byte   $aa
+        .exitif TRUE
+        .endm
+
+; test
+
+        outer1e        ; $99 $66 $aa (compare to "outer2e")
+
+; -------------------------------
+; exit from nested macro definition
+; - note that HXA considers nested macro definitions to be
+; logically distinct entities (the body of an inner definition
+; is treated as part of the outer definition, and not as
+; a separate macro)
+; - also note this means encountering an inner definition while
+; expanding an outer does *not* create a new local scope
+; - this results in some subtle differences in the behavior of
+; similar macros created using nested expansions (see above)
+; -------------------------------
+
+; exit from nested macro
+
+        .macro  outer2a
+        .byte   $99
+        .macro  inner2a
+        .byte   $66
+        .exitif TRUE$
+        .byte   $77
+        .endm
+        .byte   $aa
+        .endm
+
+; test
+
+        inner2a         ; $66
+
+        outer2a         ; $99 $66 (compare to "outer1a")
+
+; exit from nested macro
+
+        .macro  outer2b
+        .exitif TRUE$
+        .byte   $99
+        .macro  inner2b
+        .byte   $66
+        .exitif TRUE$
+        .byte   $77
+        .endm
+        .byte   $aa
+        .endm
+
+; test
+
+        inner2b         ; $66
+
+        outer2b         ; (no output)
+
+; exit from nested macro
+
+        .macro  outer2c
+        .byte   $99
+        .exitif TRUE$
+        .macro  inner2c
+        .byte   $66
+        .exitif TRUE$
+        .byte   $77
+        .endm
+        .byte   $aa
+        .endm
+
+; test
+
+        inner2c         ; $66
+
+        outer2c         ; $99
+
+; exit from nested macro
+
+        .macro  outer2d
+        .byte   $99
+        .macro  inner2d
+        .byte   $66
+        .exitif TRUE$
+        .byte   $77
+        .endm
+        .exitif TRUE$
+        .byte   $aa
+        .endm
+
+; test
+
+        inner2d         ; $66
+
+        outer2d         ; $99 $66
+
+; exit from nested macro
+
+        .macro  outer2e
+        .byte   $99
+        .macro  inner2e
+        .byte   $66
+        .exitif TRUE$
+        .byte   $77
+        .endm
+        .byte   $aa
+        .exitif TRUE$
+        .endm
+
+; test
+
+        inner2e         ; $66
+
+        outer2e         ; $99 $66 (compare to "outer1e")
+
+; ----------------------
+
+        .end

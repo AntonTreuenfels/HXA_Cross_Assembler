@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Error Test 160h
+; Whiles\While Definition
+; error: crossed WHILE and REPEAT blocks
+
+; by Anton Treuenfels
+
+; first created: 09/09/06
+; last revised:  12/22/07
+
+; warning(s): 0
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .repeat 2
+
+        .echo   "In Repeat"
+
+]dummy  .equ    4
+
+        .while  ]dummy      ; the crossed block
+
+        .echo   "In Repeat/While"
+
+        .endr
+
+]dummy  .equ    ]dummy-1
+
+        .echo   "In While"
+
+        .endw
+
+; -------------------------------
+
+        .end

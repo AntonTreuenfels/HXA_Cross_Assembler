@@ -1,0 +1,65 @@
+; Hobby Cross-Assembler Error Test 100h
+; Macros\Macro Definition
+; error: unresolved forward reference within macro (second pass)
+
+; by Anton Treuenfels
+
+; first created: 07/05/04
+; last revised:  07/05/04
+
+; warning(s): 0
+
+; error(s): 6
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we're interested just in what the error report looks like
+; - how easy is it to tell where to find the error in the source ?
+
+; a simple definition
+
+        .macro  UNRESOLVED
+        .word   unknownLabel
+        .endm
+
+; try it
+
+        UNRESOLVED
+
+; try it again
+
+        UNRESOLVED
+
+; -------------------------------
+
+; multiple unresolved labels
+
+        .macro  UNRESOLVED_2
+        .word   unknownLabel
+        .word   unknownAgain
+        .endm
+
+; try it
+
+        UNRESOLVED_2
+
+; try it again
+
+        UNRESOLVED_2
+
+; -------------------------------
+
+        .end

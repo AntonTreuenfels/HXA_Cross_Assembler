@@ -1,0 +1,123 @@
+; Hobby Cross-Assembler Test 155
+; Repeats\EXIT from Nested Macro/Repeats
+; ok: unconditional "EXIT" from nested macro/repeat blocks
+
+; by Anton Treuenfels
+
+; first created: 08/07/03
+; last revised:  01/24/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; --------------------------
+; from MACROS within REPEATS
+; --------------------------
+
+; define
+
+        .macro  level0
+        .byte   $00
+        .exit
+        .byte   $ff
+        .endm
+
+; test
+
+        level0          ; $00
+
+; define/test
+
+        .repeat 2       ; $00 $00
+        level0
+        .endr
+
+; define
+
+        .macro level1
+        .byte   $a0
+        .exit
+        level0
+        .byte   $0a
+        .endm
+
+; test
+
+        level1          ; $a0
+
+; define/test
+
+        .repeat 2       ; $a0 $a0
+        level1
+        .endr
+
+; --------------------------
+; from REPEATS within MACROS
+; --------------------------
+
+; define
+
+        .macro  repnest1
+        .repeat 2
+        .byte   $0a
+        .exit
+        .byte   $05
+        .endr
+        .byte   $a0
+        .endm
+
+; test
+
+        repnest1        ; $0a $a0
+
+; define
+
+        .macro  repnest2
+        .repeat 2
+        .byte   $77
+        .repeat 2
+        .byte   $88
+        .exit
+        .byte   $66
+        .endr
+        .endr
+        .byte   $55
+        .endm
+
+; test
+
+        repnest2        ; $77 $88 $77 $88 $55
+
+; define
+
+        .macro  repnest3
+        .repeat 2
+        .byte   $11
+        .exit
+        .repeat 2
+        .byte   $22
+        .exit
+        .byte   $33
+        .endr
+        .endr
+        .byte   $44
+        .endm
+
+; test
+
+        repnest3        ; $11 $44
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,137 @@
+; Hobby Cross-Assembler Test 165
+; Whiles\EXIT from Nested Macro/Whiles
+; ok: unconditional "EXIT" from nested macro/while blocks
+
+; by Anton Treuenfels
+
+; first created: 11/07/04
+; last revised:  11/07/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; --------------------------
+; from MACROS within WHILES
+; --------------------------
+
+; define
+
+        .macro  level0
+        .byte   $00
+        .exit
+        .byte   $ff
+        .endm
+
+; test
+
+        level0          ; $00
+
+; define/test
+
+]COUNT  = 2
+        .while ]COUNT   ; $00 $00
+        level0
+]COUNT  = ]COUNT - 1
+        .endw
+
+; define
+
+        .macro level1
+        .byte   $a0
+        .exit
+        level0
+        .byte   $0a
+        .endm
+
+; test
+
+        level1          ; $a0
+
+; define/test
+
+]COUNT  = 2
+        .while  ]COUNT  ; $a0 $a0
+        level1
+]COUNT  = ]COUNT - 1
+        .endw
+
+; --------------------------
+; from WHILES within MACROS
+; --------------------------
+
+; define
+
+        .macro  nested1
+]COUNT  = 2
+        .while  ]COUNT
+        .byte   $0a
+        .exit
+        .byte   $05
+]COUNT  = ]COUNT - 1
+        .endw
+        .byte   $a0
+        .endm
+
+; test
+
+        nested1        ; $0a $a0
+
+; define
+
+        .macro  nested2
+]COUNT1 = 2
+        .while  ]COUNT1
+        .byte   $77
+]COUNT2 = 2
+        .while  ]COUNT2
+        .byte   $88
+        .exit
+        .byte   $66
+]COUNT2 = ]COUNT2 - 1
+        .endw
+]COUNT1 = ]COUNT1 - 1
+        .endw
+        .byte   $55
+        .endm
+
+; test
+
+        nested2        ; $77 $88 $77 $88 $55
+
+; define
+
+        .macro  nested3
+]COUNT1 = 2
+        .while  ]COUNT1
+        .byte   $11
+        .exit
+]COUNT2 = 2
+        .while  ]COUNT2
+        .byte   $22
+        .exit
+        .byte   $33
+]COUNT2 = ]COUNT2 - 1
+        .endw
+]COUNT1 = ]COUNT1 - 1
+        .endw
+        .byte   $44
+        .endm
+
+; test
+
+        nested3        ; $11 $44
+
+; -------------------------------
+
+        .end

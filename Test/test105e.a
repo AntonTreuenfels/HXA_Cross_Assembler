@@ -1,0 +1,82 @@
+; Hobby Cross-Assembler Error Test 105e
+; Macros\DEFINED() and UNDEF
+; error: malformed "defined()" function and "undef" psop
+
+; by Anton Treuenfels
+
+; first created: 01/12/04
+; last revised:  09/06/09
+
+; warning(s): 0
+
+; error(s): 16
+; - unexpected EOE
+; - bad ")"
+; - bad "("
+; - type err
+; - expecting BOE
+; - expecting number
+; - expecting global name
+; - bad arg
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; malformed expressions
+
+        .byte   defined(
+
+        .byte   defined()
+
+        .byte   defined( goodname
+
+        .byte   defined( ?badname )
+
+        .byte   defined( 123 )
+
+        .byte   defined( goodname + goodname2 )
+
+        .byte   defined( goodname + 123 )
+
+; it's okay to "UNDEF" a non-existent macro...
+
+        .undef  non_existent
+
+        .undef  "non_existent"
+
+]unKnown$   =   "non_existent"
+
+        .undef  ]unKnown$
+
+        .undef  non_existent, "non_existent", ]unknown$
+
+; ...but it should be a legal name
+
+]unKnown$   =   "123"
+
+        .undef  ]unKnown$
+
+        .undef
+
+        .undef  ""
+
+        .undef  ?badname
+
+        .undef  123
+
+        .undef  ]unKnown$, "", ?badname, 123
+
+; --------------------
+
+        .end

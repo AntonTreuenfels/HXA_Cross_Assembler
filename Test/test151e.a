@@ -1,0 +1,98 @@
+; Hobby Cross-Assembler Error Test 151e
+; Repeats\Macros and Repeats
+; error: macro definitions within repeat blocks
+
+; by Anton Treuenfels
+
+; first created: 02/01/04
+; last revised:  02/01/04
+
+; warning(s):
+
+; error(s): 3
+; - expecting string
+; - expecting operand
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; Summary: Repeat block expansions are a form of macro expansion.
+; During expansions HXA silently ignores the delimiters of any
+; macro definition encounted but does duplicate the actual body of
+; the definition (this is what allows macro definitions to be nested).
+; Attempting to define a macro within a repeat block can lead to
+; unexpected behavior.
+
+; no error reported; the macro definition is ignored
+
+        .repeat 1
+        .macro  null_1
+        .endm
+        .endr
+
+; interpreted as a label, not a macro call
+
+        null_1
+
+; no error reported; the definition is repeated twice but also ignored twice
+
+        .repeat 2
+        .macro  null_2
+        .endm
+        .endr
+
+; interpreted as a label, not a macro call
+
+        null_2
+
+; no error reported; places two zero bytes in output at this point
+
+        .repeat 2
+        .macro  name_1
+        .byte   $00
+        .endm
+        .endr
+
+; interpreted as a label, not a macro call
+
+        name_1
+
+; error reported when formal argument is not replaced but evaluated anyway
+
+        .repeat 1
+        .macro  name_2, ?text
+        .str    ?text
+        .byte   0
+        .endm
+        .endr
+
+; interpreted as a label, not a macro call
+
+        name_2
+
+; error reported when formal argument is not replaced but evaluated anyway
+
+        .repeat 2
+        .macro  name_3, ?val
+        .word   2 * ?val
+        .endm
+        .endr
+
+; interpreted as label, not a macro call
+
+        name_3
+
+; -------------------------------
+
+        .end

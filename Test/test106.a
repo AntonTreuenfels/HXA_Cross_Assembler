@@ -1,0 +1,80 @@
+; Hobby Cross-Assembler Test 106
+; Macros\Macros and Labels
+; ok: macros with the same names as labels
+
+; by Anton Treuenfels
+
+; first created: 07/24/03
+; last revised:  01/13/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros  ; show macro expansions
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+; summary: a label can be defined with the same name as an existing macro
+; if the label ends with a colon (":") character. Thereafter context makes
+; them distinct to the assembler. Except for initial definition, labels
+; always appear *after* an instruction, pseudo-op or macro call.
+
+; - note this doesn't go the other way; a macro cannot be defined with
+; the same name as an existing label
+
+; a macro defined *before* label with the same name
+
+        .mac    test1, ?str
+        .str    "?str"
+        .byte   $00
+        .endm
+
+; a label with the same name defined *later* must end with a colon (":")
+; - this prevents the label definition from being identified as a macro call
+
+; 'test1' *label* on 'test1' *macro* to produce string "test1"
+
+test1:  test1   test1
+
+; 'test1' used as *label* to produce address of 'test1' label
+
+        .word   test1
+
+; 'test1' used as *macro* to produce string "test1 + redux"
+
+        test1   test1 + redux
+
+; 'test1' used as *label* to produce sum of 'test1' and 'redux' labels
+
+redux   .word   test1 + redux   ; redux + $1000
+
+; ------------------
+
+; let's try that again; macro definition first
+
+        .mac    test2, ?value
+        .word   ?value
+        .endm
+
+; 'test2' *label* on 'test2' *macro* to produce address of 'test2' label
+
+test2:  test2   test2
+
+; 'test2' *macro* and 'test1' and 'test2' *labels*
+
+        test2   test2 - test1
+
+; 'test1' *macro* and string 'test2'
+
+        test1   test2
+
+; -----------------
+
+        .end

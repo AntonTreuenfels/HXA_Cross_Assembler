@@ -1,0 +1,350 @@
+; Hobby Cross-Assembler Error Test 100e
+; Macros\Macro Definition
+; warn\error: basic macro definition
+
+; by Anton Treuenfels
+
+; first created: 05/17/03
+; last revised:  05/21/11
+
+; warning(s): 34
+; - definition ignored
+; - odd label
+; - token ignored
+
+; error(s): 44
+; - need name
+; - unmatched names
+; - illegal name (macro and formal argument)
+; - duplicate name (macro and formal argument)
+; - need operand (error specific to problem; not general)
+; - bad EOE
+; - unmatched block
+; - bad name
+; - no arg
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 200
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; missing macro name (w/o arguments)
+
+        .macro
+        .echo   "Macros must have names"
+        .endm
+
+; -------------------------------
+
+; name mis-matches
+
+        .macro  startname
+        .echo   "<MACRO> and <ENDMACRO> names must match"
+        .endm   endname
+
+        .macro  "startname"
+        .echo   "<MACRO> and <ENDMACRO> names must match"
+        .endm   "endname"
+
+]name$  .equ    "startname"
+
+        .macro  ]name$
+        .echo   "<MACRO> and <ENDMACRO> names must match"
+        .endm   ]name$ "extended"
+
+; -------------------------------
+
+; endmacro with expression (definition phase)
+
+        .macro  Endmacro_Expression
+        .echo   "Numeric expressions after <ENDMACRO> are not allowed"
+        .endm   100 * 2
+
+; try to expand it (accepted as label)
+
+        Endmacro_Expression
+
+; now cannot create macro with that name
+
+Endmacro_Expression .macro
+        .echo   "Name already accepted as label"
+        .endm
+
+; try to expand it (duplicate name error)
+
+        ENDMACRO_EXPRESSION
+
+        .byte   $00         ; bump program counter...
+
+        endMacro_expreSSion
+
+; -------------------------------
+
+; bad macro name
+
+        .macro  @badName
+        .echo   "Local labels not allowed as macro names"
+        .endm
+
+; bad macro name (alternate definition form)
+
+@badname    .macro
+            .echo   "Still!"
+            .endm
+
+; bad macro name
+
+        .macro  ]badName
+        .echo   "Variable labels not allowed as macro names"
+        .endm
+
+; bad macro name
+
+]badName    .macro
+            .echo   "Still!"
+            .endm
+
+; bad macro name
+
+        .macro  :+
+        .echo   "Branch target labels not allowed as macro names"
+        .endm
+
+; bad macro name
+
+ +      .macro
+        .echo   "Still!"
+        .endm
+
+; bad macro name
+
+        .macro  string
+        .echo   "Pseudo-ops not allowed as macro names"
+        .endm
+
+; bad macro name (detected as an error by 'string' psop processing, though)
+
+string  .macro
+        .echo   "This shouldn't appear (but does)"
+        .endm
+
+; a perfectly good label
+
+goodLabel:
+
+; bad macro name
+; - this does not cause cascade error because it's detected by
+; macro processing, not initial psop processing
+
+        .macro  goodLabel
+        .echo   "Known labels not allowed as macro names"
+        .endm
+
+; bad macro name
+
+goodLabel   .macro
+            .echo   "Still!"
+            .endm
+
+; bad macro name (literal)
+
+        .macro  index
+        .echo   "Built-in functions not allowed as macro names"
+        .endm
+
+; bad macro name (expression)
+
+        .macro  "index"
+        .echo   "Still!"
+        .endm
+
+; bad macro name
+
+index   .macro
+        .echo   "Still!"
+        .endm
+
+; --------------------------
+
+; missing macro definition
+
+        .endm
+
+; this is okay...
+
+        .macro  nameOk
+        .echo   "Nothing wrong with this"
+        .endm
+
+; ...try it...
+
+        nameOk
+
+        .byte   $00
+
+        nameOk
+
+; ...but can't define it again...
+
+        .macro  nameOk
+        .echo   "Duplicate names not allowed"
+        .endm
+
+; ...make sure original macro still works...
+
+        nameOk
+
+        .byte   $00
+
+        nameOk
+
+; ...however this next form of attempted redefinition is interpreted as an
+; invocation of the existing macro
+; - doesn't trigger an error or warning on the start line of the redefinition
+; unless there is a problem detected with the (supposed) actual arguments
+; - in this case the existing macro does not accept arguments, so a warning
+; is issued, and then the macro executes
+; - triggers at least one cascade error at the last line of the redefinition,
+; because the assembler isn't actually defining a macro
+
+nameOk  .macro
+        .echo   "Still!"
+        .endm
+
+; --------------------------
+
+; bad macro name
+
+        .macro  nameFine ?argFine
+        .echo   "No separator between name and argument"
+        .endm
+
+; bad arg name
+
+        .macro  nameFine, arg
+        .echo   "Global labels not allowed as formal argument names"
+        .endm
+
+; bad arg name
+; - note duplication of macro name itself not noticed because previous
+; (bad) definition not recorded
+
+nameFine    .macro  arg
+            .echo   "Still!"
+            .endm
+
+; bad arg name
+
+        .macro  nameFine, :+
+        .echo   "Branch target labels not allowed as formal argument names"
+        .endm
+
+; bad arg name
+
+nameFine    .macro  +
+            .echo   "Still!"
+            .endm
+
+; --------------------------
+
+; duplicate arg names
+
+        .macro  nameFine, ?arg, ?arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  ?arg, ?arg
+            .echo   "Still!"
+            .endm
+
+; duplicate arg names
+
+        .macro  nameFine, ?arg, ?otherarg, ?arg
+        .echo   "Duplicate formal argument names not allowed"
+        .endm
+
+; duplicate arg names
+
+nameFine    .macro  ?arg, ?otherarg, ?arg
+            .echo   "Still!"
+            .endm
+
+; --------------------------
+
+; multiple arg name problems
+
+        .macro  nameFine, ?arg, badname, ?arg
+        .echo   "Neither bad nor duplicate names allowed"
+        .endm
+
+; multiple arg name problems
+
+nameFine    .macro  ?arg, badname, ?arg
+            .echo   "Still!"
+            .endm
+
+; --------------------------
+
+; missing macro name (w/ arguments)
+; - blank expression field detected during initial line processing
+
+        .macro , ?argfine
+        .echo   "Still!"
+        .endm
+
+; missing arg name in formal argument list
+; - blank expression field detected during initial line processing
+
+        .macro  nameFine,
+        .echo   "Formal argument missing!"
+        .endm
+
+; missing arg name in body of macro
+
+accept1 .macro
+        .echo   "?Still!"           ; note the "?" character
+        .endm
+
+; try to expand it
+; - because definition not accepted this is interpreted as a label...
+
+        accept1
+
+; ...which won't actually cause an error until the program counter changes...
+
+        accept1
+
+; ...so we'll change it...
+
+        .byte   $01
+
+; ...and finally get an error...
+
+        accept1
+
+; --------------------------
+
+; incomplete (unterminated) definition
+
+        .macro  no_end
+        .echo   "This macro definition is not properly closed"
+        .byte   $00
+
+; ---------------------------
+
+        .end            ; not processed because of unterminated definition !
+

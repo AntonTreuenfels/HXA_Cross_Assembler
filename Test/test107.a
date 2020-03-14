@@ -1,0 +1,90 @@
+; Hobby Cross-Assembler Test 107
+; Macros\Odd Macro Arguments
+; ok: actual arguments which match formal argument names
+
+; by Anton Treuenfels
+
+; first created: 02/22/04
+; last revised:  06/19/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* not necessary for these tests
+
+*        .cpu    "6502"      ; required psop
+*        .org    $1000       ; required psop
+
+; -------------------------------
+
+; what we're looking at is situations like the following:
+; - (1) macros with body lines containing more than one formal argument
+; (they can be the same or different), and
+; - (2) an actual argument provided to such a line which contains
+; within itself one of the formal arguments of the line
+; - now consider what happens when (say) the first formal argument
+; of such a line is replaced by an actual argument which matches one
+; of the later formal arguments on the line. Essentially there is now
+; an "extra" copy of the later formal argument in the body line
+; - as a result, we have to be careful to ignore the "extra" copy as
+; we complete the replacement process
+
+; a simple test with only one formal argument
+
+        .macro  TEST_1, ?arg1
+        .echo   "\"?arg1\" is the same as \"?arg1\""
+        .endm
+
+; this is fine:
+
+        TEST_1  Any old argument
+
+; this appears fine...
+
+        TEST_1  ?arg1
+
+; ...but suppose the second replacement incorrectly replaced the first
+; formal argument again. If the replacement of a formal argument always
+; begins by scanning for it from the start of the string, then an actual
+; argument which matches it always stops the scan at its first occurance.
+; In that case the output appears correct even though it was done
+; incorrectly. If this error is occurring, we should be able to see it by
+; prefixing the formal argument within the actual argument. Incorrect
+; replacement from this cause should multiply the prefix at the first
+; occurance of the formal argument by as many times as it appears in
+; the text
+
+        TEST_1  prefix?arg1
+
+; another simple test with two formal arguments
+
+        .macro  TEST_2, ?arg1, ?arg2
+        .echo   "\"?arg1\" is on the same line as \"?arg2\""
+        .endm
+
+; these work fine:
+
+        TEST_2  YES, YES
+        TEST_2  YES, NO
+        TEST_2  NO, YES
+        TEST_2  NO, NO
+
+; and these appear to work fine even if they don't really:
+
+        TEST_2  ?arg1, ?arg1
+        TEST_2  ?arg1, ?arg2
+        TEST_2  ?arg2, ?arg1
+        TEST_2  ?arg2, ?arg2
+
+; these should fail if replacement is incorrect
+
+        TEST_2  ?arg2, This should replace '?arg2'
+        TEST_2  prefix?arg2, ?arg2suffix
+
+; --------------------
+
+        .end

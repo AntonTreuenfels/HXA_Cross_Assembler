@@ -1,0 +1,93 @@
+; Hobby Cross-Assembler Test 160
+; Whiles\While Definition
+; ok: basic while block definition and expansion (numeric control expressions)
+
+; by Anton Treuenfels
+
+; first created: 11/02/04
+; last revised:  10/28/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros, autos   ; show expansions and internal labels
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; ---------------
+
+; empty body test
+
+NO_BODY_1:
+        .while 0            ; infinite loop if non-zero
+        .endw
+
+        .byte   $00
+
+; ---------------
+
+; unseen body test
+
+UNSEEN:
+        .while 0           ; no warning (body skipped)
+        .echo "Shouldn't see this!"
+        .endw
+
+        .byte   $00
+
+; ---------------
+
+; a simple expansion
+
+]COUNT  =   4
+        .while  ]COUNT
+        .byte   ]COUNT
+]COUNT  = ]COUNT - 1
+        .endw
+
+        .byte   ]COUNT
+
+; ---------------
+
+; a simple expansion showing label scoping
+; - note that neither "while" nor "endw" generate code themselves,
+; so the value assigned to any attached labels is the same as the
+; current value of the program counter (and also the same as the
+; *next* object byte address)
+
+]COUNT  =   4
+@local1 .while  ]COUNT  ; first "@local1" is outside while block scope
+        .word   @local1 ; data = value of second "@local1"
+]COUNT  = ]COUNT - 1
+@local1 .endw           ; second "@local1" is inside while block scope
+
+; ]curradr == value of second @local1
+
+]curradr .word   @local1 ; data = value of first "@local1"
+
+        .byte   $00
+
+; ---------------
+
+; a 16 x 16 multiplication table built w/ nested whiles
+
+]M1     = 0
+
+MULT_4BY4:
+        .while ]M1 < 16
+]M2     = 0
+        .while ]M2 < 16
+        .byte   ]M1 * ]M2
+]M2     = ]M2 + 1
+        .endw
+]M1     = ]M1 + 1
+        .endw
+
+; ---------------
+
+        .end

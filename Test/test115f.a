@@ -1,0 +1,299 @@
+; Hobby Cross-Assembler Error Test 115f
+; Macros\Assignable Formal Arguments
+; error: forward reference (fail) and backward reference (ok)
+
+; by Anton Treuenfels
+
+; first created: 06/02/07
+; last revised:  06/02/07
+
+; warning(s): 4
+; - odd label
+
+; error(s): 22
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a major goal is to show that:
+
+;       .macro  name, ?formalarg
+; ]var  .equ    ?formalarg
+
+; and
+
+;        .macro name, ]formalarg
+
+; behave the same (ie., are equivalent) under both success and failure
+; conditions, so any failure is not the result of the method itself
+; but its application (ie., bad user code)
+
+; -------------------------------
+
+; backward references
+
+backref:
+backref$:
+
+; a simple numeric test
+; - these should give equivalent results (if given the same argument)
+; - results ECHOed to error file "TEST115F.ERR" for easy checking
+
+        .macro  test1a, ?fa
+        .if ?fa
+        .echo   "?fa= " str$(?fa)
+        .endif
+        .endm
+
+        .macro  test1b, ?fa
+]fa     .equ    ?fa
+        .if ]fa
+        .echo   "]fa= " str$(]fa)
+        .endif
+        .endm
+
+        .macro  test1c, ?fa
+@fa     .equ    ?fa
+        .if @fa
+        .echo   "@fa= " str$(@fa)
+        .endif
+        .endm
+
+        .macro  test1d, ]fa
+        .if ]fa
+        .echo   "]fa= " str$(]fa)
+        .endif
+        .endm
+
+        .macro  test1e, @fa
+        .if @fa
+        .echo   "@fa= " str$(@fa)
+        .endif
+        .endm
+
+; try them...
+
+        .echo "a constant (OK)"
+
+        test1a  10
+        test1b  10
+        test1c  10
+        test1d  10
+        test1e  10
+
+        .echo   "an expression (OK)"
+
+        test1a  10+10
+        test1b  10+10
+        test1c  10+10
+        test1d  10+10
+        test1e  10+10
+
+        .echo   "a backward reference (OK)"
+
+        test1a  backref
+        test1b  backref
+        test1c  backref
+        test1d  backref
+        test1e  backref
+
+        .echo   "a backward reference in an expression (OK)"
+
+        test1a  backref+10
+        test1b  backref+10
+        test1c  backref+10
+        test1d  backref+10
+        test1e  backref+10
+
+        ; these next fail because of forward reference
+        ; - the failures of test1b and test1d are equivalent,
+        ; as are the failures of test1c and test1e
+        ; - which is good, as we want label formal arguments to have
+        ; the same effect as the equivalent explicit assignment version,
+        ; both for success and failure
+        ; - note that for test1b and test1d the variable label retains
+        ; its existing value when the assignment of a new value fails,
+        ; hence its conditional test succeeds (using the old value)
+        ; - for test1c and test1e, on the other hand, the local variable
+        ; is not created when the assignment fails, hence the conditional
+        ; test also fails when its expression cannot be evaluated
+        ; (although HXA does know the internal name the local variable
+        ; it can't find *should* have)
+
+        .echo   "a forward reference (FAIL)"
+
+        test1a  forwardref
+        test1b  forwardref
+        test1c  forwardref
+        test1d  forwardref
+        test1e  forwardref
+
+; -------------------------------
+
+; a simple numeric test
+; - this time we want to see what happens when we try to use a variable
+; label when it doesn't exist (assignment failure before any success)
+
+        .macro  test1f, ?fb
+]fb     .equ    ?fb
+        .if ]fb
+        .echo   "]fb= " str$(]fb)
+        .endif
+        .endm
+
+        .macro  test1g, ]fb
+        .if ]fb
+        .echo   "]fb= " str$(]fb)
+        .endif
+        .endm
+
+; try them...
+
+        .echo   "a forward reference (FAIL) - uncreated variable labels"
+
+        test1f  forwardref
+        test1g  forwardref
+
+; -------------------------------
+
+; a simple string test
+; - these should give equivalent results (if given the same argument)
+; - results ECHOed to error file "TEST115F.ERR" for easy checking
+
+        .macro  test2a, ?fa
+        .if ?fa != ""
+        .echo   ?fa "= " ?fa
+        .endif
+        .endm
+
+        .macro  test2b, ?fa
+]fa$    .equ    ?fa
+        .if ]fa$ != ""
+        .echo   "]fa$= " ]fa$
+        .endif
+        .endm
+
+        .macro  test2c, ?fa
+@fa$    .equ    ?fa
+        .if @fa$ != ""
+        .echo   "@fa$= " @fa$
+        .endif
+        .endm
+
+        .macro  test2d, ]fa$
+        .if ]fa$ != ""
+        .echo   "]fa$= " ]fa$
+        .endif
+        .endm
+
+        .macro  test2e, @fa$
+        .if @fa$ != ""
+        .echo   "@fa$= " @fa$
+        .endif
+        .endm
+
+; try them...
+
+        .echo "a constant (OK)"
+
+        test2a  "10"
+        test2b  "10"
+        test2c  "10"
+        test2d  "10"
+        test2e  "10"
+
+        .echo   "an expression (OK)"
+
+        test2a  "1" "0"
+        test2b  "1" "0"
+        test2c  "1" "0"
+        test2d  "1" "0"
+        test2e  "1" "0"
+
+        .echo   "a backward reference (OK)"
+
+        test2a  backref$
+        test2b  backref$
+        test2c  backref$
+        test2d  backref$
+        test2e  backref$
+
+        .echo   "a backward reference in an expression (OK)"
+
+        test2a  mid$(backref$,1,2)
+        test2b  mid$(backref$,1,2)
+        test2c  mid$(backref$,1,2)
+        test2d  mid$(backref$,1,2)
+        test2e  mid$(backref$,1,2)
+
+        ; these next fail because of forward reference
+        ; - the failures of test2b and test2d are equivalent,
+        ; as are the failures of test2c and test2e
+        ; - which is good, as we want label formal arguments to have
+        ; the same effect as the equivalent explicit assignment version,
+        ; both for success and failure
+        ; - note that for test2b and test2d the variable label retains
+        ; its existing value when the assignment of a new value fails,
+        ; hence its conditional test succeeds (using the old value)
+        ; - for test2c and test2e, on the other hand, the local variable
+        ; is not created when the assignment fails, hence the conditional
+        ; test also fails when its expression cannot be evaluated
+        ; (although HXA does know the internal name the local variable
+        ; it can't find *should* have)
+
+        .echo   "a forward reference (FAIL)"
+
+        test2a  forwardref$
+        test2b  forwardref$
+        test2c  forwardref$
+        test2d  forwardref$
+        test2e  forwardref$
+
+; -------------------------------
+
+; a simple string test
+; - this time we want to see what happens when we try to use a variable
+; label when it doesn't exist (assignment failure before any success)
+
+        .macro  test2f, ?fb
+]fb$    .equ    ?fb
+        .if ]fb$ != ""
+        .echo   "]fb$= " ]fb$
+        .endif
+        .endm
+
+        .macro  test2g, ]fb$
+        .if ]fb$ != ""
+        .echo   "]fb$= " ]fb$
+        .endif
+        .endm
+
+; try them...
+
+        .echo   "a forward reference (FAIL) - uncreated variable labels"
+
+        test2f  forwardref$
+        test2g  forwardref$
+
+; forward references
+; - not actually needed; any unknown and/or non-existent labels
+; will do for testing
+
+forwardref$:
+forwardref:
+
+; -------------------------------
+
+        .end

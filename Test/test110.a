@@ -1,0 +1,151 @@
+; Hobby Cross-Assembler Test 110
+; Macros\Default Macro Arguments
+; ok: macros with default argument values
+
+; by Anton Treuenfels
+
+; first created: 03/18/04
+; last revised:  06/12/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; pad object
+
+        .macro  CONST_FILL, ?len, ?val=$00
+        .repeat ?len
+        .byte   ?val
+        .endr
+        .endm
+
+; -------------------------------
+
+; test CONST_FILL
+
+        CONST_FILL  8, $ff
+        CONST_FILL  8
+
+]TEMP   = 0
+        .repeat 8
+        CONST_FILL  ]TEMP+1, ]TEMP+$80
+]TEMP   = ]TEMP + 1
+        .endr
+
+]TEMP   = 0
+        .repeat 8
+        CONST_FILL  ]TEMP+1
+]TEMP   = ]TEMP + 1
+        .endr
+
+; -------------------------------
+
+; align object
+
+        .macro  ALIGN_TO, ?boundary=2, ?val=$00
+        CONST_FILL  ?boundary - (* % ?boundary), ?val
+        .endm
+
+; check if on boundary
+
+        .macro  ON_BOUNDARY, ?boundary
+        .byte   !(* % ?boundary)    ; 1= yes; 0= no
+        .endm
+
+; -------------------------------
+
+; test ALIGN_TO
+
+        ALIGN_TO 3, $ff
+        ON_BOUNDARY 3
+        ALIGN_TO 5
+        ON_BOUNDARY 5
+        ALIGN_TO
+        ON_BOUNDARY 2
+
+]TEMP   = 3
+        .repeat 5
+        ALIGN_TO    ]TEMP, ]TEMP
+        ON_BOUNDARY ]TEMP
+]TEMP   = ]TEMP + 1
+        .endr
+
+]TEMP   = 3
+        .repeat 5
+        ALIGN_TO    ]TEMP
+        ON_BOUNDARY ]TEMP
+]TEMP   = ]TEMP + 1
+        .endr
+
+]TEMP   = 3
+        .repeat 5
+        ALIGN_TO
+        ON_BOUNDARY 2
+]TEMP   = ]TEMP + 1
+        .endr
+
+; -------------------------------
+
+; test default containing an equal sign
+
+        .macro  STRZ, ?text="Equal sign (=) in quoted string ok"
+        .string ?text
+        .byte   $00
+        .endm
+
+; -------------------------------
+
+; test STRZ
+
+        STRZ
+        STRZ    "A C-style string"
+
+; -------------------------------
+
+; test default containing an equal sign
+; - the escape sequence allows use of the equal sign in an unquoted
+; default, but note that because macro replacements are purely text
+; replacements, this kind of replacement must be placed into a
+; quoted string or the escapes will never be removed
+
+        .macro  DESC_RELATE, ?arg1, ?arg2, ?arg3=\=\=
+        .string "?arg1 ?arg3 ?arg2"
+        .endm
+
+; -------------------------------
+
+; test DESC_RELATE
+
+        DESC_RELATE 2, 2
+        DESC_RELATE 2, 3, !=
+
+; -------------------------------
+
+; a potentially troublesome char sequence in the arg list
+; - the arg separator appears escaped, but really it's
+; the escape char that's escaped
+
+        .macro  STR2, ?s1=\\backslashed\\, ?s2=/slashed/
+        .str    "?s1"
+        .str    "?s2"
+        .endm
+
+; -------------------------------
+
+; test STR2
+
+        STR2
+        STR2   yes
+        STR2   yes, no
+
+        .end

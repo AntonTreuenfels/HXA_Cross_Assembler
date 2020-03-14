@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 160i
+; Whiles\While Definition
+; error: control expression goes out of range
+
+; by Anton Treuenfels
+
+; first created: 07/25/10
+; last revised:  07/25/10
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we're interested in the control expression itself failing to evaluate
+; at some point after looping begins, so this test has to have that
+; expression start out legal and eventually become illegal
+
+]control    =   1
+
+        .while  ]control * 2
+]control    =   ]control * 2
+        .echo   "]control = " str$(]control)
+        .endwhile
+
+; -------------------------------
+
+        .end
