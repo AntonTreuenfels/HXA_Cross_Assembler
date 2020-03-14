@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 331
+; Segments\Object Output (By Segments, Default Names)
+; ok: 16-bit
+
+; by Anton Treuenfels
+
+; first created: 12/12/09
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .objbyseg           ; check output
+
+; -------------------------------
+
+        .cpu    "T_16_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start       ; not used by object format

@@ -1,0 +1,193 @@
+; Hobby Cross-Assembler Error Test 356e
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; error: segments cannot be re-typed
+
+; by Anton Treuenfels
+
+; first created: 01/22/08
+; last revised:  01/26/08
+
+; warning(s): 0
+
+; error(s): 15
+; - segment type mismatch
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; define segments and their types
+
+        .segment    absorg_type ; absolute origin
+
+        .absorg $1000           ; must specify before pc changes
+
+        .ends
+
+        .segment    relorg_type ; relative origin
+
+        .byte   $00             ; default type if pc changes first
+
+        .ends
+
+        .segment    relend_type ; relative end
+
+        .relend                 ; must specify before pc changes
+
+        .ends
+
+        .segment    absend_type ; absolute end
+
+        .absend $8000           ; must specify before pc changes
+
+        .ends
+
+; -------------------------------
+
+; try to re-define to absolute origin type
+
+        .segment    absorg_type
+
+        .absorg $1000           ; okay
+
+        .ends
+
+        .segment    relorg_type
+
+        .absorg $1000           ; fail
+
+        .ends
+
+        .segment    relend_type
+
+        .absorg $1000           ; fail
+
+        .ends
+
+        .segment    absend_type
+
+        .absorg $1000           ; fail
+
+        .ends
+
+; try to re-define to relative end type
+
+        .segment    absorg_type
+
+        .relend                 ; fail
+
+        .ends
+
+        .segment    relorg_type
+
+        .relend                 ; fail
+
+        .ends
+
+        .segment    relend_type
+
+        .relend                 ; okay
+
+        .ends
+
+        .segment    absend_type
+
+        .relend                 ; fail
+
+        .ends
+
+; try to re-define to absolute end type
+
+        .segment    absorg_type
+
+        .absend $8000           ; fail
+
+        .ends
+
+        .segment    relorg_type
+
+        .absend $8000           ; fail
+
+        .ends
+
+        .segment    relend_type
+
+        .absend $8000           ; fail
+
+        .ends
+
+        .segment    absend_type
+
+        .absend $8000           ; okay
+
+        .ends
+
+; -------------------------------
+
+; try to re-define absolute origin to other types
+
+        .segment    absorg_type
+
+        .byte   $00
+
+        .absorg $1000           ; okay
+
+        .byte   $00
+
+        .relend                 ; fail
+
+        .byte   $00
+
+        .absend $8000           ; fail
+
+        .ends
+
+; try to re-define relative end to other types
+
+        .segment    relend_type
+
+        .byte   $00
+
+        .absorg $1000           ; fail
+
+        .byte   $00
+
+        .relend                 ; okay
+
+        .byte   $00
+
+        .absend $8000           ; fail
+
+        .ends
+
+; try to re-define absolute end to other types
+
+        .segment    absend_type
+
+        .byte   $00
+
+        .absorg $1000           ; fail
+
+        .byte   $00
+
+        .relend                 ; fail
+
+        .byte   $00
+
+        .absend $8000           ; okay
+
+        .ends
+
+; -------------------------------
+
+        .end

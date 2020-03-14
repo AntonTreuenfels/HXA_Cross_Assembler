@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Error Test 370j
+; Segments\Nested Segments
+; error: nested segments have nested local scopes
+
+; by Anton Treuenfels
+
+; first created: 04/25/08
+; last revised:  04/25/08
+
+; warning(s): 0
+
+; error(s): 6
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; nested segments
+
+        .segment    abs1
+
+        .org    $1000
+
+@label1 .word   @label1
+
+        .word   @label2         ; local in another sceope
+
+        .word   @label3         ; local in another sceope
+
+        .segment    rel1        ; nested segment
+
+        .word   @label1         ; local in another scope
+
+@label2 .word   @label2
+
+        .word   @label3         ; local in another scope
+
+        .ends
+
+        .segment    abs1        ; self-nested segment
+
+        .word   @label1         ; local in another scope
+
+        .word   @label2         ; local in another scope
+
+@label2 .word   @label3
+
+        .ends
+
+        .ends
+
+; -------------------------------
+
+        .end

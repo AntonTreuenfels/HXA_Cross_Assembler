@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 352g
+; Segments\Common Segments
+; error: no "common" after "padto"
+
+; by Anton Treuenfels
+
+; first created: 10/06/07
+; last revised:  01/21/08
+
+; warning(s): 0
+
+; error(s): 1
+; - seg is padded
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop
+
+; -------------------------------
+
+; cannot declare common after padding used
+
+        .segment    haspadding
+
+        .org    $1000
+
+        .padto  $1234
+
+        .common
+
+        .ends
+
+; -------------------------------
+
+        .end

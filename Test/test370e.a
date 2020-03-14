@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 370e
+; Segments\Nested Segments
+; error: segment without endsegment (outer, named)
+
+; by Anton Treuenfels
+
+; first created: 04/25/08
+; last revised:  06/29/08
+
+; warning(s): 1
+; - odd use
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; nested segments
+
+        .segment	abs1
+
+        .segment    rel1
+
+        .ends   rel1
+
+;        .ends   abs1
+
+; -------------------------------
+
+        .end

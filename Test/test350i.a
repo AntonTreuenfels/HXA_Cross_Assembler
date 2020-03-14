@@ -1,0 +1,31 @@
+; Hobby Cross-Assembler Error Test 350i
+; Segments\Uninitialized Segments
+; fatal: can't use in monolithic program
+
+; by Anton Treuenfels
+
+; first created: 03/26/11
+; last revised:  08/20/13
+
+; error(s): 0
+
+; fatal: 1
+; - not within segment
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .uninitialized
+
+; -------------------------------
+
+        .end

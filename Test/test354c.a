@@ -1,0 +1,86 @@
+; Hobby Cross-Assembler Test 354c
+; Segments\"RELORG" Pseudo Op
+; ok: correct addresses of relative segment data (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop
+;        .absorg $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .absorg $10000000   ; ORG before any data makes segment absolute
+
+        .bit32  *
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .absorg $20000000   ; absolute
+
+        .bit32  $
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment	rel2_1
+
+        .relorg             ; relative (prior to data storage)
+
+        .bit32  *
+
+        .ends	REL2_1
+
+; another segment
+
+        .segment	abs3
+
+        .absorg $30000000   ; absolute
+
+        .bit32  $
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .bit32  *
+
+        .relorg             ; relative (after data storage)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .relorg             ; relative (before...)
+
+        .bit32  $
+
+        .relorg             ; (...and after data storage)
+
+        .ends
+
+; -------------------------------
+
+        .end

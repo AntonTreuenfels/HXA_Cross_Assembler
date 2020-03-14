@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 354f
+; Segments\"RELORG" Pseudo Op
+; warn: labels and expressions
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; warning(s): 4
+; - ignored
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .absorg  $1000      ; can't use outside of explicit segment
+
+; -------------------------------
+
+; avoid 'not absolute' error by making sure there is an absolute segment
+
+        .segment    abs1
+
+        .absorg $1000
+
+        .ends
+
+; the test
+
+        .segment    rel1
+
+        .relorg             ; okay
+
+label1  .relorg             ; ignored
+
+        .relorg $1000       ; ignored
+
+label2  .relorg $2000       ; ignored/ignored
+
+        .ends
+
+; -------------------------------
+
+        .end

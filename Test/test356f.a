@@ -1,0 +1,75 @@
+; Hobby Cross-Assembler Error Test 356f
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; warn\error: labels and expressions
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; warning(s): 6
+; - ignored
+; - already set
+
+; error(s): 4 
+; - need number
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; relative end
+
+        .segment    relend
+
+        .relend             ; okay
+
+label1  .relend             ; ignored
+
+        .relend $1000       ; ignored
+
+label2  .relend $1800       ; ignored
+
+        .ends
+
+; absolute end
+
+        .segment    absend
+
+        .absend             ; fail
+
+label3  .absend             ; fail
+
+        .absend $1000       ; okay
+
+label4  .absend $1000       ; okay
+
+        .ends
+
+; absolute end (different address)
+
+        .segment    absend
+
+        .absend             ; fail
+
+label5  .absend             ; fail
+
+        .absend $2000       ; fail
+
+label6  .absend $2000       ; fail
+
+        .ends
+
+; -------------------------------
+
+        .end

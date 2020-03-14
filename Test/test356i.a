@@ -1,0 +1,151 @@
+; Hobby Cross-Assembler Error Test 356i
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; error: cannot make segments absolute
+
+; by Anton Treuenfels
+
+; first created: 01/27/08
+; last revised:  01/27/08
+
+; warning(s): 0
+
+; error(s): 6
+; - not absolute
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .absorg  $1000      ; can't use outside of explicit segment
+
+; -------------------------------
+
+; the segment definitions that follow are all okay,
+; however the relative segments are placed incorrectly so they
+; will never have the information they need to become absolute
+
+; fail - must know the absolute start of the following segment to resolve
+
+        .segment    relend1
+
+        .relend
+
+        .ends
+
+; fail - must know the absolute end of the preceeding segment to resolve
+
+        .segment    relorg1
+
+        .relorg
+
+        .ends
+
+; okay - an absolute segment can be resolved
+
+        .segment    absorg
+
+        .absorg $1000
+
+        .ends
+
+; fail - must know the absolute start of the following segment to resolve
+
+        .segment    relend2
+
+        .relend
+
+        .ends
+
+; fail - must know the absolute end of the preceeding segment to resolve
+
+        .segment    relorg2
+
+        .relorg
+
+        .ends
+
+; okay - an absolute segment can be resolved
+
+        .segment    absend
+
+        .absend $2000
+
+        .ends
+
+; fail - must know the absolute start of the following segment to resolve
+
+        .segment    relend3
+
+        .relend
+
+        .ends
+
+; fail - must know the absolute end of the preceeding segment to resolve
+
+        .segment    relorg3
+
+        .relorg
+
+        .ends
+
+; -------------------------------
+
+; put some data in each segment
+; - note if they had been *defined* in this order,
+; they could all eventually be resolved
+
+        .segment    absorg  ; is absolute in itself...
+
+        .bit16  $2222
+
+        .ends
+
+        .segment    relorg1 ; ...would be absolute by relation to 'absorg'
+
+        .bit16  $1111
+
+        .ends
+
+        .segment    relorg2 ; ...would be absolute by relation to 'relorg1'
+
+        .bit16  $4444
+
+        .ends
+
+        .segment    relorg3 ; ...would be absolute by relation to 'relorg2'
+
+        .bit16  $7777
+
+        .ends
+
+        .segment    relend1 ; ...would be absolute by relation to 'relend2'
+
+        .bit16  $0000
+
+        .ends
+
+        .segment    relend2 ; ...would be absolute by relation to 'relend3'
+
+        .bit16  $3333
+
+        .ends
+
+        .segment    relend3 ; ...would be absolute by relation to 'absend'
+
+        .ends
+
+        .segment    absend  ; is absolute in itself...
+
+        .bit16  $5555
+
+        .ends
+
+; -------------------------------
+
+        .end

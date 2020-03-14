@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 356
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; ok: correct addresses of relative segment data (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/21/08
+; last revised:  04/06/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+        .include    "iabsend.a"
+
+; -------------------------------
+
+        .end

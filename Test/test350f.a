@@ -1,0 +1,63 @@
+; Hobby Cross-Assembler Error Test 350f
+; Segments\Uninitialized Segments
+; fatal: cannot store data in "uninitialized" segments
+
+; by Anton Treuenfels
+
+; first created: 09/26/09
+; last revised:  09/26/09
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - uninitialized segment
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop
+
+; -------------------------------
+
+; a legal fragment
+
+        .segment    nodata1
+
+        .uninitialized
+
+        .ds 256
+
+        .ends
+
+; another legal fragment
+
+        .segment    data1
+
+        .byte   $00
+        .word   $0102
+        .long   $03040506
+
+        .ends
+
+; ...but this isn't legal
+
+        .segment    nodata2
+
+        .uninitialized
+
+        .byte   $10             ; immediately fatal
+        .word   $1112
+        .long   $13141516
+
+        .ends
+
+; -------------------------------
+
+        .end

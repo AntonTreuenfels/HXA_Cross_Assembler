@@ -1,0 +1,85 @@
+; Hobby Cross-Assembler Error Test 356j
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; error: ---END segments cannot be padded
+
+; by Anton Treuenfels
+
+; first created: 01/27/08
+; last revised:  01/27/08
+
+; warning(s): 0
+
+; error(s): 2
+; - segment is ---end
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; define segments and their types
+
+        .segment    absorg_type ; absolute origin
+
+        .absorg $1000           ; must specify before pc changes
+
+        .ends
+
+        .segment    relorg_type ; relative origin
+
+        .byte   $00             ; default type if pc changes first
+
+        .ends
+
+        .segment    relend_type ; relative end
+
+        .relend                 ; must specify before pc changes
+
+        .ends
+
+        .segment    absend_type ; absolute end
+
+        .absend $8000           ; must specify before pc changes
+
+        .ends
+
+; -------------------------------
+
+; try to pad each one to an even byte boundary
+
+        .segment    absorg_type
+
+        .padto  2               ; okay
+
+        .ends
+
+        .segment    relorg_type
+
+        .padto  2               ; okay
+
+        .ends
+
+        .segment    relend_type
+
+        .padto  2               ; fail
+
+        .ends
+
+        .segment    absend_type
+
+        .padto  2               ; fail
+
+        .ends
+
+; -------------------------------
+
+        .end

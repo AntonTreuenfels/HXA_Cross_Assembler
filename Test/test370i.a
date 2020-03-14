@@ -1,0 +1,77 @@
+; Hobby Cross-Assembler Error Test 370i
+; Segments\Nested Segments
+; error: self-nesting exceeds max depth
+
+; by Anton Treuenfels
+
+; first created: 04/25/08
+; last revised:  04/25/08
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - max depth
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; - names of segments don't actually matter, only nesting depth
+; - don't even need matching 'endsegment' since fatal error exepcted
+
+        .maxdepth   10      ; reduce depth to reduce copying/duplicating
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+; -------------------------------   10
+
+        .segment    abs1    ; depth exceeded
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+        .segment    abs1
+
+; -------------------------------   20
+
+        .end

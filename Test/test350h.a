@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 350h
+; Segments\Uninitialized Segments
+; error: no "padto" after "uninitialized"
+
+; by Anton Treuenfels
+
+; first created: 09/26/09
+; last revised:  09/26/09
+
+; warning(s): 0
+
+; error(s): 1
+; - seg padded
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop
+
+; -------------------------------
+
+; cannot use padding after uninitialized declared
+
+        .segment    haspadding
+
+        .org    $1000
+
+        .uninitialized
+
+        .padto  $1234
+
+        .ends
+
+; -------------------------------
+
+        .end

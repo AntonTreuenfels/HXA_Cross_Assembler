@@ -1,0 +1,233 @@
+; Hobby Cross-Assembler Test 352
+; Segments\Common Segments
+; ok: basic definition
+
+; by Anton Treuenfels
+
+; first created: 09/30/07
+; last revised:  04/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; common segments: abs1, rel2_1, rel3_1, abs4, abs5
+
+; - all should be as large as the greatest amount of storage
+; used in any one fragment
+; abs1   : size 4, 3 labels (3 same value = start value of segment)
+; rel2_1 : size 4, 6 labels (3 same value = start value of segment)
+; rel3_1 : size 8, 6 labels (3 same value = start value of segment)
+; abs4   : size 4, 2 labels (2 same value = start value of segment)
+; abs5   : size 4, 2 labels (2 same value = start value of segment)
+
+; -------------------------------
+
+; first explicit segment *must* be absolute (at some point)
+
+        .segment	abs1
+
+        .common             ; COMMON legal before first data store
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+a1_a1   .ds     2           ; only DS legal now
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000       ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+        .common
+
+r21_a1  .ds     2   
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .org    $3000       ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .common
+
+r31_a1  .ds     2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .byte   $02         ; relative
+
+        .ends
+
+; -------------------------------
+
+; no more new segments - re-use existing segments
+; - note at most one ORG is allowed for any segment (which makes it absolute)
+; - need another ORG ? Use another segment (there's lots)
+
+        .segment	abs1
+
+a1_b1   .ds     4
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+r21_b1  .ds     1
+r21_b2  .ds     1
+r21_b3  .ds     1
+r21_b4  .ds     1
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+r31_b1  .ds     2
+r31_b2  .ds     2
+r31_b3  .ds     2
+r31_b4  .ds     2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .byte   $02         ; relative
+
+        .ends
+
+; -------------------------------
+
+; show existing "common" segments can be re-declared as such
+; - legal as long as program counter not incremented since entry to fragment
+
+        .segment    abs1
+        .common
+        .ends
+
+        .segment    rel2_1
+        .common
+        .ends
+
+        .segment    rel3_1
+        .common
+        .ends
+
+; -------------------------------
+
+; show "common" can be declared after ORG
+
+        .segment    abs4
+
+        .org    $4000
+
+        .common
+
+a4_a1   .ds     4
+
+        .ends
+
+; -------------------------------
+
+; show size of "common" segments is same as largest fragment
+; - ie., these are smallest of all fragments and so should not
+; affect maximum size (established by fragments with the "_b" labels)
+
+        .segment    abs1
+a1_c1   .ds     1
+        .ends
+
+        .segment    rel2_1
+r21_c1  .ds     1
+        .ends
+
+        .segment    rel3_1
+r31_c1  .ds     1
+        .ends
+
+        .segment    abs4
+a4_c1   .ds     1
+        .ends
+
+; -------------------------------
+
+; show can declare a segment "common" in one fragment and make it
+; absolute in another
+
+        .segment    abs5
+        .common
+        .ends
+
+        .segment    abs5
+        .org    $5000
+        .ends
+
+        .segment    abs5
+        .common             ; re-declare
+        .ends
+
+        .segment    abs5
+a5_a1   .ds     2
+        .ends
+
+        .segment    abs5
+        .common
+a5_b1   .ds     4
+        .ends
+
+; -------------------------------
+
+        .end

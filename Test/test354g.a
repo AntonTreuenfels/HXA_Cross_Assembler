@@ -1,0 +1,44 @@
+; Hobby Cross-Assembler Error Test 354g
+; Segments\"RELORG" Pseudo Op
+; error\fatal: outside segment
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; warning(s): 0
+
+; error(s): 1
+; - outside segment
+
+; fatal: 1
+; - pc invalid
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .absorg  $1000      ; can't use outside of explicit segment
+
+; -------------------------------
+
+; legal use
+
+        .segment    rel1
+
+        .relorg             ; okay
+
+        .ends
+
+; illegal use
+
+        .relorg             ; fail
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,72 @@
+; Hobby Cross-Assembler Error Test 352e
+; Segments\Common Segments
+; warn\error\fatal: declaration errors
+
+; by Anton Treuenfels
+
+; first created: 09/30/07
+; last revised:  03/13/10
+
+; warning(s): 4
+; - token ignored
+
+; error(s): 2
+; - data stored
+; - outside segment
+
+; fatal: 1
+; - invalid pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no labels or expressions accepted
+
+        .segment    nolabels
+
+]label1 .common                     ; warning
+
+        .common     $1234           ; warning
+
+]label1 .common     $5678           ; warning (2)
+
+        .ends
+
+; -------------------------------
+
+; cannot make "common" after data stored
+
+        .segment    pcinc1
+
+        .ds     4                   ; implicitly declares uninitialized
+
+        .common                     ; ok
+
+        .ends
+
+        .segment    pcinc2
+
+        .bit32  $ffffffff           ; implicitly declares initialized
+
+        .common                     ; error
+
+        .ends
+
+; -------------------------------
+
+; cannot declare outside of segment
+
+        .common                     ; error/fatal
+
+; -------------------------------
+
+        .end

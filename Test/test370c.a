@@ -1,0 +1,274 @@
+; Hobby Cross-Assembler Test 370c
+; Segments\Nested Segments
+; ok: correct addresses of segment data (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 04/25/08
+; last revised:  04/25/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; check output
+
+; -------------------------------
+
+; adjust these values for different pc widths
+
+        .cpu    "T_32_L"    ; required psop
+
+test_beg    =   $0F000000
+test_end    =   $7fffffff
+
+; -------------------------------
+
+        .macro  B_FIRST, ?name
+.onexpand   ]?name  .equ    0
+        .byte   $00
+        .endm
+
+        .macro  B_NEXT, ?name
+.onexpand   ]?name  .equ    ]?name+1
+        .byte   ]?name
+        .endm
+
+; -------------------------------
+
+; an absolute segment
+
+        .segment    absorg1
+
+        .org    test_beg    ; ORG before any data makes segment absolute
+
+        B_FIRST absorg1
+
+        .endsegment
+
+; -------------------------------
+
+; nest it inside itself
+
+        .segment    absorg1
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .ends
+
+        .ends
+
+; nest a new segment inside it
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .segment    relorg1 ; immediately follows 'absorg1' in output
+
+        B_FIRST relorg1     ; address(es) immediately follow 'absorg1'
+
+        .ends
+
+        B_NEXT  absorg1
+
+        .ends
+
+; nest another new segment inside it
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .segment    relend1 ; immediately follows 'relorg1' in output
+
+        .relend
+
+        B_FIRST relend1     ; address(es) immediately preceed 'absend1'
+
+        .ends
+
+        B_NEXT  absorg1
+
+        .ends
+
+; nest another new segment inside it
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .segment    absend1 ; immediately follows 'relend1' in output
+
+        .absend test_end
+
+        B_FIRST absend1     ; address(es) immediately follow 'relend1'
+
+        .ends
+
+        B_NEXT  absorg1
+
+        .ends
+
+; -------------------------------
+
+; nest all segments inside 'absorg1'
+
+        .segment    absorg1
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .ends
+
+        .segment    relorg1
+
+        B_NEXT  relorg1
+
+        .ends
+
+        .segment    relend1
+
+        B_NEXT  relend1
+
+        .ends
+
+        .segment    absend1
+
+        B_NEXT  absend1
+
+        .ends
+
+        .ends
+
+; nest all segments inside 'relorg1'
+
+        .segment    relorg1
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .ends
+
+        .segment    relorg1
+
+        B_NEXT  relorg1
+
+        .ends
+
+        .segment    relend1
+
+        B_NEXT  relend1
+
+        .ends
+
+        .segment    absend1
+
+        B_NEXT  absend1
+
+        .ends
+
+        .ends
+
+; nest all segments inside 'relend1'
+
+        .segment    relorg1
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .ends
+
+        .segment    relorg1
+
+        B_NEXT  relorg1
+
+        .ends
+
+        .segment    relend1
+
+        B_NEXT  relend1
+
+        .ends
+
+        .segment    absend1
+
+        B_NEXT  absend1
+
+        .ends
+
+        .ends
+
+; nest all segments inside 'absend1'
+
+        .segment    absend1
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .ends
+
+        .segment    relorg1
+
+        B_NEXT  relorg1
+
+        .ends
+
+        .segment    relend1
+
+        B_NEXT  relend1
+
+        .ends
+
+        .segment    absend1
+
+        B_NEXT  absend1
+
+        .ends
+
+        .ends
+
+; -------------------------------
+
+; nest all segments (three deep)
+
+        .segment    absorg1
+
+        B_NEXT  absorg1
+
+        .segment    relorg1
+
+        B_NEXT  relorg1
+
+        .segment    relend1
+
+        B_NEXT  relend1
+
+        .segment    absend1
+
+        B_NEXT  absend1
+
+        .ends
+
+        B_NEXT  relend1
+
+        .ends
+
+        B_NEXT  relorg1
+
+        .ends
+
+        B_NEXT  absorg1
+
+        .ends
+
+; -------------------------------
+
+        .end

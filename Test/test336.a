@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 336
+; Segments\Object Output (By Blocks, ".%0x" Template)
+; ok: 16-bit
+
+; by Anton Treuenfels
+
+; first created: 01/21/10
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .objbyblock "obj16.%0x"  ; check output
+
+; -------------------------------
+
+        .cpu        "T_16_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start       ; not used by object format

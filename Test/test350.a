@@ -1,0 +1,134 @@
+; Hobby Cross-Assembler Test 350
+; Segments\Uninitialized Segments
+; ok: basic definition
+
+; by Anton Treuenfels
+
+; first created: 09/26/09
+; last revised:  09/26/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; first segment must be made absolute at some point...
+
+    .segment    data1
+
+    .org    $1000           ; ...so we'll do it now
+
+    .word   segoff(data1)   ; a data segment
+    .word   segoff(data2)
+
+    .ends
+
+; another data segment
+; - will be relative to "data1"
+
+    .segment    data2
+
+    .word   segoff(data1)
+    .word   segoff(data2)
+
+    .ends
+
+; an uninitialized segment
+; - will be relative to "data2"
+
+    .segment    var1
+
+    .uninitialized          ; explicitly declared
+
+v1  .ds 2
+v2  .ds 2
+v3  .ds 2
+
+    .ends
+
+; another data segment
+
+    .segment    data3
+
+    .org    $3000
+
+    .word   segoff(data1)
+    .word   segoff(data2)
+    .word   segoff(data3)
+
+    .ends
+
+; another uninitialized segment
+
+    .segment    var2
+
+    .org    $4000           ; located elsewhere
+
+;    .uninitialized         ; not explicitly declared
+
+v4  .ds 2                   ; "DS" implicitly declares "uninitialized"
+v5  .ds 2
+v6  .ds 2
+
+    .ends
+
+; add some more data or variables to various segments
+
+    .segment    data2
+    .word   segoff(data3)
+    .ends
+
+    .segment    var2
+v4a .ds 4
+    .ends
+
+    .segment    var1
+v1a .ds 4
+    .ends
+
+    .segment    data1
+    .word   segoff(data3)
+    .ends
+
+; another uninitialized segment
+
+    .segment    var3
+
+    .uninitialized
+
+    .org    $5000
+
+    .uninitialized  ; okay as long as pc not changed (except by ORG)
+
+v7  .ds 2
+v8  .ds 2
+v9  .ds 2
+
+    .ends
+
+; another uninitialized segment
+
+    .segment    var4
+
+    .uninitialized
+
+    .absend $6000
+
+    .uninitialized  ; okay as long as pc not changed
+
+v10  .ds 2
+v11  .ds 2
+v12  .ds 2
+
+    .ends
+
+; -------------------------------
+
+        .end

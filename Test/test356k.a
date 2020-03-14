@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 356k
+; Segments\"ABSEND" and "RELEND" Pseudo Ops
+; error: program counter pushed below zero
+
+; by Anton Treuenfels
+
+; first created: 03/20/10
+; last revised:  03/20/10
+
+; warning(s): 0
+
+; error(s): 1
+; - too small
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; define segment
+
+        .segment    really_small
+
+        .absend $0002           ; must specify before pc changes
+
+        .long   $11223344       ; four bytes in two-byte segment
+
+        .ends
+
+; -------------------------------
+
+        .end

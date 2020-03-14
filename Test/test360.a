@@ -1,0 +1,234 @@
+; Hobby Cross-Assembler Test 360
+; Segments\Segment Map Identification
+; ok: correct identification of segment type
+
+; by Anton Treuenfels
+
+; first created: 04/26/08
+; last revised:  04/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+
+; -------------------------------
+
+; absolute origin
+
+        .segment	abs1
+
+        .org $1000          ; ORG before any data makes segment absolute
+
+        .bit16  *
+
+        .ends
+
+; relative origin (implicit)
+
+        .segment    rel1_1
+
+        .bit16  *
+
+        .ends
+
+; relative origin + common (implicit)
+
+        .segment    rel1_2
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; absolute origin + common
+
+        .segment	abs2
+
+        .absorg $2000       ; absolute
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; relative origin (explicit)
+
+        .segment    rel2_1
+
+        .relorg             ; relative (prior to data storage)
+
+        .bit16  *
+
+        .ends
+
+; relative origin + common (explicit)
+
+        .segment    rel2_2
+
+        .relorg             ; relative (prior to data allocation)
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; absolute origin
+
+        .segment	abs3
+
+        .absorg $3000       ; absolute
+
+        .bit16  $
+
+        .ends
+
+; relative origin (explicit)
+
+        .segment    rel3_1
+
+        .bit16  *
+
+        .relorg             ; relative (after data storage)
+
+        .ends
+
+; relative origin + common (explicit)
+
+        .segment    rel3_2
+
+        .common
+
+        .ds 2
+
+        .relorg             ; relative (after data allocation)
+
+        .ends
+
+; absolute origin + common
+
+        .segment    abs4
+
+        .absorg $4000       ; absolute
+
+        .ds 2
+
+        .ends
+
+; relative origin (explicit)
+
+        .segment    rel4_1
+
+        .relorg             ; relative (before...)
+
+        .bit16  *
+
+        .relorg             ; (..and after data storage)
+
+        .ends
+
+; relative origin + common (explicit)
+
+        .segment    rel4_2
+
+        .relorg             ; relative (before...)
+
+        .common
+
+        .ds 2
+
+        .relorg             ; (...and after space allocation)
+
+        .ends
+
+; relative end + common
+
+        .segment    rel5_2
+
+        .relend             ; relative
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; relative end
+
+        .segment    rel5_1
+
+        .relend             ; relative
+
+        .bit16  *
+
+        .ends
+
+; absolute end
+
+        .segment    abs5
+
+        .absend $5000       ; absolute
+
+        .bit16  *
+
+        .ends
+
+; -------------------------------
+
+; absolute origin is (or becomes) zero
+; - a boundary case of sorts
+
+; absolute origin
+
+        .segment    abs6
+
+        .org    0
+
+        .bit16  *
+
+        .ends
+
+; absolute origin + common
+
+        .segment    abs7
+
+        .absorg 0
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; absolute end
+
+        .segment    abs8
+
+        .absend 2
+
+        .bit16  *
+
+        .ends
+
+; absolute end + common
+
+        .segment    abs9
+
+        .absend 2
+
+        .common
+
+        .ds 2
+
+        .ends
+
+; -------------------------------
+
+        .end

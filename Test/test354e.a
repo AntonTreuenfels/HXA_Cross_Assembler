@@ -1,0 +1,137 @@
+; Hobby Cross-Assembler Error Test 354e
+; Segments\"RELORG" Pseudo Op
+; error: segments cannot be re-typed
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; warning(s): 0
+
+; error(s): 6
+; - segment type mismatch
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .absorg  $1000      ; can't use outside of explicit segment
+
+; -------------------------------
+
+; define segments and their types
+
+        .segment    absorg_type ; absolute origin
+
+        .absorg $1000           ; must specify before pc changes
+
+        .ends
+
+        .segment    relorg_type1    ; relative origin
+
+        .byte   $00             ; default type if pc changes first
+
+        .ends
+
+        .segment    relorg_type2    ; relative origin
+
+        .relorg                 ; explicitly typed
+
+        .ends
+
+; -------------------------------
+
+; try to re-define to absolute origin type
+
+        .segment    absorg_type
+
+        .absorg $1000           ; okay
+
+        .ends
+
+        .segment    relorg_type1
+
+        .absorg $1000           ; fail
+
+        .ends
+
+        .segment    relorg_type2
+
+        .absorg $1000           ; fail
+
+        .ends
+
+; try to re-define to relative origin type
+
+        .segment    absorg_type
+
+        .relorg                 ; fail
+
+        .ends
+
+        .segment    relorg_type1
+
+        .relorg                 ; okay
+
+        .ends
+
+        .segment    relorg_type2
+
+        .relorg                 ; okay
+
+        .ends
+
+; -------------------------------
+
+; try to re-define absolute origin to other type
+
+        .segment    absorg_type
+
+        .byte   $00
+
+        .absorg $1000           ; okay
+
+        .byte   $00
+
+        .relorg                 ; fail
+
+        .ends
+
+; try to re-define relative origin (implicit) to other type
+
+        .segment    relorg_type1
+
+        .byte   $00
+
+        .absorg $1000           ; fail
+
+        .byte   $00
+
+        .relorg                 ; okay
+
+        .ends
+
+; try to re-define relative origin (explicit) to other type
+
+        .segment    relorg_type2
+
+        .byte   $00
+
+        .absorg $1000           ; fail
+
+        .byte   $00
+
+        .relorg                 ; okay
+
+        .ends
+
+; -------------------------------
+
+        .end

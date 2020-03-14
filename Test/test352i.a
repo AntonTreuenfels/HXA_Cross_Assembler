@@ -1,0 +1,31 @@
+; Hobby Cross-Assembler Error Test 352i
+; Segments\Common Segments
+; fatal: can't use in monolithic program
+
+; by Anton Treuenfels
+
+; first created: 03/26/11
+; last revised:  03/26/11
+
+; error(s): 0
+
+; fatal: 1
+; - not within segment
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .common
+
+; -------------------------------
+
+        .end

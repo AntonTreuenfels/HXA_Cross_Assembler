@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 370h
+; Segments\Nested Segments
+; error: endsegment without segment
+
+; by Anton Treuenfels
+
+; first created: 04/25/08
+; last revised:  04/25/08
+
+; warning(s): 0
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; nested segments
+
+        .segment    abs1
+
+        .segment    rel1
+
+        .ends       rel1
+
+        .org        $1000       ; make absolute (pc not changed yet, so ok)
+
+        .ends       abs1
+
+; not nested any more
+
+        .ends       abs1        ; duplicated (presumably by accident)
+
+; -------------------------------
+
+        .end

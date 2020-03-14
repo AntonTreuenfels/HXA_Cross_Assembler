@@ -1,0 +1,86 @@
+; Hobby Cross-Assembler Test 354
+; Segments\"RELORG" Pseudo Op
+; ok: correct addresses of relative segment data (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/26/08
+; last revised:  01/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .absorg  $1000      ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .absorg $1000       ; ORG before any data makes segment absolute
+
+        .bit16  *
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .absorg $2000       ; absolute
+
+        .bit16  $
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment	rel2_1
+
+        .relorg             ; relative (prior to data storage)
+
+        .bit16  *
+
+        .ends	REL2_1
+
+; another segment
+
+        .segment	abs3
+
+        .absorg $3000       ; absolute
+
+        .bit16  $
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .bit16  *
+
+        .relorg             ; relative (after data storage)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .relorg             ; relative (before...)
+
+        .bit16  $
+
+        .relorg             ; (...and after data storage)
+
+        .ends
+
+; -------------------------------
+
+        .end
