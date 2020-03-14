@@ -1,0 +1,80 @@
+; Hobby Cross-Assembler Error Test 303e
+; Segments\Labels
+; error: missing global labels
+
+; by Anton Treuenfels
+
+; first created: 07/01/05
+; last revised:  07/01/05
+
+; warning(s): 0
+
+; error(s): 9
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+
+; -------------------------------
+
+        .segment	abs1
+
+        .org    $1000
+
+l_abs1  .word   $00
+
+        .word   l_abs1
+        .word   l_abs2
+        .word   l_rel2_1
+
+        .word   l_abs1_2    ; missing
+        .word   l_abs2_2    ; missing
+        .word   l_rel2_2    ; missing
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000
+
+l_abs2  .word   $00
+
+        .word   l_abs1
+        .word   l_abs2
+        .word   l_rel2_1
+
+        .word   l_abs1_2    ; missing
+        .word   l_abs2_2    ; missing
+        .word   l_rel2_2    ; missing
+
+        .ends
+
+; another segment
+
+        .segment    rel2_1
+
+l_rel2_1    .word   $00
+
+        .word   l_abs1
+        .word   l_abs2
+        .word   l_rel2_1
+
+        .word   l_abs1_2    ; missing
+        .word   l_abs2_2    ; missing
+        .word   l_rel2_2    ; missing
+
+        .ends
+
+; -------------------------------
+
+        .end

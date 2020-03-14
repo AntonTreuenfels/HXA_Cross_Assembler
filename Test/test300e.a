@@ -1,0 +1,84 @@
+; Hobby Cross-Assembler Error Test 300e
+; Segments\Basic Definition
+; error: bad segment names and unmatched block
+
+; by Anton Treuenfels
+
+; first created: 04/26/08
+; last revised:  06/28/09
+
+; warning(s): 1
+; - odd use
+
+; error(s): 15
+; - need name
+; - unmatched block
+; - name not found
+; - bad BOE
+; - need global
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment            ; error - no name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment 1          ; error - bad name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment ""         ; error - null name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment @abs1      ; error - bad name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment ]abs1      ; error - bad name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment ?abs1      ; error - bad name
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment unKnown$   ; error - unresolvable expression
+
+        .ends               ; error - not in segment
+
+; an explicit segment
+
+        .segment abs1       ; good name, but unterminated segment
+
+;       .ends               ; a comment (so missed)
+
+; -------------------------------
+
+        .end

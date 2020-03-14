@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 300h
+; Segments\Basic Definition
+; error: no absolute segment
+
+; by Anton Treuenfels
+
+; first created: 06/22/05
+; last revised:  01/21/08
+
+; warning(s): 0
+
+; error(s): 1
+; - seg not absolute
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment	rel1
+
+;        .org    $1000       ; make segment absolute
+
+        .byte   $00
+
+        .ends
+
+; -------------------------------
+
+        .end                ; no absolute segment declared

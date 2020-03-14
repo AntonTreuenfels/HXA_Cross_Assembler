@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Error Test 304h
+; Segments\Program Counter (Implicit)
+; error: cannot make absolute ( so cannot resolve data )
+
+; by Anton Treuenfels
+
+; first created: 01/31/09
+; last revised:  01/31/09
+
+; warning(s): 0
+
+; error(s): 2
+; - not absolute
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+; - which we will deliberately not make happen
+
+        .segment	abs1
+
+;        .org    $1000       ; ORG before any data makes segment absolute
+
+in1_2                       ; ok (implicit assignment)
+
+        .ends
+
+; a relative segment
+; - data cannot be resolved during first pass - what error (if any ) ?
+
+        .segment    rel1
+
+in2_2                       ; ok (implicit pc assignment)
+
+        .word   in1_2       ; in 'abs1'
+
+        .word   in2_2       ; in 'rel1'
+
+        ; out of range values
+
+        .uword  in1_2 + 100000
+
+        .uword  in2_2 + 100000
+
+        .uword  fwdref
+
+        .ends
+
+fwdref  .equ    100000
+
+; -------------------------------
+
+        .end

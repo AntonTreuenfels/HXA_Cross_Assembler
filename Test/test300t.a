@@ -1,0 +1,73 @@
+; Hobby Cross-Assembler Error Test 300t
+; Segments\Basic Definition
+; error: crossed block structures in segment fragments
+
+; by Anton Treuenfels
+
+; first created: 09/04/06
+; last revised:  12/22/07
+
+; warning(s): 0
+
+; error(s): 5
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; unmatched
+
+]COUNT  = 1
+
+        .if ]COUNT
+        .ends               ; unmatched
+        .endif
+
+        .repeat ]COUNT
+        .ends               ; unmatched
+        .endr
+
+        .while ]COUNT
+        .ends               ; unmatched
+]COUNT  =   ]COUNT-1
+        .endw
+
+; -------------------------------
+; a macro expansion block error
+; -------------------------------
+
+        .macro  badblock
+        .ends               ; terminates segment
+        .endm
+
+; try it by itself (nonfatal because there is no open segment)
+
+        badblock            ; unmatched
+
+; try it in a segment (fatal because there *is* an open segment)
+; - in previous tests the ENDS was unmatched, here the MACRO is unclosed:
+; - source code sequence:
+;   segment
+;   macro
+;   endsegment  <- HXA detects the unclosed MACRO at this point
+;   endmacro
+
+        .segment	abs1
+
+        badblock            ; unclosed
+
+; -------------------------------
+
+        .end

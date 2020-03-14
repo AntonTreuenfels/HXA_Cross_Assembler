@@ -1,0 +1,96 @@
+; Hobby Cross-Assembler Test 305
+; Segments\Program Counter (Explicit)
+; ok: PC expressions in relative segments
+
+; by Anton Treuenfels
+
+; first created: 07/05/05
+; last revised:  07/05/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000       ; absolute
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment    rel2_1  ; relative
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .ends	REL2_1
+
+; another segment
+
+        .segment	abs3
+
+        .org    $3000       ; absolute
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .ends
+
+; another segment
+
+        .segment    rel3_1  ; relative
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .ends
+
+; another segment
+
+        .segment    rel3_2  ; relative
+
+        .word   *
+        .word   * + 1
+        .word   1 + *
+        .word   * + *
+
+        .ends
+
+; -------------------------------
+
+        .end

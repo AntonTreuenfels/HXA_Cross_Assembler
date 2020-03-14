@@ -1,0 +1,63 @@
+; Hobby Cross-Assembler Error Test 302e
+; Segments\Legal Data Storage
+; error: first named segment must be absolute before end of source
+
+; by Anton Treuenfels
+
+; first created: 08/08/05
+; last revised:  01/21/08
+
+; warning(s): 0
+
+; error(s): 1
+; - seg not absolute
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; explicit segments - perfectly okay to be empty
+
+        .repeat 10
+
+        .segment    abs1
+        .ends
+
+        .segment    abs2
+        .ends
+
+        .segment    rel2_1
+        .ends
+
+        .endr
+
+; perfectly okay to store data in segments
+
+        .segment    abs2
+        .org    $2000
+        .byte   $02
+        .ends
+
+        .segment    rel2_1
+        .word   $0201
+        .ends
+
+; ...but *must* make first named segment absolute
+; before end of source
+
+        .segment    abs1
+;        .org    $1000          ; which doesn't happen here...
+        .ends
+
+; -------------------------------
+
+        .end

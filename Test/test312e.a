@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Error Test 312e
+; Segments\Intel Hexfile Output (By Segments, "%03d." Template)
+; error: bad template names
+
+; by Anton Treuenfels
+
+; first created: 01/18/10
+; last revised:  01/23/10
+
+; warning(s): 0
+
+; error(s): 9
+; - bad template
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .hexbyseg   "badname"   ; no template
+
+        .hexbyseg   "bad%name"  ; no base or digit specifier
+
+        .hexbyseg   "bad%03"    ; no base specified
+
+        .hexbyseg   "bad%14d"   ; too many digits
+
+        .hexbyseg   "ba%d%03d"  ; more than one '%' sign
+
+        .hexbyseg   "bad%%03d"  ; more than one '%' sign
+
+        .hexbyseg   "bad%03%d"  ; more than one '%' sign
+
+        .hexbyseg   "bad%03d%"  ; more than one '%' sign
+
+        .hexbyseg   "bad%03de%" ; more than one '%' sign
+
+; -------------------------------
+
+        .end

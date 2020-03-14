@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 325b
+; Segments\Motorola Hexfile Output (By Blocks, Default Names)
+; ok: correct output sequence and start address (24-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/21/10
+; last revised:  03/26/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecbyblock        ; check output
+
+; -------------------------------
+
+        .cpu        "T_24_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start

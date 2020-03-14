@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 315c
+; Segments\Intel Hexfile Output (By Blocks, Default Names)
+; ok: correct output sequence and start address (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/21/10
+; last revised:  03/26/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexbyblock         ; check output
+
+; -------------------------------
+
+        .cpu        "T_32_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start       ; not used by 16-bit

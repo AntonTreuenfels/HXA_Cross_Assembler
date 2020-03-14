@@ -1,0 +1,58 @@
+; Hobby Cross-Assembler Error Test 301e
+; Segments\Segments Re-Used
+; error\fatal: 16-bit relative segment exceeds max pc value (at fixup)
+
+; by Anton Treuenfels
+
+; first created: 06/28/05
+; last revised:  06/28/05
+
+; warning(s): 0
+
+; error(s): 1
+; - too big
+
+; fatal: 1
+; - bad PC
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment	abs1
+
+        .org    $fffe       ; first segment must be absolute
+
+        .byte   $00         ; byte at $fffe, pc -> $ffff
+
+        .ends
+
+; segment relative to previous
+
+        .segment	rel1
+
+        .byte   $00         ; byte at $ffff, pc -> $10000 (ok)
+
+        .ends
+
+; same segment
+
+        .segment	rel1
+
+        .byte   $03         ; pc = $10000 (fail)
+
+        .ends
+
+; -------------------------------
+
+        .end

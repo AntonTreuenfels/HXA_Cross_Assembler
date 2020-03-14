@@ -1,0 +1,86 @@
+; Hobby Cross-Assembler Test 300c
+; Segments\Basic Definition
+; ok: correct addresses of relative segment data (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 06/24/05
+; last revised:  08/10/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+; - we'll put all these segments at the top of memory (which HXA limits
+; to 31 bits)
+
+        .segment	abs1
+
+        .org    $7fffffff   ; ORG before any data makes segment absolute
+
+        .byte   $00
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+beg2    .org    $bfffffff-1 ; absolute (also checking label value assignment)
+
+        .byte   $00
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment	rel2_1
+
+        .byte   $01         ; relative
+
+        .ends	REL2_1
+
+; another segment (at top of memory)
+
+        .segment	abs3
+
+        .org    $ffffffff-2 ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .byte   $02         ; relative
+
+        .ends
+
+; an empty segment at top of memory
+
+        .segment    rel3_3
+
+        .ends
+
+; -------------------------------
+
+        .end

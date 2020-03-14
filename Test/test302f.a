@@ -1,0 +1,67 @@
+; Hobby Cross-Assembler Error Test 302f
+; Segments\Legal Data Storage
+; error: storing data in first segment before making it absolute
+
+; by Anton Treuenfels
+
+; first created: 08/08/05
+; last revised:  01/17/09
+
+; warning(s): 0
+
+; error(s): 1
+; - seg is relative
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; explicit segments - perfectly okay to be empty
+
+        .repeat 10
+
+        .segment    abs1
+        .ends
+
+        .segment    abs2
+        .ends
+
+        .segment    rel2_1
+        .ends
+
+        .endr
+
+
+; perfectly okay to store data in segments
+
+        .segment    abs2
+        .org    $2000
+        .byte   $02
+        .ends
+
+        .segment    rel2_1
+        .word   $0201
+        .ends
+
+; ...but cannot change type once set...
+
+        .segment    abs1
+
+        .byte   $01             ; storing data makes segment relative...
+
+        .org    $1000           ; ...so now cannot make absolute
+
+        .ends
+
+; -------------------------------
+
+        .end

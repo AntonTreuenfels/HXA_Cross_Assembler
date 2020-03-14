@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 322
+; Segments\Motorola Hexfile Output (By Segments, "%02x." Template)
+; ok: correct output sequence and start address (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/11/09
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecbyseg  "s16_%02x_.s19"
+
+; -------------------------------
+
+        .cpu        "T_16_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start

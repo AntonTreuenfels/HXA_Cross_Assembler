@@ -1,0 +1,91 @@
+; Hobby Cross-Assembler Test 306b
+; Segments\"USESEGMENTS" psop
+; ok: explicit declaration of segment use (first use inside segment)
+
+; by Anton Treuenfels
+
+; first created: 05/28/11
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an absolute segment
+
+        .segment	abs1
+
+        .usesegments        ; can be done inside segments (redundant, though)
+
+        .org    $7fff       ; ORG before any data makes segment absolute
+
+        .byte   $00
+
+        .endsegment	abs1
+
+; another absolute segment
+
+        .segment	abs2
+
+        .org    $bfff       ; absolute
+
+        .byte   $00
+
+        .ends               ; alias for ENDSEGMENT
+
+; a relative segment
+
+        .segment	rel2_1
+
+        .byte   $01         ; relative
+
+        .ends	REL2_1
+
+; another absolute segment
+; - note names can be string expressions
+
+        .segment    "abs3"
+
+        .org    $ffff-2     ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another relative segment
+
+]NAME$  =   "rel3_1"
+
+        .segment    ]NAME$
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another relative segment
+
+]NAME$  =   "rel3_2"
+
+        .segment    ]name$
+
+        .byte   $02         ; relative
+
+        .ends       ]Name$
+
+; an empty relative segment at top of memory
+
+        .segment    rel3_3
+
+        .ends
+
+; -------------------------------
+
+        .end

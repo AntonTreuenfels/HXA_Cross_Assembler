@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 313
+; Segments\Intel Hexfile Output (By Segment)
+; ok: non-segmented program produces no output (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/12/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexbyseg           ; check output (shouldn't be any)
+
+; -------------------------------
+
+        .cpu    "T_16_M"
+
+        .include    "ihexdata.a"
+
+; -------------------------------
+
+        .end    start       ; not used by 16-bit

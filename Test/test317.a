@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 317
+; Segments\Intel Hexfile Output (By Blocks, Overlapping)
+; ok: correct output sequence and start address (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 03/12/10
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexbyblock         ; check output
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include    "ioverlap.a"
+
+; -------------------------------
+
+        .end    start       ; not used by 16-bit

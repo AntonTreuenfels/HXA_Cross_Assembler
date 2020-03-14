@@ -1,0 +1,69 @@
+; Hobby Cross-Assembler Error Test 302g
+; Segments\Legal Data Storage
+; error\fatal: cannot store data outside of any segment
+
+; by Anton Treuenfels
+
+; first created: 08/08/05
+; last revised:  03/25/07
+
+; warning(s): 0
+
+; error(s): 1
+; - cannot use
+
+; fatal: 1
+; - invalid pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; explicit segments - perfectly okay to be empty
+
+        .repeat 10
+
+        .segment    abs1
+        .ends
+
+        .segment    abs2
+        .ends
+
+        .segment    rel2_1
+        .ends
+
+        .endr
+
+
+; perfectly okay to store data in segments
+
+        .segment    abs2
+        .org    $2000
+        .byte   $02
+        .ends
+
+        .segment    rel2_1
+        .word   $0201
+        .ends
+
+; ...but *must* make first named segment absolute
+; before end of source
+
+        .segment    abs1
+        .org    $1000
+        .ends
+
+; cannot store data outside of any segment
+
+        .long   $01020304
+
+; -------------------------------
+
+        .end

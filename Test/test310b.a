@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 310b
+; Segments\Intel Hexfile Output (Single File)
+; ok: correct output sequence and start address (20-bit)
+
+; by Anton Treuenfels
+
+; first created: 07/14/05
+; last revised:  03/13/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; check output
+
+; -------------------------------
+
+        .cpu        "T_20_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start

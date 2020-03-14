@@ -1,0 +1,74 @@
+; Hobby Cross-Assembler Error Test 303g
+; Segments\Labels
+; warn: forward reference to variable label
+
+; by Anton Treuenfels
+
+; first created: 06/30/05
+; last revised:  07/08/05
+
+; warning(s): 1
+; - odd use
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+
+; -------------------------------
+
+; forward reference to a variable label in a relative segment
+; behaves like forward reference to an absolute segment
+
+        .segment	abs1
+
+        .org    $1000
+
+]lower  .word   $00
+
+        .word   ]lower      ; refers to abs1 label
+        .word   ]higher     ; refers to rel2_1 label
+
+]higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000
+
+]lower  .word   $00
+
+        .word   ]lower      ; refers to abs2 label
+        .word   ]higher     ; refers to abs1 label
+
+]higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment    rel2_1
+
+]lower  .word   $00
+
+        .word   ]lower      ; refers to rel2_1 label
+        .word   ]higher     ; refers to abs2 label
+
+]higher .word   $00
+
+        .ends
+
+; -------------------------------
+
+        .end

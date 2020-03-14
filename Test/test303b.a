@@ -1,0 +1,165 @@
+; Hobby Cross-Assembler Test 303b.a
+; Segments\Labels
+; ok: implicit assignment of program counter to string labels
+
+; by Anton Treuenfels
+
+; first created: 06/21/06
+; last revised:  06/22/06
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; forward and backward references to labels with absolute and relative values
+; - forward reference to string labels only works in numeric contexts
+
+; -------------------------------
+; Global Symbols
+; -------------------------------
+
+; global label scope is the entire program (ie., global)
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+g_abs1
+g_abs1$
+
+        .byte   g_abs1 == val( g_abs1$ )
+        .byte   str$( g_abs1 ) == g_abs1$
+
+        .byte   g_rel1 == val( g_rel1$ )
+        .byte   str$( g_rel1 ) == g_rel1$
+
+        .byte   g_abs2 == val( g_abs2$ )
+        .byte   str$( g_abs2 ) == g_abs2$
+
+        .byte   g_rel2 == val( g_rel2$ )
+        .byte   str$( g_rel2 ) == g_rel2$
+
+g_abs2
+g_abs2$
+
+        .ends
+
+; a relative segment
+
+        .segment    rel1
+
+g_rel1
+g_rel1$
+
+        .byte   g_abs1 == val( g_abs1$ )
+        .byte   str$( g_abs1 ) == g_abs1$
+
+        .byte   g_rel1 == val( g_rel1$ )
+        .byte   str$( g_rel1 ) == g_rel1$
+
+        .byte   g_abs2 == val( g_abs2$ )
+        .byte   str$( g_abs2 ) == g_abs2$
+
+        .byte   g_rel2 == val( g_rel2$ )
+        .byte   str$( g_rel2 ) == g_rel2$
+
+g_rel2
+g_rel2$
+
+        .ends
+
+; -------------------------------
+; Local Symbols
+; -------------------------------
+
+; local label scope is at most the segment invocation they appear in
+
+        .segment    abs1
+
+@lower$
+
+        .byte   str$( * ) == @lower$
+        .byte   * + 1 == val( @higher$ )
+
+@higher$
+
+        .ends
+
+        .segment    rel1
+
+@lower$
+
+        .byte   str$( $ ) == @lower$
+        .byte   $ + 1 == val( @higher$ )
+
+@higher$
+
+        .ends
+
+        .segment    abs1
+
+@lower$
+
+        .byte   str$( * ) == @lower$
+        .byte   * + 1 == val( @higher$ )
+
+@higher$
+
+        .ends
+
+        .segment    rel1
+
+@lower$
+
+        .byte   str$( $ ) == @lower$
+        .byte   $ + 1 == val( @higher$ )
+
+@higher$
+
+        .ends
+
+; -------------------------------
+; Variable Symbols
+; -------------------------------
+
+; variable label scope is global
+
+        .segment    abs1
+
+]bakref$
+
+        .str   ]bakref$
+
+]bakref$
+
+        .str   ]bakref$
+
+        .ends
+
+; another segment
+
+        .segment    rel1
+
+        .str   ]bakref$     ; "]bakref$" -> last absolute pc value assigned
+                            ; - ie, a backward reference
+
+]bakref$                    ; "]bakref$" -> current relative pc value
+                            ; - ie, a forward reference
+
+        .byte   ]bakref$ == str$( * )
+
+        .ends
+        
+; -------------------------------
+
+        .end

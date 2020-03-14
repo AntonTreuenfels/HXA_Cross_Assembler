@@ -1,0 +1,98 @@
+; Hobby Cross-Assembler Error Test 300g
+; Segments\Basic Definition
+; error: mis-matched segment names
+
+; by Anton Treuenfels
+
+; first created: 06/22/05
+; last revised:  11/24/12
+
+; warning(s): 0
+
+; error(s): 3
+; - name mis-match
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment	abs1
+
+        .org    $1000       ; make segment absolute
+
+        .byte   $00
+
+        .ends               ; no name is OK
+
+        ; global literal
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   abs1        ; OK
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   badname     ; error
+
+        ; close properly (so we can go on)
+
+        .ends   abs1
+
+        ; string literal
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   "abs1"      ; OK
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   "badname"   ; error
+
+        ; close properly (so we can go on)
+
+        .ends   "abs1"
+
+        ; string label
+
+n1$     .equ    "abs1"
+n2$     .equ    "badname"
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   n1$         ; OK
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends   n2$         ; error
+
+        ; close properly (so we can go on)
+
+        .ends   n1$
+
+; -------------------------------
+
+        .end

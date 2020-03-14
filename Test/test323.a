@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 323
+; Segments\Motorola Hexfile Output (By Segments, Default Names, No Header)
+; ok: correct output sequence and start address (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 05/27/11
+; last revised:  05/27/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecbyseg                  ; check output
+        .assume srecfile:noheader   ; ...suppress header
+
+; -------------------------------
+
+; what we're looking for is a correct record count in each output file
+
+        .cpu        "T_16_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start

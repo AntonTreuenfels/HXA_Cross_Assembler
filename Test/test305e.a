@@ -1,0 +1,52 @@
+; Hobby Cross-Assembler Error Test 305e
+; Segments\Program Counter (Explicit)
+; error: illegal forward reference to pc in relative segment
+
+; by Anton Treuenfels
+
+; first created: 07/06/05
+; last revised:  07/06/05
+
+; warning(s): 0
+
+; error(s): 2
+; - invalid pc
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+        .segment    abs1
+
+        .org    $1000       ; "ORG" makes segment absolute
+
+pca_1   .equ    *           ; ok
+
+        .if     *           ; ok
+        .echo   "OK"
+        .endif
+
+        .endsegment
+
+        .segment    rel1    ; relative segment
+
+pcr_1   .equ    *           ; error
+
+        .if     *           ; error
+        .echo   "FAIL"
+        .endif
+
+        .endsegment
+
+; -------------------------------
+
+        .end

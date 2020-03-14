@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 312b
+; Segments\Intel Hexfile Output (By Segments, "%03d." Template)
+; ok: correct output sequence and start address (20-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/10/09
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexbyseg  "h20_%03d.hex"
+
+; -------------------------------
+
+        .cpu        "T_20_M"
+
+        .include    "ihexseg.a"
+
+; -------------------------------
+
+        .end    start           ; not used by 16-bit

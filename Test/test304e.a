@@ -1,0 +1,61 @@
+; Hobby Cross-Assembler Error Test 304e
+; Segments\Program Counter (Implicit)
+; fatal: pc invalid outside segments
+
+; by Anton Treuenfels
+
+; first created: 07/16/05
+; last revised:  03/31/07
+
+; warning(s): 0
+
+; error(s): 1
+; - invalid outside fragment
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+in1_2                       ; ok (implicit assignment)
+
+        .ends
+
+; a relative segment
+
+        .segment    rel1
+
+in2_2                       ; ok (implicit pc assignment)
+
+        .ends
+
+; the pc is invalid outside of any segment
+
+out3_1                      ; fatal (implicit assignment)
+
+; a relative segment
+
+        .segment    rel2
+
+in3_1                       ; ok (if it actually gets here)
+
+        .ends
+
+; -------------------------------
+
+        .end

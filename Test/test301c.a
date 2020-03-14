@@ -1,0 +1,130 @@
+; Hobby Cross-Assembler Test 301c
+; Segments\Segments Re-Used
+; ok: correct addresses of absolute and relative data (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 06/28/05
+; last revised:  06/28/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $10000000   ; ORG before any data makes segment absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .org    $20000000   ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .org    $30000000   ; absolute
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .byte   $02         ; relative
+
+        .ends
+
+; -------------------------------
+
+; no more new segments - re-use existing segments
+; - note at most one ORG is allowed for any segment (which makes it absolute)
+; - need another ORG ? Use another segment (there's lots)
+
+        .segment	abs1
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .byte   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .byte   $01         ; relative
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .byte   $02         ; relative
+
+        .ends
+
+; -------------------------------
+
+        .end

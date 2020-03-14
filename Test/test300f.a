@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 300f
+; Segments\Basic Definition
+; fatal: SEGMENT after first ORG outside of segment (therefore monolithic)
+
+; by Anton Treuenfels
+
+; first created: 06/22/05
+; last revised:  05/28/11
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - monolithic
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; first ORG before first SEGMENT disallows explicit segments
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment	abs1
+
+        .org    $1000       ; first segment must be absolute
+
+        .byte   $00
+
+        .ends	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000       ; absolute
+
+        .byte   $00
+
+        .ends
+
+; -------------------------------
+
+        .end

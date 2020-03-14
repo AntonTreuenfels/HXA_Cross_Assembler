@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Error Test 300p
+; Segments\Basic Definition
+; error\fatal: 32-bit relative segment exceeds max pc value (during assembly)
+
+; by Anton Treuenfels
+
+; first created: 07/13/05
+; last revised:  01/23/10
+
+; warning(s): 0
+
+; error(s): 1
+; - too big
+
+; fatal: 1
+; - bad PC
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; since we are going to cause a failure before the second pass,
+; we don't need to make any segment absolute for the test to work
+
+; each segment has its own program counter
+
+        .segment    seg1
+
+        .ds $ffffffff       ; ok (segment pc < $1:0000:0000 max)
+
+        .ds 1               ; ok (segment pc = $1:0000:0000 max)
+
+        .ends
+
+; each segment has its own program counter
+; - we cannot enter a value larger than 2^32-1 directly because the
+; expression evaluator forbids it
+
+        .segment    seg2
+
+        .ds $ffffffff       ; ok (segment pc < $1:0000:0000 max)
+
+        .ds 2               ; fatal (segment pc = $1:0000:0001)
+
+        .ends
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,755 @@
+; Hobby Cross-Assembler Test 304
+; Segments\Program Counter (Implicit)
+; ok: implicit use of program counter (relative offsets)
+
+; by Anton Treuenfels
+
+; first created: 07/05/05
+; last revised:  07/05/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; same as test 303, except we are looking for how offsets relative to
+; the program counter are resolved
+
+; -------------------------------
+; Global Symbols
+; -------------------------------
+
+; global label scope is the entire program (ie., global)
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+l_abs1  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000       ; absolute
+
+l_abs2  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+l_rel2_1    .word   $01     ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .org    $3000       ; absolute
+
+l_abs3  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+l_rel3_1    .word   $01         ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+l_rel3_2    .word   $02         ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; -------------------------------
+
+; try the globals again
+
+; no more new segments - re-use existing segments
+
+        .segment	abs1
+
+m_abs1  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+m_abs2  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+m_rel2_1    .word   $01     ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+m_abs3  .word   $00
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+m_rel3_1    .word   $01         ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+m_rel3_2    .word   $02         ; relative
+
+        .rword  l_abs1
+        .rword  l_abs2
+        .rword  l_rel2_1
+        .rword  l_abs3
+        .rword  l_rel3_1
+        .rword  l_rel3_2
+
+        .rword  m_abs1
+        .rword  m_abs2
+        .rword  m_rel2_1
+        .rword  m_abs3
+        .rword  m_rel3_1
+        .rword  m_rel3_2
+
+        .ends
+
+; -------------------------------
+; Local Symbols
+; -------------------------------
+
+; local label scope is at most the segment invocation they appear in
+
+        .segment	abs1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; -------------------------------
+
+; try the locals again
+
+        .segment	abs1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+@lower  .word   $00
+
+        .rword  @lower
+        .rword  @higher
+
+@higher .word   $00
+
+        .ends
+
+; -------------------------------
+; Variable Symbols
+; -------------------------------
+
+; variable label scope is global
+; - note implicit pc assigment occurs only in absolute segments
+
+        .segment	abs1
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .word   ]lower
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .rword  ]lower
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .rword  ]lower
+
+        .ends
+
+; -------------------------------
+
+; try the variables again
+
+        .segment	abs1
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+
+        .rword  ]lower
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+
+        .rword  ]lower
+
+]lower  .word   $00
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .rword  ]lower
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .rword  ]lower
+
+        .ends
+
+; -------------------------------
+; Branch Target Symbols
+; -------------------------------
+
+; branch target label scope is global
+
+        .segment	abs1
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+ -
+        .word   $00
+
+        .rword  -     
+        .rword  +      
+ +
+        .word   $00
+
+        .ends
+
+; -------------------------------
+
+; try the branch targets again
+; - we'll verify globality by checking inter-segment references
+
+        .segment	abs1
+ -
+        .word   $00
+
+        .rword  --
+        .rword  ++      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs2
+ -
+        .word   $00
+
+        .rword  --
+        .rword  ++      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel2_1
+ -
+        .word   $00
+
+        .rword  --     
+        .rword  ++      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	abs3
+ -
+        .word   $00
+
+        .rword  --     
+        .rword  ++      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+ -
+        .word   $00
+
+        .rword  --     
+        .rword  ++      
+ +
+        .word   $00
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+ -
+        .word   $00
+
+        .rword  --     
+        .rword  ++
+ +
+        .word   $00
+ +                              ; an extra forward target (so '++' works)
+        .ends
+
+; -------------------------------
+
+        .end

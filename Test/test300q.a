@@ -1,0 +1,63 @@
+; Hobby Cross-Assembler Error Test 300q
+; Segments\Basic Definition
+; error\fatal: too many segments (Monolithic, by ORG)
+
+; by Anton Treuenfels
+
+; first created: 07/21/05
+; last revised:  07/24/12
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - too many segments
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; we'll use implicit segments (the default)
+
+; -------------------------------
+
+; implicit segments are unnamed, so we can deliberately generate enough of
+; them to reach the limit without a whole lot of trouble
+
+; a discontinuous program counter by itself does not create a new segment
+; because what matters is non-consective data storage
+
+        .echo   "No data storage"
+
+        .repeat $800
+        .org    * + 2
+        .endr
+
+; we can change the program counter as often as we want without creating
+; a new segment as long as data storage is continuous
+
+        .echo   "No discontinuous data storage"
+
+        .repeat $800
+        .word   *
+        .org    *+2
+        .org    *-2
+        .endr
+
+; discontinuous data storage is what creates new implicit segments
+
+        .echo   "Discontinuous data storage"
+
+        .repeat $800
+        .word   *           ; current version allows 1023 segments
+        .org    *+2
+        .endr
+
+; -------------------------------
+
+        .end

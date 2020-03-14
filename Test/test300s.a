@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 300s
+; Segments\Basic Definition
+; error: segment ORG must come before data storage
+
+; by Anton Treuenfels
+
+; first created: 08/08/05
+; last revised:  08/08/05
+
+; warning(s): 0
+
+; error(s): 1
+; - illegal ORG
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment    abs1
+
+        .org    $1000       ; first segment must be absolute
+
+        .byte   $00
+
+        .ends
+
+; data storage before ORG makes a segment relative
+
+        .segment    rel1
+
+        .byte   $01
+
+        .org    $2000       ; error - can't change to absolute
+
+        .ends
+
+; -------------------------------
+
+        .end

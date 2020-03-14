@@ -1,0 +1,71 @@
+; Hobby Cross-Assembler Error Test 300i
+; Segments\Basic Definition
+; error\fatal: ORG outside of any segment
+
+; by Anton Treuenfels
+
+; first created: 06/22/05
+; last revised:  03/18/07
+
+; warning(s): 0
+
+; error(s): 1
+; - outside segment
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; an explicit segment
+
+        .segment	abs1
+
+        .org    $1000       ; first segment must be absolute
+
+        .byte   $00
+
+        .ends
+
+; -------------------------------
+; now outside of any segment
+; - anything that affects the program counter cannot be used
+
+; cannot set pc value...
+
+        .org    $4000       ; error
+
+        .byte   $00         ; error
+
+        .ds     100         ; error
+
+; ...nor get pc value
+
+my_label                    ; error
+
+        .if     * > $1000   ; error
+        .endif
+
+; -------------------------------
+
+; another segment (not atually necessary for the test(s))
+
+        .segment	rel1_1
+
+        .byte   $01
+
+        .ends
+
+; -------------------------------
+
+        .end

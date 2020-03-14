@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Test 302
+; Segments\Legal Data Storage
+; ok: first named segment must be absolute before end of source
+
+; by Anton Treuenfels
+
+; first created: 08/08/05
+; last revised:  03/25/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+
+; -------------------------------
+
+; explicit segments - perfectly okay to be empty
+
+        .repeat 10
+
+        .segment    abs1
+        .ends
+
+        .segment    abs2
+        .ends
+
+        .segment    rel2_1
+        .ends
+
+        .endr
+
+
+; perfectly okay to store data in segments
+
+        .segment    abs2
+        .org    $2000
+        .byte   $02
+        .ends
+
+        .segment    rel2_1
+        .word   $0201
+        .ends
+
+; ...but *must* make first named segment absolute
+; before end of source
+
+        .segment    abs1
+        .org    $1000
+        .ends
+
+; -------------------------------
+
+        .end
