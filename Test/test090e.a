@@ -1,0 +1,232 @@
+; Hobby Cross-Assembler Error Test 090e
+; Expressions\Expression Evaluation
+; error: malformed expressions
+
+; by Anton Treuenfels
+
+; first created: 04/11/03
+; last revised:  09/15/12
+
+; warning(s): 0
+
+; error(s): 68
+; - need BOE
+; - need number
+; - bad EOE
+; - need num_op
+; - need close_paren
+; - need str_op
+; - need string
+; - need regex
+; - bad close_paren
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        maxerr  200         ; raise default limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; these tests are drawn from the "test8?e.a" series and are meant to
+; provide a quick but comprehensive check of all operators
+; - if errors are found an original, more extensive, test can be
+; run if necessary to help identify specific problems
+
+; -------------------------------
+; unary operators
+; -------------------------------
+
+        ; unrecognized as operators or operands
+
+        .word   #123
+        .word   &123
+
+        ; unrecognized operands
+
+        .word   >/
+        .word   <=
+
+        ; mis-placed unary operators
+
+        .word   123-
+        .word   123!
+
+        ; mis-placed binary operators
+
+        .word   *123
+        .word   && 123
+
+        ; no operand
+
+        .word   ~
+        .word   !
+
+        .word   <^
+        .word   >^
+
+        ; type mis-match
+
+        .word   ~ /abc/
+        .word   ! /abc/
+
+; -------------------------------
+; numeric binary operators
+; -------------------------------
+
+; unrecognized operators
+
+        .word   123 @ 456
+        .word   123 # 456
+
+; arithmetic results
+
+        .word   / 123
+        .word   123 +
+        .word   ( 123 +
+        .word   123 + (/456)
+
+; bitwise results
+
+        .word   $a5 ^
+        .word   | $a5
+
+; logical results
+
+        .word   123 >
+        .word   &&123
+
+; program counter
+
+        .word   123 + (*456)
+        .word   * 123
+
+; combined expressions
+
+label1  .equ    $4000
+label2  .equ    $8000
+
+        .word   label1 label2
+
+        .word   'AB' - '0'
+
+        .word   ( 'A' - 10 * 2
+
+        .word   ( ( 'A' - 10 ) * 2
+
+        .word   ( label1 / 2 ) + ( 'A' - 10
+
+; -------------------------------
+; string binary operators
+; -------------------------------
+
+        ; unrecognized as operators or operands
+
+        .word   "123" #
+        .word   @"123"
+
+        ; incomplete expressions
+
+        .word   "123"
+        .word   "123" /
+
+        ; type mismatch
+
+        .word   "123" == 123
+        .word   "abc" * "def"
+
+; -------------------------------
+; regular expression operators
+; -------------------------------
+
+        .byte   /123/
+
+        .byte   "123" !~
+
+        .byte   !~ /123/
+
+        .byte   /123/ ~
+
+        .byte   "123" ~ "123"
+        .byte   "123" !~ 123
+
+        .byte   123 ~ /ghi/
+        .byte   "123" ~ /ghi/k
+
+; -------------------------------
+; string concatenation
+; -------------------------------
+
+        ; malformed strings
+
+        .string "a              ; error
+
+        .string "a "b"          ; error
+
+        .string "a\\\" "b"      ; error
+
+        ; illegal parentheses
+        ; - limitations: due to the way parsing is handled, only the first
+        ; string operand can be preceeded by one or more open parenthesis
+
+        .string "a" ("b")       ; error
+
+        .string ("a" ("b"))     ; error
+
+        ; illegal operators
+
+        .string "abc" - "def"
+
+; -------------------------------
+; ternary conditional
+; -------------------------------
+
+        ; various null expressions (no nesting)
+
+        .byte   ?
+        .byte   :
+
+        .byte   ? :
+
+        .byte   1 ? :
+        .byte   ? 1 :
+        .byte   ? : 1
+
+        ; missing operator
+
+        .byte   1 ? 2
+        .byte   1 ? 2 ; 3       ; a semi-colon instead of colon !
+
+        ; type mis-match (numeric)
+
+        .byte   1 ? "str" : 3
+
+        .byte   "str1" ? "str2" : 3
+
+        .byte   "str1" ? "str2" : "str3"
+
+        .byte   1 ? "s1" "s2" : 3
+
+        .byte   1 ? /regex/ : 3
+
+        ; type mis-match (string)
+
+        .str    1 ? /regex/ : 3     ; fail
+        .str    1 ? 2 : /regex/     ; fail
+
+        ; bad parenthesis
+
+        .byte   ( 0 + 1 ? 2 + 3 ) : 4 + 5
+        .byte   0 + ( 1 ? 2 + 3 ) : 4 + 5
+
+; -------------------------------
+
+        .end

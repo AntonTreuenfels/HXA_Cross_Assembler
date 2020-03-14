@@ -1,0 +1,157 @@
+; Hobby Cross-Assembler Error Test 081f
+; Expressions\Numeric Binary Operators
+; error: out-of-range values
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 21
+; - too small
+; - too big
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+intMin  .equ    -2147483648     ; -2^31
+intMax  .equ     2147483647     ; 2^31 -1
+
+uintMin .equ     0
+uintMax .equ     4294967295     ;  2^32 - 1
+
+; -------------------------------
+
+; out-of-range at expression end
+
+        .long   intMin - 1
+        .long   uintMax + 1
+
+        .long   intMin + 1 - 2
+        .long   uintMax - 1 + 2
+
+        .long   1 + intMin - 2
+        .long   2 + uintMax - 1
+
+        .long   1 - 2 + intMin
+        .long   2 - 1 + uintMax
+
+        .long   intMin + intMin     ; adds negatives
+        .long   uintMax + uintMax
+
+        .long   2 * intMin
+        .long   2 * uintMax
+
+; -------------------------------
+
+; in-range at expression end
+; - in every expression, intermediate results are more than
+; 32 significant bits
+; - all give no error (and correct result) except last in each series,
+; which has an end result greater than 32 significant bits
+; - 10-digit decimal literals larger than uintMax can be used directly
+; with no error as long as final result is in range
+; - binary and hexadecimal literals larger than uintMax will cause an
+; error as soon as detected (and the expression as a whole won't be evaluated)
+
+        .long   500000*10000 - 300000*10000         ; = 2E9
+        .long   500000*10000 - 400000*10000         ; = 1E9
+        .long   500000*10000 - 500000*10000         ; = 0
+        .long   500000*10000 - 600000*10000         ; = -1E9
+        .long   500000*10000 - 700000*10000         ; = -2E9
+        .long   500000*10000 - 800000*10000         ; = -3E9 (out of range)
+
+        .long   500000d*10000d - 300000d*10000d     ; = 2E9
+        .long   500000d*10000d - 400000d*10000d     ; = 1E9
+        .long   500000d*10000d - 500000d*10000d     ; = 0
+        .long   500000d*10000d - 600000d*10000d     ; = -1E9
+        .long   500000d*10000d - 700000d*10000d     ; = -2E9
+        .long   500000d*10000d - 800000d*10000d     ; = -3E9 (out of range)
+
+        .long   -400000*10000 + 300000*10000        ; = -1E9
+        .long   -400000*10000 + 400000*10000        ; = 0
+        .long   -400000*10000 + 500000*10000        ; = 1E9
+        .long   -400000*10000 + 600000*10000        ; = 2E9
+        .long   -400000*10000 + 700000*10000        ; = 3E9
+        .long   -400000*10000 + 800000*10000        ; = 4E9
+        .long   -400000*10000 + 900000*10000        ; = 5E9 (out of range)
+
+        .long   -400000d*10000d + 300000d*10000d    ; = -1E9
+        .long   -400000d*10000d + 400000d*10000d    ; = 0
+        .long   -400000d*10000d + 500000d*10000d    ; = 1E9
+        .long   -400000d*10000d + 600000d*10000d    ; = 2E9
+        .long   -400000d*10000d + 700000d*10000d    ; = 3E9
+        .long   -400000d*10000d + 800000d*10000d    ; = 4E9
+        .long   -400000d*10000d + 900000d*10000d    ; = 5E9 (out of range)
+
+        .long   1 + uintMax - 2
+        .long   10 + uintMax - 20
+        .long   100 + uintMax - 200
+        .long   1000 + uintMax - 2000
+        .long   10000 + uintMax - 20000
+        .long   100000 + uintMax - 200000
+        .long   1000000 + uintMax - 2000000
+        .long   10000000 + uintMax - 20000000
+        .long   100000000 + uintMax - 200000000
+        .long   1000000000 + uintMax - 2000000000
+        .long   10000000000 + uintMax - 20000000000  ; not fully evaluated
+
+        .long   -1d + intMin + 2d
+        .long   -10d + intMin + 20d
+        .long   -100d + intMin + 200d
+        .long   -1000d + intMin + 2000d
+        .long   -10000d + intMin + 20000d
+        .long   -100000d + intMin + 200000d
+        .long   -1000000d + intMin + 2000000d
+        .long   -10000000d + intMin + 20000000d
+        .long   -100000000d + intMin + 200000000d
+        .long   -1000000000d + intMin + 2000000000d
+        .long   -10000000000d + intMin + 20000000000d   ; not fully evaluated
+
+        .long   $1 + uintMax - $2
+        .long   $10 + uintMax - $20
+        .long   $100 + uintMax - $200
+        .long   $1000 + uintMax - $2000
+        .long   $10000 + uintMax - $20000
+        .long   $100000 + uintMax - $200000
+        .long   $1000000 + uintMax - $2000000
+        .long   $10000000 + uintMax - $20000000
+        .long   $100000000 + uintMax - $200000000    ; not fully evaluated
+
+        .long   1H + uintMax - 2H
+        .long   10H + uintMax - 20H
+        .long   100H + uintMax - 200H
+        .long   1000H + uintMax - 2000H
+        .long   10000H + uintMax - 20000H
+        .long   100000H + uintMax - 200000H
+        .long   1000000H + uintMax - 2000000H
+        .long   10000000H + uintMax - 20000000H
+        .long   100000000H + uintMax - 200000000H    ; not fully evaluated
+
+        .long   0x1 + uintMax - 0x2
+        .long   0x10 + uintMax - 0x20
+        .long   0x100 + uintMax - 0x200
+        .long   0x1000 + uintMax - 0x2000
+        .long   0x10000 + uintMax - 0x20000
+        .long   0x100000 + uintMax - 0x200000
+        .long   0x1000000 + uintMax - 0x2000000
+        .long   0x10000000 + uintMax - 0x20000000
+        .long   0x100000000 + uintMax - 0x200000000    ; not fully evaluated
+
+; -------------------------------
+
+        .end

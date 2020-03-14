@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 055e
+; Expressions\String Labels
+; error: string labels
+
+; by Anton Treuenfels
+
+; first created: 06/21/06
+; last revised:  06/21/06
+
+; warning(s): 0
+
+; error(s): 4
+; - need label
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; malformed name
+
+g_str$label
+
+]v_strlab$el
+
+@l$_strlabel
+
+; forward reference in string context
+
+        .string forward$
+
+forward$
+
+; -------------------------------
+
+        .end

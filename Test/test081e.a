@@ -1,0 +1,93 @@
+; Hobby Cross-Assembler Error Test 081e
+; Expressions\Numeric Binary Operators
+; error: malformed expressions
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  01/02/10
+
+; warning(s): 0
+
+; error(s): 30
+; - need num_op
+; - need BOE
+; - need EOE
+; - need number
+; - no close paren
+; - bad close paren
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 50
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; unrecognized operators
+
+        .word   123 @ 456
+        .word   123 # 456
+
+; arithmetic results
+
+        .word   / 123
+        .word   123 +
+        .word   123 + -
+        .word   123 + )
+        .word   ( 123 +
+        .word   ( )
+        .word   123 + ( ) 456
+        .word   123 () +456
+        .word   123 + (/456)
+
+; bitwise results
+
+        .word   $a5 ^
+        .word   $a5 & &
+        .word   | $a5
+
+; logical results
+
+        .word   123 >
+        .word   123  ||
+        .word   &&123
+
+; program counter
+
+        .word   123 + (*456)
+        .word   * 123
+
+; combined expressions
+
+label1  .equ    $4000
+label2  .equ    $8000
+
+        .word   label1 label2
+        .word   label1  label2
+        .word   label1   label2
+
+        .word   'AB' - '0'
+        .word   'A' - '0 - 10
+
+        .word   ( 'A' - 10 * 2
+        .word   'A' - 10 ) * 2
+
+        .word   ( ( 'A' - 10 ) * 2
+        .word   ( 'A' - 10 ) ) * 2
+
+        .word   ( label1 / 2 ) + ( 'A' - 10
+        .word   ( label1 / 2 ) + 'A' - 10 )
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,124 @@
+; Hobby Cross-Assembler Error Test 045e
+; Expressions\String Literals
+; error: malformed strings
+
+; by Anton Treuenfels
+
+; first created: 07/27/03
+; last revised:  08/22/09
+
+; warning(s):
+
+; error(s): 25
+; - need str
+; - need BOE
+; - need numeric op
+; - need string op
+; - unmatched close parenthesis
+; - unmatched open parenthesis
+; - bad EOE
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 100
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no argument
+
+        .string
+
+; -------------------------------
+
+; unmatched delimiters
+
+        .string "No trailing quote mark
+
+; unmatched delimiters
+
+        .string no leading quote mark"
+
+; unmatched delimiters
+
+        .string one "embedded quote mark
+
+; unmatched delimiters
+
+        .string two "embedded" quote marks
+
+; unmatched delimiters
+
+        .string "a leading and second" but no trailing quote mark
+
+; unmatched delimiters
+
+        .string no leading but an "embedded and trailing quote mark"
+
+; -------------------------------
+
+; unmatched parenthesis
+
+        .string "legal string" )
+
+; -------------------------------
+
+; double-quote escape sequences
+; - rule: a string literal extends from its opening double quote mark to
+; the next double quote mark which is NOT preceeded by an ODD number of
+; backslashes
+; - because each pair of backslashes (an even number) reduces to
+; one backslash, and then the last (odd) backslash escapes the double quote
+; (hence that double quote does not mark the end of a literal string)
+
+        .string "\"             ; error
+        .string "\""            ; okay
+
+        .string "\\"            ; okay
+        .string "\\""           ; error
+
+        .string "\\\"           ; error
+        .string "\\\""          ; okay
+
+        .string "\\\\"          ; okay
+        .string "\\\\""         ; error
+
+        .string "\\\\\"         ; error
+        .string "\\\\\""        ; okay
+
+        .string "\\\\\\"        ; okay
+        .string "\\\\\\""       ; error
+
+        .string "\\\\\\\"       ; error
+        .string "\\\\\\\""      ; okay
+
+; -------------------------------
+
+; bad types
+
+        .string /regex/
+        .string "ABC", /regex/
+        .string 0x40, /regex/
+        .string /regex1/, /regex2/, "ABCDEF", 64, /regex3/
+
+; -------------------------------
+
+; bad expressions
+
+        .string ( 21
+        .string "ABC", 21+, "DEF"
+        .string "ABC" ==, "DEF"
+        .string "ABC", 1 ? "DEF" :, "GHI"
+
+; -------------------------------
+
+        .end

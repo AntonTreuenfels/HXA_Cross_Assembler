@@ -1,0 +1,56 @@
+; Hobby Cross-Assembler Error Test 050g
+; Expressions\Global Labels
+; error: global label ok; rest of source line malformed
+
+; by Anton Treuenfels
+
+; first created: 11/06/03
+; last revised:  03/11/04
+
+; warning(s):
+
+; error(s): 11
+; - expecting opcode
+
+; fatal:
+
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; labels are good, second token is bad (ie., not psop, instruction or macro)
+
+good1   badTok              ; alpha token
+
+good2   123                 ; decimal number token
+
+good3   123abc              ; alphanum token
+
+good4:  abc123              ; alphanum token
+
+good5:  %0101               ; Motorola-style binary number token
+
+good6:  $123abc             ; Motorola-style hex number token
+
+good7   $abc123             ; Motorola-style hex number token
+
+good8   0101B               ; Intel-style binary number token
+
+good9   123abcH             ; Intel-style hex number token
+
+good10  0abc123H            ; Intel-style hex number token
+
+good11  good1               ; global label
+
+; -------------------------------
+
+        .end

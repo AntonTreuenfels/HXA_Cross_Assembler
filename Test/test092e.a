@@ -1,0 +1,77 @@
+; Hobby Cross-Assembler Error Test 092e
+; Expressions\Assign Label Value
+; error: bad "EQU" use
+
+; by Anton Treuenfels
+
+; first created: 04/24/04
+; last revised:  05/17/11
+
+; warning(s): 2
+; - odd use
+
+; error(s): 10
+; - expecting label
+; - unexpected blank
+; - unexpected EOE
+; - expecting string
+; - name not found
+; - duplicate name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; malformed "EQU" psop
+
+        .equ
+
+label1  .equ
+
+        .equ    123
+
+; type mismatch
+
+label2  .equ    "string literal"
+
+label2$ .equ    123
+
+; no forward reference allowed
+
+label3  .equ    unknown_Label
+
+label3$ .equ    unknown_Label$
+
+; these are ok...
+
+label4  .equ    123
+
+label4$ .equ    "string literal"
+
+; ...as are these
+
+label4  .equ    123
+
+label4$ .equ    "string literal"
+
+; ...but these aren't...
+
+label4  .equ    456
+
+label4$ .equ    "another string literal"
+
+; -------------------------------
+
+        .end

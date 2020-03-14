@@ -1,0 +1,220 @@
+; Hobby Cross-Assembler Test 085b
+; Expressions\Logical Short Circuit
+; ok: "&&" and "||" Operators (string expressions)
+
+; by Anton Treuenfels
+
+; first created: 03/08/10
+; last revised:  03/08/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; single operator
+
+        .byte   "" && ""              ; 0
+        .byte   "" && "1"             ; 0
+        .byte   "1" && ""             ; 0
+        .byte   "1" && "1"            ; 1
+
+        .byte   "" || ""              ; 0
+        .byte   "" || "1"             ; 1
+        .byte   "1" || ""             ; 1
+        .byte   "1" || "1"            ; 1
+
+        ; multiple operators; changing precedence
+
+        .byte   "" && "" && ""        ; 0
+        .byte   "" && ("" && "")      ; 0
+        .byte   "" && "" && "1"       ; 0
+        .byte   "" && ("" && "1")     ; 0
+        .byte   "" && "1" && ""       ; 0
+        .byte   "" && ("1" && "")     ; 0
+        .byte   "" && "1" && "1"      ; 0
+        .byte   "" && ("1" && "1")    ; 0
+        .byte   "1" && "" && ""       ; 0
+        .byte   "1" && ("" && "")     ; 0
+        .byte   "1" && "" && "1"      ; 0
+        .byte   "1" && ("" && "1")    ; 0
+        .byte   "1" && "1" && ""      ; 0
+        .byte   "1" && ("1" && "")    ; 0
+        .byte   "1" && "1" && "1"     ; 1
+        .byte   "1" && ("1" && "1")   ; 1
+
+        .byte   "" && "" || ""        ; 0
+        .byte   "" && ("" || "")      ; 0
+        .byte   "" && "" || "1"       ; 1
+        .byte   "" && ("" || "1")     ; 0
+        .byte   "" && "1" || ""       ; 0
+        .byte   "" && ("1" || "")     ; 0
+        .byte   "" && "1" || "1"      ; 1
+        .byte   "" && ("1" || "1")    ; 0
+        .byte   "1" && "" || ""       ; 0
+        .byte   "1" && ("" || "")     ; 0
+        .byte   "1" && "" || "1"      ; 1
+        .byte   "1" && ("" || "1")    ; 1
+        .byte   "1" && "1" || ""      ; 1
+        .byte   "1" && ("1" || "")    ; 1
+        .byte   "1" && "1" || "1"     ; 1
+        .byte   "1" && ("1" || "1")   ; 1
+
+        .byte   "" || "" && ""        ; 0
+        .byte   "" || ("" && "")      ; 0
+        .byte   "" || "" && "1"       ; 0
+        .byte   "" || ("" && "1")     ; 0
+        .byte   "" || "1" && ""       ; 0
+        .byte   "" || ("1" && "")     ; 0
+        .byte   "" || "1" && "1"      ; 1
+        .byte   "" || ("1" && "1")    ; 1
+        .byte   "1" || "" && ""       ; 1
+        .byte   "1" || ("" && "")     ; 1
+        .byte   "1" || "" && "1"      ; 1
+        .byte   "1" || ("" && "1")    ; 1
+        .byte   "1" || "1" && ""      ; 1
+        .byte   "1" || ("1" && "")    ; 1
+        .byte   "1" || "1" && "1"     ; 1
+        .byte   "1" || ("1" && "1")   ; 1
+
+        .byte   "" || "" || ""        ; 0
+        .byte   "" || ("" || "")      ; 0
+        .byte   "" || "" || "1"       ; 1
+        .byte   "" || ("" || "1")     ; 1
+        .byte   "" || "1" || ""       ; 1
+        .byte   "" || ("1" || "")     ; 1
+        .byte   "" || "1" || "1"      ; 1
+        .byte   "" || ("1" || "1")    ; 1
+        .byte   "1" || "" || ""       ; 1
+        .byte   "1" || ("" || "")     ; 1
+        .byte   "1" || "" || "1"      ; 1
+        .byte   "1" || ("" || "1")    ; 1
+        .byte   "1" || "1" || ""      ; 1
+        .byte   "1" || ("1" || "")    ; 1
+        .byte   "1" || "1" || "1"     ; 1
+        .byte   "1" || ("1" || "1")   ; 1
+
+        ; single operator, backward variable reference
+
+bak0$   .equ    ""
+bak1$   .equ    "1"
+
+        .byte   bak0$ && bak0$        ; 0
+        .byte   bak0$ && bak1$        ; 0
+        .byte   bak1$ && bak0$        ; 0
+        .byte   bak1$ && bak1$        ; 1
+
+        .byte   bak0$ || bak0$        ; 0
+        .byte   bak0$ || bak1$        ; 1
+        .byte   bak1$ || bak0$        ; 1
+        .byte   bak1$ || bak1$        ; 1
+
+        ; parenthesized strings, backward variable reference
+
+        .byte   (bak0$) && (bak0$)    ; 0
+        .byte   (bak0$) && (bak1$)    ; 0
+        .byte   (bak1$) && (bak0$)    ; 0
+        .byte   (bak1$) && (bak1$)    ; 1
+
+        .byte   (bak0$) || (bak0$)    ; 0
+        .byte   (bak0$) || (bak1$)    ; 1
+        .byte   (bak1$) || (bak0$)    ; 1
+        .byte   (bak1$) || (bak1$)    ; 1
+
+        ; multiple operators (single logical), backward variable reference
+
+        .byte   ((bak0$) && (bak0$)) + 1 ; 1
+        .byte   ((bak0$) && (bak1$)) + 1 ; 1
+        .byte   ((bak1$) && (bak0$)) + 1 ; 1
+        .byte   ((bak1$) && (bak1$)) + 1 ; 2
+
+        .byte   ((bak0$) || (bak0$)) + 1 ; 1
+        .byte   ((bak0$) || (bak1$)) + 1 ; 2
+        .byte   ((bak1$) || (bak0$)) + 1 ; 2
+        .byte   ((bak1$) || (bak1$)) + 1 ; 2
+
+        ; single operator, forward variable reference
+
+        .byte   fwd0$ && fwd0$            ; 0
+        .byte   fwd0$ && fwd1$            ; 0
+        .byte   fwd1$ && fwd0$            ; 0
+        .byte   fwd1$ && fwd1$            ; 1
+
+        .byte   fwd0$ || fwd0$            ; 0
+        .byte   fwd0$ || fwd1$            ; 1
+        .byte   fwd1$ || fwd0$            ; 1
+        .byte   fwd1$ || fwd1$            ; 1
+
+        ; parenthesized strings, forward variable reference
+
+        .byte   (fwd0$) && (fwd0$)    ; 0
+        .byte   (fwd0$) && (fwd1$)    ; 0
+        .byte   (fwd1$) && (fwd0$)    ; 0
+        .byte   (fwd1$) && (fwd1$)    ; 1
+
+        .byte   (fwd0$) || (fwd0$)    ; 0
+        .byte   (fwd0$) || (fwd1$)    ; 1
+        .byte   (fwd1$) || (fwd0$)    ; 1
+        .byte   (fwd1$) || (fwd1$)    ; 1
+
+        ; multiple operators (single logical), forward variable reference
+
+        .byte   ((fwd0$) && (fwd0$)) + 1 ; 1
+        .byte   ((fwd0$) && (fwd1$)) + 1 ; 1
+        .byte   ((fwd1$) && (fwd0$)) + 1 ; 1
+        .byte   ((fwd1$) && (fwd1$)) + 1 ; 2
+
+        .byte   ((fwd0$) || (fwd0$)) + 1 ; 1
+        .byte   ((fwd0$) || (fwd1$)) + 1 ; 2
+        .byte   ((fwd1$) || (fwd0$)) + 1 ; 2
+        .byte   ((fwd1$) || (fwd1$)) + 1 ; 2
+
+      ; multiple operators, forward and backward reference
+
+        .byte   (bak0$) && (fwd1$) || (bak1$) && (fwd0$) ; 0
+        .byte   (bak0$) || (fwd1$) && (bak1$) || (fwd0$) ; 1
+        .byte   (bak0$) && (fwd0$) || (bak1$) && (fwd1$) ; 1
+        .byte   (bak0$) || (fwd0$) && (bak1$) || (fwd1$) ; 1
+
+fwd0$   .equ    ""
+fwd1$   .equ    "1"
+
+      ; non-existent (and unnecessary) reference if left side can
+      ; determine final result without evaluating right side
+      ; - "unKnown$" will not appear in the symbol table listing !
+
+        .byte   "" && unKnown$         ; 0
+;        .byte   "1" && unKnown$        ; unresolvable
+;        .byte   "" || unKnown$         ; unresolvable
+        .byte   "1" || unKnown$        ; 1
+
+        .byte   "" && unKnown$ && ""   ; 0
+        .byte   "" && unKnown$ && "1"  ; 0
+;        .byte   "1" && unKnown$ && ""  ; unresolvable
+;        .byte   "1" && unKnown$ && "1" ; unresolvable
+
+;        .byte   "" || unKnown$ && ""   ; unresolvable
+;        .byte   "" || unKnown$ && "1"  ; unresolvable
+        .byte   "1" || unKnown$ && ""  ; 1
+        .byte   "1" || unKnown$ && "1" ; 1
+
+        .byte   "" && unKnown$ || ""   ; 0
+        .byte   "" && unKnown$ || "1"  ; 1
+;        .byte   "1" && unKnown$ || ""  ; unresolvable
+;        .byte   "1" && unKnown$ || "1" ; unresolvable
+
+;        .byte   "" || unKnown$ || ""   ; unresolvable
+;        .byte   "" || unKnown$ || "1"  ; unresolvable
+        .byte   "1" || unKnown$ || ""  ; 1
+        .byte   "1" || unKnown$ || "1" ; 1
+
+; -------------------------------
+
+        .end

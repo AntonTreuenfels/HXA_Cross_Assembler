@@ -1,0 +1,77 @@
+; Hobby Cross-Assembler Error Test 080e
+; Expressions\Unary Operators
+; error: malformed expressions
+
+; by Anton Treuenfels
+
+; first created: 01/01/10
+; last revised:  09/29/12
+
+; warning(s): 0
+
+; error(s): 22
+; - bad BOE
+; - need number
+; - bad EOE
+; - need num_op
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; unrecognized as operators or operands
+
+        .word   #123
+        .word   &123
+
+        ; unrecognized operands
+
+        .word   >/
+        .word   <=
+
+        ; mis-placed unary operators
+
+        .word   123-
+        .word   123!
+        .word   123<
+
+        ; mis-placed binary operators
+
+        .word   *123
+        .word   &123
+        .word   && 123
+
+        ; no operand
+
+        .word   +       ; taken as branch target reference
+        .word   -       ; taken as branch target reference
+        .word   ~
+        .word   !
+        .word   <
+        .word   >
+        .word   ^
+
+        .word   !!
+        .word   -!
+        .word   !-
+        .word   <^
+        .word   >^
+
+        ; type mis-match
+
+        .word   ~ /abc/
+        .word   ! /abc/
+
+; -------------------------------
+
+        .end

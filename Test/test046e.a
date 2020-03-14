@@ -1,0 +1,88 @@
+; Hobby Cross-Assembler Error Test 046e
+; Expressions\XLATE() and XLATE
+; warn\error: malformed translation patterns
+
+; by Anton Treuenfels
+
+; first created: 03/07/04
+; last revised:  11/28/08
+
+; warning(s): 6
+; - odd val
+; - no effect
+
+; error(s): 20
+; - unexpected blank field
+; - expecting string
+; - expecting equate
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .xlate              ; no argument
+
+        .xlate  ""          ; null argument
+
+; pattern malformations
+; - note that if errors are found while processing a translation pattern,
+; the current char mapping won't change. But if only a warning is found,
+; the current char mapping will be changed by any parts of the pattern
+; that don't generate a warning.
+
+        .xlate  "A=         ; malformed argument
+
+        .xlate  =A"         ; malformed argument
+
+        .xlate  "A="        ; malformed argument
+
+        .xlate  "  A="      ; malformed argument
+
+; malformed escape sequences
+
+        .xlate  "A=$81"
+
+        .xlate  "A=81H"
+
+; range malformations
+
+        .xlate  "A-Z="
+
+        .xlate  "A-=Z"
+
+        .xlate  "A-=a-"
+
+        .xlate  "\$80-\$8f=\$90-"
+
+; range errors - start greater than end
+; - these won't cause a failure but will issue a warning (because these
+; patterns won't cause anything to happen)
+
+        .xlate  "Z-A=A"     ; no effect
+
+        .xlate  "Z-A=0-9"   ; no effect
+
+        .xlate  "A-Z=9-0"   ; no effect
+
+; the first re-mapping works, but the second has no effect
+; - the first re-mapping will be applied
+
+        .xlate  "A-B=1-3", "X-Z=9-0"   ; no effect
+
+; first ok, second no effect, third error
+
+        .xlate  "A-B=1-3", "X-Z=9-0", "M="  ; no effect, blank field
+
+; -------------------------------
+
+        .end

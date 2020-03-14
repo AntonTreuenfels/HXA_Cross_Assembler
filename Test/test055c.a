@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Test 055c
+; Expressions\String Labels
+; ok: string and numeric labels (local forms only)
+
+; by Anton Treuenfels
+
+; first created: 05/07/11
+; last revised:  05/07/11
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+         .cpu    "T_16_L"   ; required psop
+         .org    $1000      ; required psop (can be labeled)
+
+         .liston    autos   ; string and numeric listed separately
+
+; -------------------------------
+
+; if no global labels are included, the listing should show
+; "numeric by value" but not "alphabetic numeric" data
+
+; local form
+
+@local_1                    ; pc (as number)
+@local.1$                   ; pc (as string)
+
+        .word   @local_1
+        .string @local.1$
+
+; string labels on most pseudo ops also acquire the value of the pc
+
+]pvlabel$   .string ]pvlabel$
+
+; string labels may end with a colon character
+
+@colon$:
+
+            .string @colon$:
+
+; -------------------------------
+
+    .end

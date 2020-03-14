@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 051g
+; Expressions\Local Labels
+; error: duplicate labels
+
+; by Anton Treuenfels
+
+; first created: 07/29/05
+; last revised:  05/28/11
+
+; warning(s): 1
+; - odd use
+
+; error(s): 1
+; - duplicate names
+
+; fatal:
+
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos   ; "auto-generated" labels shown in symbol listing
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+@local1                     ; = current value of PC ($1000)
+
+@local1                     ; ok (= $1000)
+
+@local1 .word   global1     ; ok (= $1000)
+
+        .word   @local1     ; refers to current value ($1000)
+
+global1:                    ; global clears local label table
+
+@local1                     ; =current value of PC ($1004)
+
+@local1 .word   @local1     ; ok (= $1004)
+
+        .word   global1
+
+@local1                     ; error - value changed ($1008)
+
+; -------------------------------
+
+        .end

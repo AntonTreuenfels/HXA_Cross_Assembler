@@ -1,0 +1,277 @@
+; Hobby Cross-Assembler Test 080b
+; Expressions\Unary Operators
+; ok: arithmetic, bitwise, logical (string operands)
+
+; by Anton Treuenfels
+
+; first created: 03/18/10
+; last revised:  03/18/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; unary operators applied to strings implicitly cause
+; a comparison of the string to the null string
+; before the unary operator is applied
+; - thus the unary operator is always applied
+; to either the value zero or the value one
+
+; - the impetus is the idea that the "!" operator applied to a string
+; should result in a value that reflects whether or not the string
+; is null
+; - the other unary operators just "come along for the ride"
+; in that no extra effort at all is required to implement them
+
+; -------------------------------
+
+; some useful strings
+
+nul$   .equ    ""
+abc$    .equ    "abc"
+def$    .equ    "def"
+
+; -------------------------------
+
+        ; --------------------
+        ; literal string tests
+        ; --------------------
+
+        .byte   +"", +(""), (+"")
+
+        .byte   -"", -(""), (-"")
+
+        .byte   ~"", ~(""), (~"")
+
+        .byte   !"", !(""), (!"")
+
+        .byte   <"", <(""), (<"")
+
+        .byte   >"", >(""), (>"")
+
+        .byte   ^"", ^(""), (^"")
+
+        ; --------------------
+
+        .byte   +"a", +("a"), (+"a")
+
+        .byte   -"a", -("a"), (-"a")
+
+        .byte   ~"a", ~("a"), (~"a")
+
+        .byte   !"a", !("a"), (!"a")
+
+        .byte   <"a", <("a"), (<"a")
+
+        .byte   >"a", >("a"), (>"a")
+
+        .byte   ^"a", ^("a"), (^"a")
+
+        ; --------------------
+
+        .byte   +"" "", +("" ""), (+"" "")
+
+        .byte   -"" "", -("" ""), (-"" "")
+
+        .byte   ~"" "", ~("" ""), (~"" "")
+
+        .byte   !"" "", !("" ""), (!"" "")
+
+        .byte   <"" "", <("" ""), (<"" "")
+
+        .byte   >"" "", >("" ""), (>"" "")
+
+        .byte   ^"" "", ^("" ""), (^"" "")
+
+        ; --------------------
+
+        .byte   +"" "b", +("" "b"), (+"" "b")
+
+        .byte   -"" "b", -("" "b"), (-"" "b")
+
+        .byte   ~"" "b", ~("" "b"), (~"" "b")
+
+        .byte   !"" "b", !("" "b"), (!"" "b")
+
+        .byte   <"" "b", <("" "b"), (<"" "b")
+
+        .byte   >"" "b", >("" "b"), (>"" "b")
+
+        .byte   ^"" "b", ^("" "b"), (^"" "b")
+
+        ; --------------------
+
+        .byte   +"a" "", +("a" ""), (+"a" "")
+
+        .byte   -"a" "", -("a" ""), (-"a" "")
+
+        .byte   ~"a" "", ~("a" ""), (~"a" "")
+
+        .byte   !"a" "", !("a" ""), (!"a" "")
+
+        .byte   <"a" "", <("a" ""), (<"a" "")
+
+        .byte   >"a" "", >("a" ""), (>"a" "")
+
+        .byte   ^"a" "", ^("a" ""), (^"a" "")
+
+        ; --------------------
+
+        .byte   +"a" "b", +("a" "b"), (+"a" "b")
+
+        .byte   -"a" "b", -("a" "b"), (-"a" "b")
+
+        .byte   ~"a" "b", ~("a" "b"), (~"a" "b")
+
+        .byte   !"a" "b", !("a" "b"), (!"a" "b")
+
+        .byte   <"a" "b", <("a" "b"), (<"a" "b")
+
+        .byte   >"a" "b", >("a" "b"), (>"a" "b")
+
+        .byte   ^"a" "b", ^("a" "b"), (^"a" "b")
+
+        ; --------------------
+        ; string label tests
+        ; --------------------
+
+        .byte   +nul$, +(nul$), (+nul$)
+
+        .byte   -nul$, -(nul$), (-nul$)
+
+        .byte   ~nul$, ~(nul$), (~nul$)
+
+        .byte   !nul$, !(nul$), (!nul$)
+
+        .byte   <nul$, <(nul$), (<nul$)
+
+        .byte   >nul$, >(nul$), (>nul$)
+
+        .byte   ^nul$, ^(nul$), (^nul$)
+
+        ; --------------------
+
+        .byte   +abc$, +(abc$), (+abc$)
+
+        .byte   -abc$, -(abc$), (-abc$)
+
+        .byte   ~abc$, ~(abc$), (~abc$)
+
+        .byte   !abc$, !(abc$), (!abc$)
+
+        .byte   <abc$, <(abc$), (<abc$)
+
+        .byte   >abc$, >(abc$), (>abc$)
+
+        .byte   ^abc$, ^(abc$), (^abc$)
+
+        ; --------------------
+
+        .byte   +nul$ nul$, +(nul$ nul$), (+nul$ nul$)
+
+        .byte   -nul$ nul$, -(nul$ nul$), (-nul$ nul$)
+
+        .byte   ~nul$ nul$, ~(nul$ nul$), (~nul$ nul$)
+
+        .byte   !nul$ nul$, !(nul$ nul$), (!nul$ nul$)
+
+        .byte   <nul$ nul$, <(nul$ nul$), (<nul$ nul$)
+
+        .byte   >nul$ nul$, >(nul$ nul$), (>nul$ nul$)
+
+        .byte   ^nul$ nul$, ^(nul$ nul$), (^nul$ nul$)
+
+        ; --------------------
+
+        .byte   +nul$ def$, +(nul$ def$), (+nul$ def$)
+
+        .byte   -nul$ def$, -(nul$ def$), (-nul$ def$)
+
+        .byte   ~nul$ def$, ~(nul$ def$), (~nul$ def$)
+
+        .byte   !nul$ def$, !(nul$ def$), (!nul$ def$)
+
+        .byte   <nul$ def$, <(nul$ def$), (<nul$ def$)
+
+        .byte   >nul$ def$, >(nul$ def$), (>nul$ def$)
+
+        .byte   ^nul$ def$, ^(nul$ def$), (^nul$ def$)
+
+        ; --------------------
+
+        .byte   +abc$ nul$, +(abc$ nul$), (+abc$ nul$)
+
+        .byte   -abc$ nul$, -(abc$ nul$), (-abc$ nul$)
+
+        .byte   ~abc$ nul$, ~(abc$ nul$), (~abc$ nul$)
+
+        .byte   !abc$ nul$, !(abc$ nul$), (!abc$ nul$)
+
+        .byte   <abc$ nul$, <(abc$ nul$), (<abc$ nul$)
+
+        .byte   >abc$ nul$, >(abc$ nul$), (>abc$ nul$)
+
+        .byte   ^abc$ nul$, ^(abc$ nul$), (^abc$ nul$)
+
+        ; --------------------
+
+        .byte   +abc$ def$, +(abc$ def$), (+abc$ def$)
+
+        .byte   -abc$ def$, -(abc$ def$), (-abc$ def$)
+
+        .byte   ~abc$ def$, ~(abc$ def$), (~abc$ def$)
+
+        .byte   !abc$ def$, !(abc$ def$), (!abc$ def$)
+
+        .byte   <abc$ def$, <(abc$ def$), (<abc$ def$)
+
+        .byte   >abc$ def$, >(abc$ def$), (>abc$ def$)
+
+        .byte   ^abc$ def$, ^(abc$ def$), (^abc$ def$)
+
+        ; --------------------
+        ; mixed literal/label tests
+        ; --------------------
+
+        .byte   +"" nul$, +("" nul$), +("")nul$
+
+        .byte   -"" nul$, -("" nul$), -("")nul$
+
+        .byte   ~"" nul$, ~("" nul$), ~("")nul$
+
+        .byte   !"" nul$, !("" nul$), !("")nul$
+
+        .byte   <"" nul$, <("" nul$), <("")nul$
+
+        .byte   >"" nul$, >("" nul$), >("")nul$
+
+        .byte   ^"" nul$, ^("" nul$), ^("")nul$
+
+        ; --------------------
+
+        .byte   +abc$ "b", +(abc$ "b"), +(abc$)"b"
+
+        .byte   -abc$ "b", -(abc$ "b"), -(abc$)"b"
+
+        .byte   ~abc$ "b", ~(abc$ "b"), ~(abc$)"b"
+
+        .byte   !abc$ "b", !(abc$ "b"), !(abc$)"b"
+
+        .byte   <abc$ "b", <(abc$ "b"), <(abc$)"b"
+
+        .byte   >abc$ "b", >(abc$ "b"), >(abc$)"b"
+
+        .byte   ^abc$ "b", ^(abc$ "b"), ^(abc$)"b"
+
+; -------------------------------
+
+        .end
+

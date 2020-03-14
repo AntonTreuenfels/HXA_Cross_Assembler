@@ -1,0 +1,90 @@
+; Hobby Cross-Assembler Test 050
+; Expressions\Global Labels
+; ok: global labels
+
+; by Anton Treuenfels
+
+; first created: 05/27/03
+; last revised:  06/09/12
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+label1  .org    $1000       ; required psop (can be labeled)
+
+; -------------------------------
+
+label1a .word   label6      ; "label1a" has same value as "label1"
+
+_label2 .word   label_5
+
+label3  .word   label3
+
+label4                      ; label by itself gets current PC as value
+
+LABEL4a .word   label1a     ; "LABEL4a" has same value as "label4"
+
+label_5 .word   label1:     ; trailing colon allowed in reference to label
+
+BADH    .word   BADH        ; "BADH" is interpreted as a label
+        .word   0BADH       ; "0BADH" is interpreted as an Intel-style number
+
+u_label .word   p.label     ; check embedded underscore and period chars
+
+p.label .word   u_label     ; - legal after first char
+
+u_label_     .word   p.label.2  ; underscore legal as last char...
+
+p.label.2    .word   u_label_   ; ...but not period char
+
+; -------------------------------
+
+x                           ; a single letter is acceptable
+
+X       .word   X           ; ... in either case
+        .word   x
+
+_                           ; a single underscore is acceptable
+
+_       .word   _           ; ... however deplorable as style
+        .word   _
+
+_._                         ; a single period is never acceptable
+
+_._     .word   _._         ; ... but odd names are still possible
+        .word   _._
+
+A._B                        ; another acceptable odd name
+
+a._b    .word   A._B
+        .word   a._b
+
+_1                          ; and another pair of slightly odd names
+
+_9      .word   _1
+        .word   _9
+
+; -------------------------------
+
+__      .word   __          ; multiple successive underscores are acceptable
+
+__A__   .word   __a__
+
+__A__B__    .word   __a__b__
+
+___     .word   ___
+
+___a___ .word   ___A___
+
+___a___b___ .word   ___A___B___
+
+; -------------------------------
+
+label6: .end                ; optional psop (can be labeled)

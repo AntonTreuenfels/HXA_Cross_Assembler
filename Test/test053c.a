@@ -1,0 +1,138 @@
+; Hobby Cross-Assembler Test 053c
+; Expressions\Branch Target Labels
+; ok: only colons as branch targets
+
+; by Anton Treuenfels
+
+; first created: 09/16/12
+; last revised:  09/16/12
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos   ; "auto-generated" labels shown in symbol listing
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; using branch target labels in the label field of most pseudo ops
+; generates a warning, but if we put them on lines of their own, they
+; get assigned the current value of the program counter without any fuss
+
+        .word   :++++++++++ ; refers to tenth (last) target (forward ref)
+ :                          ; first target
+        .word   :-          ; refers to first target (backward ref)
+ :                          ; second target
+        .word   :--         ; refers to first target
+ :                          ; third target
+        .word   :---        ; refers to first target
+
+global1:                    ; =current PC (no effect on branch target labels)
+
+        .word   :-          ; refers to third target (backward ref)
+
+        .word   :--         ; refers to second target
+
+        .word   :---        ; refers to first target
+
+global2:                    ; = current PC
+
+        .word   :+++        ; refers to sixth target (forward ref)
+
+        .word   :++         ; refers to fifth target
+
+        .word   :+          ; refers to fourth target
+
+global3:                    ; = current PC
+
+ :                          ; fourth target
+        .word   :+++        ; refers to seventh target (forward ref)
+ :                          ; fifth target
+        .word   :++         ; refers to seventh target
+ :                          ; sixth target
+        .word   :+          ; refers to seventh target
+ :                          ; seventh target
+
+global4:                    ; = current PC
+
+        .word   :++         ; refers to ninth target
+
+        .word   :+          ; refers to eighth target
+ :                          ; eighth target
+        .word   :-          ; refers to eighth target
+
+        .word   :+          ; refers to ninth target
+ :                          ; ninth target
+        .word   :-          ; refers to ninth target
+
+        .word   :--         ; refers to eighth target
+ :                          ; tenth target
+        .word   :---------- ; refers to first target (backward ref)
+
+; ---------------------------------------
+; we'll duplicate the test, this time using the optional form of
+; branch target reference which omits the leading ":".
+; This is legal as long as the reference is the only element
+; of the expression field
+
+        .word   ++++++++++  ; refers to tenth (last) target (forward ref)
+ :                          ; first target
+        .word   -           ; refers to first target (backward ref)
+ :                          ; second target
+        .word   --          ; refers to first target
+ :                          ; third target
+        .word   ---         ; refers to first target
+
+global1a:                   ; =current PC (no effect on branch target labels)
+
+        .word   -           ; refers to third target (backward ref)
+
+        .word   --          ; refers to second target
+
+        .word   ---         ; refers to first target
+
+global2a:                   ; = current PC
+
+        .word   +++         ; refers to sixth target (forward ref)
+
+        .word   ++          ; refers to fifth target
+
+        .word   +           ; refers to fourth target
+
+global3a:                   ; = current PC
+
+ :                          ; fourth target
+        .word   +++         ; refers to seventh target (forward ref)
+ :                          ; fifth target
+        .word   ++          ; refers to seventh target
+ :                          ; sixth target
+        .word   +           ; refers to seventh target
+ :                          ; seventh target
+
+global4a:                   ; = current PC
+
+        .word   ++          ; refers to ninth target
+
+        .word   +           ; refers to eighth target
+ :                          ; eighth target
+        .word   -           ; refers to eighth target
+
+        .word   +           ; refers to ninth target
+ :                          ; ninth target
+        .word   -           ; refers to ninth target
+
+        .word   --          ; refers to eighth target
+ :                          ; tenth target
+        .word   ----------  ; refers to first target (backward ref)
+
+; ----------------------
+
+        .end

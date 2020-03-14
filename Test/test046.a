@@ -1,0 +1,386 @@
+; Hobby Cross-Assembler Test 046
+; Expressions\XLATE() and XLATE
+; ok: character set re-mapping
+
+; by Anton Treuenfels
+
+; first created: 03/07/04
+; last revised:  07/26/06
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; make sure we know what default is (it's ASCII, of course)
+; - only operands of "STRING" pseudo-op are automatically translated
+; - individual chars in expressions can be translated with XLATE()
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; test separation of opening parenthesis
+
+        .byte   xlate ('A')
+        .byte   xlate  ( 'B' )
+        .byte   xlate   (  'C'  )
+
+; test multiple opening parenthesis
+
+        .byte   xlate (('A'))
+        .byte   xlate  ( ( 'B' ) )
+        .byte   xlate   (  (  (  'C'  )  )  )
+
+; translate a single char to start
+
+        .xlate  "A=a"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; try it again with a different value
+
+        .xlate  "A=\$80"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; restore original value (in a schizophrenic way !)
+
+        .xlate  "\$41=\41H"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a range of chars to a single value
+
+        .xlate  "A-C=a"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; try it again with a different value
+
+        .xlate  "A-C=\$80"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+        .byte   xlate (('A'))
+        .byte   xlate  ( ( 'B' ) )
+        .byte   xlate   (  (  (  'C'  )  )  )
+
+; restore original values (first test of two ranges)
+; - note translation indices are always based on ASCII values,
+; whatever the current mapping is
+
+        .xlate  "A-C=A-C"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a range of characters to a range of characters
+
+        .xlate  "A-C=\$81-\$83"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a subrange back to original values
+; - after source range is exhausted, its last value is simply repeated
+; until the destination range is filled
+
+        .xlate  "A-C=A-B"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map that last char back to original
+
+        .xlate  "C=C"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a range of characters to a range of characters
+
+        .xlate  "A-C=1-3"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a subrange back to original values
+; - after destination range is complete, remainder of source range
+; is simply ignored
+
+        .xlate  "A-B=A-C"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map that last char back to original
+
+        .xlate  "C=C"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; re-map multiple values
+
+        .xlate  "A=a", "C=c"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; restore original values (again schizophrenic !)
+
+        .xlate  "\$43=\43H",  "\41H=\$41"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; -------------------------------
+
+; possible surprises
+; - space char must double-escaped to be recognized
+; - '=' char must be double-escaped to avoid interpretation as
+; field separator
+; - "-" range indicator char does not have to be escaped to be recognized
+; as either field value or range indicator
+
+        .xlate  "A=\\s", "B=\\=", "C=-"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; back to original values
+; - doesn't matter if this range is larger than re-mapped range !
+
+        .xlate  "A-Z=A-Z"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; possible surprises (2)
+; - escaping the range indicator ! (just to show we can)
+
+        .xlate  "A\-C=\\ \$2D\\="
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; back to original values
+
+        .xlate  "A-Z=A-Z"
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; possible surprises (3)
+; - space and "=" characters must be escaped to be recognized,
+; but "-" range indicator doesn't have to be (redux)
+
+        .xlate  "\\s=A", "\\==B", "-=C"
+
+; test it
+
+        .str    " =-"
+        .byte   xlate(' ')
+        .byte   xlate( '=' )
+        .byte   xlate(  '-'  )
+
+; back to original values
+; - using an alternative the '\s' sequence - the effect is still to
+; make sure the field it appears in does not end in whitespace
+
+        .xlate  "\\$20=\\s", "\\==\\=", "-=-"
+
+; test it
+
+        .str    " =-"
+        .byte   xlate(' ')
+        .byte   xlate( '=' )
+        .byte   xlate(  '-'  )
+
+; -------------------------------
+
+; map a range of characters to a range of characters (undelimited)
+
+        .xlate  A-C=1-3
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map a subrange back to original values
+; - after destination range is complete, remainder of source range
+; is simply ignored
+
+        .xlate  A-B=A-C
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; map that last char back to original
+
+        .xlate  C=C
+
+; test it
+
+        .str    "ABC"
+        .byte   xlate('A')
+        .byte   xlate( 'B' )
+        .byte   xlate(  'C'  )
+
+; -------------------------------
+
+; tests of xlate() using other numeric values
+
+ndxA    .equ    'A'
+ndxB    .equ    'B'
+ndxC    .equ    'C'
+
+        .byte   xlate(ndxA), xlate(ndxB), xlate(ndxC)
+        .byte   xlate(65), xlate(66), xlate(67)
+        .byte   xlate($41), xlate($42), xlate($43)
+        .byte   xlate('\41H'), xlate('\42H'), xlate('\43h')
+
+; map a range of characters to a range of characters
+
+        .xlate  "A-C=\$81-\$83"
+
+; test it
+
+        .byte   xlate(ndxA), xlate(ndxB), xlate(ndxC)
+        .byte   xlate(65), xlate(66), xlate(67)
+        .byte   xlate($41), xlate($42), xlate($43)
+        .byte   xlate('\41H'), xlate('\42H'), xlate('\43h')
+
+; back to orginal values
+
+        .xlate  "A-C=A-C"
+
+; test it
+
+        .byte   xlate(ndxA), xlate(ndxB), xlate(ndxC)
+        .byte   xlate(65), xlate(66), xlate(67)
+        .byte   xlate($41), xlate($42), xlate($43)
+        .byte   xlate('\41H'), xlate('\42H'), xlate('\43h')
+
+; test values greater than 256 (will be AND'ed with 255 (0xff))
+
+        .byte   xlate($41), xlate($42), xlate($43)
+        .byte   xlate($1041), xlate($1042), xlate($1043)
+        .byte   xlate($102041), xlate($102042), xlate($102043)
+        .byte   xlate($10203041), xlate($10203042), xlate($10203043)
+
+; tests of expressions
+
+        .byte   xlate('A' + 0), xlate('A' + 1), xlate('A' + 2)
+        .byte   xlate(0 + 'A'), xlate(1 + 'A'), xlate(2 + 'A')
+
+
+        .byte   xlate(ndxA + 0), xlate(ndxB + 0), xlate(ndxC + 0)
+        .byte   xlate(0 + ndxA), xlate(0 + ndxB), xlate(0 + ndxC)
+
+        .byte   xlate(fwdA), xlate(fwdB), xlate(fwdC)
+
+        .byte   xlate(xlate(fwdA)), xlate(xlate(fwdB)), xlate(xlate(fwdC))
+
+; forward-referenced
+
+fwdA    .equ    'A'
+fwdB    .equ    'B'
+fwdC    .equ    'C'
+
+; -------------------------------
+
+        .end

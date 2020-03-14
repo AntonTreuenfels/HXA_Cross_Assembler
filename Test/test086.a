@@ -1,0 +1,557 @@
+; Hobby Cross-Assembler Test 086
+; Expressions\Ternary Conditional
+; ok: "?:" Operator
+
+; by Anton Treuenfels
+
+; first created: 04/25/07
+; last revised:  12/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; backward reference labels
+
+b0      .equ    0
+b1      .equ    1
+b2      .equ    2
+b3      .equ    3
+b4      .equ    4
+b5      .equ    5
+
+b0$     .equ    ""
+b1$     .equ    "1"
+b2$     .equ    "2"
+b3$     .equ    "3"
+b4$     .equ    "4"
+
+; -------------------------------
+; pure numeric conditionals
+; -------------------------------
+
+        ; -------------------------------
+        ; test form: a ? b : c 
+        ; -------------------------------
+
+        ; literals
+
+        .byte   0 ? 1 : 2
+        .byte   1 ? 1 : 2
+
+        ; backward reference
+
+        .byte   b0 ? b1 : b2
+        .byte   b1 ? b1 : b2
+
+        ; forward reference
+
+        .byte   f0 ? f1 : f2
+        .byte   f1 ? f1 : f2
+
+        ; backward and forward reference expressions
+
+        .byte   b0 + f0 ? b1 + f1 : b2 + f2
+        .byte   b1 + f1 ? b1 + f1 : b2 + f2
+
+        ; literal condition, forward reference branches
+
+        .byte   0 ? f1 : f2
+        .byte   1 ? f1 : f2
+
+        ; backward reference condition, forward reference branch expressions
+
+        .byte   b0 ? f1 + 1 : f2 + 2
+        .byte   b1 ? f1 + 1 : f2 + 2
+
+        ; ------------------------------------
+        ; test form:    a ? b ? c : d : e
+        ; association:  a ? ( b ? c : d ) : e 
+        ; ------------------------------------
+
+        ; literals
+
+        .byte   0 ? 0 ? 2 : 3 : 4
+        .byte   0 ? 1 ? 2 : 3 : 4
+        .byte   1 ? 0 ? 2 : 3 : 4
+        .byte   1 ? 1 ? 2 : 3 : 4
+
+        ; backward reference
+
+        .byte   b0 ? b0 ? b2 : b3 : b4
+        .byte   b0 ? b1 ? b2 : b3 : b4
+        .byte   b1 ? b0 ? b2 : b3 : b4
+        .byte   b1 ? b1 ? b2 : b3 : b4
+
+        ; forward reference
+
+        .byte   f0 ? f0 ? f2 : f3 : f4
+        .byte   f0 ? f1 ? f2 : f3 : f4
+        .byte   f1 ? f0 ? f2 : f3 : f4
+        .byte   f1 ? f1 ? f2 : f3 : f4
+
+        ; backward and forward reference expressions
+
+        .byte b0+f0 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4
+        .byte b0+f0 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4
+        .byte b1+f1 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4
+        .byte b1+f1 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4
+
+        ; literal condition, forward reference branches
+
+        .byte   0 ? 0 ? f1 : f2 : f3
+        .byte   0 ? 1 ? f1 : f2 : f3
+        .byte   1 ? 0 ? f1 : f2 : f3
+        .byte   1 ? 1 ? f1 : f2 : f3
+
+        ; backward reference condition, forward reference branch expressions
+
+        .byte   b0 ? b0 ? f1 + 1 : f2 + 2 : f3 + 3
+        .byte   b0 ? b1 ? f1 + 1 : f2 + 2 : f3 + 3
+        .byte   b1 ? b0 ? f1 + 1 : f2 + 2 : f3 + 3
+        .byte   b1 ? b1 ? f1 + 1 : f2 + 2 : f3 + 3
+
+        ; ------------------------------------
+        ; test form:    a ? b : c ? d : e
+        ; association:  a ? b : ( c ? d : e )
+        ; ------------------------------------
+
+        ; literals
+
+        .byte   0 ? 2 : 0 ? 3 : 4
+        .byte   0 ? 2 : 1 ? 3 : 4
+        .byte   1 ? 2 : 0 ? 3 : 4
+        .byte   1 ? 2 : 1 ? 3 : 4
+
+        ; backward reference
+
+        .byte   b0 ? b2 : b0 ? b3 : b4
+        .byte   b0 ? b2 : b1 ? b3 : b4
+        .byte   b1 ? b2 : b0 ? b3 : b4
+        .byte   b1 ? b2 : b1 ? b3 : b4
+
+        ; forward reference
+
+        .byte   f0 ? f2 : f0 ? f3 : f4
+        .byte   f0 ? f2 : f1 ? f3 : f4
+        .byte   f1 ? f2 : f0 ? f3 : f4
+        .byte   f1 ? f2 : f1 ? f3 : f4
+
+        ; backward and forward reference expressions
+
+        .byte b0+f0 ? b2+f2 : b0+f0 ? b3+f3 : b4+f4
+        .byte b0+f0 ? b2+f2 : b1+f1 ? b3+f3 : b4+f4
+        .byte b1+f1 ? b2+f2 : b0+f0 ? b3+f3 : b4+f4
+        .byte b1+f1 ? b2+f2 : b1+f1 ? b3+f3 : b4+f4
+
+        ; literal condition, forward reference branches
+
+        .byte   0 ? f1 : 0 ? f2 : f3
+        .byte   0 ? f1 : 1 ? f2 : f3
+        .byte   1 ? f1 : 0 ? f2 : f3
+        .byte   1 ? f1 : 1 ? f2 : f3
+
+        ; backward reference condition, forward reference branch expressions
+
+        .byte   b0 ? f1 + 1 : b0 ? f2 + 2 : f3 + 3
+        .byte   b0 ? f1 + 1 : b1 ? f2 + 2 : f3 + 3
+        .byte   b1 ? f1 + 1 : b0 ? f2 + 2 : f3 + 3
+        .byte   b1 ? f1 + 1 : b1 ? f2 + 2 : f3 + 3
+
+        ; -----------------------------------------------
+        ; test form:    a ? b ? c ? d : e : f : g
+        ; association:  a ? ( b ? ( c ? d : e ) : f : g )
+        ; -----------------------------------------------
+
+        ; literals
+
+        .byte   0 ? 0 ? 0 ? 2 : 3 : 4 : 5
+        .byte   0 ? 0 ? 1 ? 2 : 3 : 4 : 5
+        .byte   0 ? 1 ? 0 ? 2 : 3 : 4 : 5
+        .byte   0 ? 1 ? 1 ? 2 : 3 : 4 : 5
+        .byte   1 ? 0 ? 0 ? 2 : 3 : 4 : 5
+        .byte   1 ? 0 ? 1 ? 2 : 3 : 4 : 5
+        .byte   1 ? 1 ? 0 ? 2 : 3 : 4 : 5
+        .byte   1 ? 1 ? 1 ? 2 : 3 : 4 : 5
+
+        ; backward reference
+
+        .byte   b0 ? b0 ? b0 ? b2 : b3 : b4 : b5
+        .byte   b0 ? b0 ? b1 ? b2 : b3 : b4 : b5
+        .byte   b0 ? b1 ? b0 ? b2 : b3 : b4 : b5
+        .byte   b0 ? b1 ? b1 ? b2 : b3 : b4 : b5
+        .byte   b1 ? b0 ? b0 ? b2 : b3 : b4 : b5
+        .byte   b1 ? b0 ? b1 ? b2 : b3 : b4 : b5
+        .byte   b1 ? b1 ? b0 ? b2 : b3 : b4 : b5
+        .byte   b1 ? b1 ? b1 ? b2 : b3 : b4 : b5
+
+        ; forward reference
+
+        .byte   f0 ? f0 ? f0 ? f2 : f3 : f4 : f5
+        .byte   f0 ? f0 ? f1 ? f2 : f3 : f4 : f5
+        .byte   f0 ? f1 ? f0 ? f2 : f3 : f4 : f5
+        .byte   f0 ? f1 ? f1 ? f2 : f3 : f4 : f5
+        .byte   f1 ? f0 ? f0 ? f2 : f3 : f4 : f5
+        .byte   f1 ? f0 ? f1 ? f2 : f3 : f4 : f5
+        .byte   f1 ? f1 ? f0 ? f2 : f3 : f4 : f5
+        .byte   f1 ? f1 ? f1 ? f2 : f3 : f4 : f5
+
+        ; backward and forward reference expressions
+
+        .byte   b0+f0 ? b0+f0 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f0 ? b0+f0 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f0 ? b1+f1 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f0 ? b1+f1 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f1 ? b0+f0 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f1 ? b0+f0 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f1 ? b1+f1 ? b0+f0 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+        .byte   b0+f1 ? b1+f1 ? b1+f1 ? b2+f2 : b3+f3 : b4+f4 : b5+f5
+
+        ; literal condition, forward reference branches
+
+        .byte   0 ? 0 ? 0 ? f2 : f3 : f4 : f5
+        .byte   0 ? 0 ? 1 ? f2 : f3 : f4 : f5
+        .byte   0 ? 1 ? 0 ? f2 : f3 : f4 : f5
+        .byte   0 ? 1 ? 1 ? f2 : f3 : f4 : f5
+        .byte   1 ? 0 ? 0 ? f2 : f3 : f4 : f5
+        .byte   1 ? 0 ? 1 ? f2 : f3 : f4 : f5
+        .byte   1 ? 1 ? 0 ? f2 : f3 : f4 : f5
+        .byte   1 ? 1 ? 1 ? f2 : f3 : f4 : f5
+
+        ; backward reference condition, forward reference branch expression
+
+        .byte   b0 ? b0 ? b0 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b0 ? b0 ? b1 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b0 ? b1 ? b0 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b0 ? b1 ? b1 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b1 ? b0 ? b0 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b1 ? b0 ? b1 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b1 ? b1 ? b0 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+        .byte   b1 ? b1 ? b1 ? f2 + 2 : f3 + 3 : f4 + 4 : f5 + 5
+
+        ; -----------------------------------------------
+        ; test form:    a ? b ? c : d : e ? f : g
+        ; association:  a ? ( b ? c : d ) : ( e ? f : g )
+        ; -----------------------------------------------
+
+        ; literals
+
+        .byte   0 ? 0 ? 2 : 3 : 0 ? 4 : 5
+        .byte   0 ? 0 ? 2 : 3 : 1 ? 4 : 5
+        .byte   0 ? 1 ? 2 : 3 : 0 ? 4 : 5
+        .byte   0 ? 1 ? 2 : 3 : 1 ? 4 : 5
+        .byte   1 ? 0 ? 2 : 3 : 0 ? 4 : 5
+        .byte   1 ? 0 ? 2 : 3 : 1 ? 4 : 5
+        .byte   1 ? 1 ? 2 : 3 : 0 ? 4 : 5
+        .byte   1 ? 1 ? 2 : 3 : 1 ? 4 : 5
+
+        ; backward reference
+
+        .byte   b0 ? b0 ? b2 : b3 : b0 ? b4 : b5
+        .byte   b0 ? b0 ? b2 : b3 : b1 ? b4 : b5
+        .byte   b0 ? b1 ? b2 : b3 : b0 ? b4 : b5
+        .byte   b0 ? b1 ? b2 : b3 : b1 ? b4 : b5
+        .byte   b1 ? b0 ? b2 : b3 : b0 ? b4 : b5
+        .byte   b1 ? b0 ? b2 : b3 : b1 ? b4 : b5
+        .byte   b1 ? b1 ? b2 : b3 : b0 ? b4 : b5
+        .byte   b1 ? b1 ? b2 : b3 : b1 ? b4 : b5
+
+        ; forward reference
+
+        .byte   f0 ? f0 ? f2 : f3 : f0 ? f4 : f5
+        .byte   f0 ? f0 ? f2 : f3 : f1 ? f4 : f5
+        .byte   f0 ? f1 ? f2 : f3 : f0 ? f4 : f5
+        .byte   f0 ? f1 ? f2 : f3 : f1 ? f4 : f5
+        .byte   f1 ? f0 ? f2 : f3 : f0 ? f4 : f5
+        .byte   f1 ? f0 ? f2 : f3 : f1 ? f4 : f5
+        .byte   f1 ? f1 ? f2 : f3 : f0 ? f4 : f5
+        .byte   f1 ? f1 ? f2 : f3 : f1 ? f4 : f5
+
+        ; backward and forward reference expressions
+
+        .byte   b0+f0 ? b0+f0 ? b2+f2 : b3+f3 : b0+f0 ? b4+f4 : b5+f5
+        .byte   b0+f0 ? b0+f0 ? b2+f2 : b3+f3 : b1+f1 ? b4+f4 : b5+f5
+        .byte   b0+f0 ? b1+f1 ? b2+f2 : b3+f3 : b0+f0 ? b4+f4 : b5+f5
+        .byte   b0+f0 ? b1+f1 ? b2+f2 : b3+f3 : b1+f1 ? b4+f4 : b5+f5
+        .byte   b1+f1 ? b0+f0 ? b2+f2 : b3+f3 : b0+f0 ? b4+f4 : b5+f5
+        .byte   b1+f1 ? b0+f0 ? b2+f2 : b3+f3 : b1+f1 ? b4+f4 : b5+f5
+        .byte   b1+f1 ? b1+f1 ? b2+f2 : b3+f3 : b0+f0 ? b4+f4 : b5+f5
+        .byte   b1+f1 ? b1+f1 ? b2+f2 : b3+f3 : b1+f1 ? b4+f4 : b5+f5
+
+        ; literal condition, forward reference branches
+
+        .byte   0 ? 0 ? f2 : f3 : 0 ? f4 : f5
+        .byte   0 ? 0 ? f2 : f3 : 1 ? f4 : f5
+        .byte   0 ? 1 ? f2 : f3 : 0 ? f4 : f5
+        .byte   0 ? 1 ? f2 : f3 : 1 ? f4 : f5
+        .byte   1 ? 0 ? f2 : f3 : 0 ? f4 : f5
+        .byte   1 ? 0 ? f2 : f3 : 1 ? f4 : f5
+        .byte   1 ? 1 ? f2 : f3 : 0 ? f4 : f5
+        .byte   1 ? 1 ? f2 : f3 : 1 ? f4 : f5
+
+        ; backward reference condition, forward reference branch expression
+
+        .byte   b0 ? b0 ? f2 + 2 : f3 + 3 : b0 ? f4 + b4 : f5 + 5
+        .byte   b0 ? b0 ? f2 + 2 : f3 + 3 : b1 ? f4 + b4 : f5 + 5
+        .byte   b0 ? b1 ? f2 + 2 : f3 + 3 : b0 ? f4 + b4 : f5 + 5
+        .byte   b0 ? b1 ? f2 + 2 : f3 + 3 : b1 ? f4 + b4 : f5 + 5
+        .byte   b1 ? b0 ? f2 + 2 : f3 + 3 : b0 ? f4 + b4 : f5 + 5
+        .byte   b1 ? b0 ? f2 + 2 : f3 + 3 : b1 ? f4 + b4 : f5 + 5
+        .byte   b1 ? b1 ? f2 + 2 : f3 + 3 : b0 ? f4 + b4 : f5 + 5
+        .byte   b1 ? b1 ? f2 + 2 : f3 + 3 : b1 ? f4 + b4 : f5 + 5
+
+        ; -------------------------------
+        ; altering precedence
+        ; -------------------------------
+
+        .byte   0 + 1 ? 2 + 3 : 4 + 5       ; 05
+        .byte   0 + ( 1 ? 2 + 3 : 4 + 5 )   ; 05
+        .byte   ( 0 + 1 ? 2 + 3 : 4 ) + 5   ; 0A
+        .byte   0 + ( 1 ? 2 + 3 : 4 ) + 5   ; 0A
+
+        .byte   1 + 0 ? 3 + 2 : 5 + 4       ; 05
+        .byte   1 + ( 0 ? 3 + 2 : 5 + 4 )   ; 0A
+        .byte   ( 1 + 0 ? 3 + 2 : 5 ) + 4   ; 09
+        .byte   1 + ( 0 ? 3 + 2 : 5 ) + 4   ; 0A
+
+; -------------------------------
+; pure string conditionals
+; -------------------------------
+
+        ; -------------------------------
+        ; test form: a ? b : c 
+        ; -------------------------------
+
+        ; literals
+
+        .str    ""  ? "1" : "2"
+        .str    "1" ? "1" : "2"
+
+        ; backward reference
+
+        .str    b0$ ? b1$ : b2$
+        .str    b1$ ? b1$ : b2$
+
+        ; ------------------------------------
+        ; test form:    a ? b ? c : d : e
+        ; association:  a ? ( b ? c : d ) : e 
+        ; ------------------------------------
+
+        ; literals
+
+        .str    "" ? "" ? "2" : "3" : "4"
+        .str    "" ? "1" ? "2" : "3" : "4"
+        .str    "1" ? "" ? "2" : "3" : "4"
+        .str    "1" ? "1" ? "2" : "3" : "4"
+
+        ; backward reference
+
+        .str    b0$ ? b0$ ? b2$ : b3$ : b4$
+        .str    b0$ ? b1$ ? b2$ : b3$ : b4$
+        .str    b1$ ? b0$ ? b2$ : b3$ : b4$
+        .str    b1$ ? b1$ ? b2$ : b3$ : b4$
+
+; ------------------------------------
+; string condition, numeric branches
+; ------------------------------------
+
+        ; -------------------------------
+        ; test form: a ? b : c 
+        ; -------------------------------
+
+        ; literals
+
+        .byte   "" ? 1 : 2
+        .byte   "1" ? 1 : 2
+
+        ; backward reference
+
+        .byte   b0$ ? b1 : b2
+        .byte   b1$ ? b1 : b2
+
+        ; forward reference
+
+        .byte   f0$ ? f1 : f2
+        .byte   f1$ ? f1 : f2
+
+        ; backward and forward reference expressions
+
+        .byte   b0$ f0$ ? b1 + f1 : b2 + f2
+        .byte   b1$ f1$ ? b1 + f1 : b2 + f2
+
+        ; literal condition, forward reference branches
+
+        .byte   "" ? f1 : f2
+        .byte   "1" ? f1 : f2
+
+        ; backward reference condition, forward reference branch expressions
+
+        .byte   b0$ ? f1 + 1 : f2 + 2
+        .byte   b1$ ? f1 + 1 : f2 + 2
+
+        ; ------------------------------------
+        ; test form:    a ? b ? c : d : e
+        ; association:  a ? ( b ? c : d ) : e 
+        ; ------------------------------------
+
+        ; literals
+
+        .byte   "" ? "" ? 2 : 3 : 4
+        .byte   "" ? "1" ? 2 : 3 : 4
+        .byte   "1" ? "" ? 2 : 3 : 4
+        .byte   "1" ? "1" ? 2 : 3 : 4
+
+        ; backward reference
+
+        .byte   b0$ ? b0$ ? b2 : b3 : b4
+        .byte   b0$ ? b1$ ? b2 : b3 : b4
+        .byte   b1$ ? b0$ ? b2 : b3 : b4
+        .byte   b1$ ? b1$ ? b2 : b3 : b4
+
+        ; forward reference
+
+        .byte   f0$ ? f0$ ? f2 : f3 : f4
+        .byte   f0$ ? f1$ ? f2 : f3 : f4
+        .byte   f1$ ? f0$ ? f2 : f3 : f4
+        .byte   f1$ ? f1$ ? f2 : f3 : f4
+
+        ; ------------------------------------
+        ; test form:    a ? b : c ? d : e
+        ; association:  a ? b : ( c ? d : e )
+        ; ------------------------------------
+
+        ; literals
+
+        .byte   "" ? 2 : "" ? 3 : 4
+        .byte   "" ? 2 : "1" ? 3 : 4
+        .byte   "1" ? 2 : "" ? 3 : 4
+        .byte   "1" ? 2 : "1" ? 3 : 4
+
+        ; backward reference
+
+        .byte   b0$ ? b2 : b0$ ? b3 : b4
+        .byte   b0$ ? b2 : b1$ ? b3 : b4
+        .byte   b1$ ? b2 : b0$ ? b3 : b4
+        .byte   b1$ ? b2 : b1$ ? b3 : b4
+
+        ; forward reference
+
+        .byte   f0$ ? f2 : f0$ ? f3 : f4
+        .byte   f0$ ? f2 : f1$ ? f3 : f4
+        .byte   f1$ ? f2 : f0$ ? f3 : f4
+        .byte   f1$ ? f2 : f1$ ? f3 : f4
+
+; -------------------------------
+; pure regex conditionals
+; -------------------------------
+
+        ; -------------------------------
+        ; test form: a ? b : c 
+        ; -------------------------------
+
+        ; literals
+
+        .byte   "1" ~ /0/ ? "2" ~ /2/ : "2" ~ /3/
+        .byte   "1" ~ /1/ ? "2" ~ /2/ : "2" ~ /3/
+
+        .byte   "1" ~ (/0/) ? "2" ~ (/2/) : "2" ~ (/3/)
+        .byte   ("1" ~ /1/) ? ("2" ~ /2/) : ("2" ~ /3/)
+
+        ; backward reference
+
+        .byte   b1$ ~ /0/ ? b2$ ~ /2/ : b2$ ~ /3/
+        .byte   b1$ ~ /1/ ? b2$ ~ /2/ : b2$ ~ /3/
+
+        ; forward reference
+
+        .byte   f1$ ~ /0/ ? f2$ ~ /2/ : f2$ ~ /3/
+        .byte   f1$ ~ /1/ ? f2$ ~ /2/ : f2$ ~ /3/
+
+; -------------------------------
+; parenthesized conditionals
+; -------------------------------
+
+        .byte   "1" == (0 ? "1" : "2")
+        .byte   "1" == (1 ? "1" : "2")
+
+        .byte   (0 ? "1" : "2") == "1"
+        .byte   (1 ? "1" : "2") == "1"
+
+        .byte   "0" ~ ( 0 ? /0/ : /1/ )
+        .byte   "0" ~ ( 1 ? /0/ : /1/ )
+
+        .byte   (0 ? "1" : "2") ~ /1/
+        .byte   (1 ? "1" : "2") ~ /1/
+
+; -------------------------------
+; mixed string conditionals
+; -------------------------------
+
+        ; the 'string' pseudo-op converts numbers to one-char strings
+
+        .string 0 ? "1" : "2"
+        .string 0 ? "1" : 2
+        .string 0 ? 1 : "2"
+        .string 0 ? 1 : 2
+
+        .string 1 ? "1" : "2"
+        .string 1 ? "1" : 2
+        .string 1 ? 1 : "2"
+        .string 1 ? 1 : 2
+
+        .string "" ? "1" : "2"
+        .string "" ? "1" : 2
+        .string "" ? 1 : "2"
+        .string "" ? 1 : 2
+
+        .string "1" ? "1" : "2"
+        .string "1" ? "1" : 2
+        .string "1" ? 1 : "2"
+        .string "1" ? 1 : 2
+
+; -------------------------------
+; labels with colon suffixes
+; -------------------------------
+
+        ; backward and forward reference expressions
+
+        .byte   b0: + f0: ? b1: + f1: : b2: + f2:
+        .byte   b1: + f1: ? b1: + f1: : b2: + f2:
+
+        .byte   b0:+f0:?b1:+f1::b2:+f2:
+        .byte   b1:+f1:?b1:+f1::b2:+f2:
+
+        ; backward reference (".str" requires constant value)
+
+        .str    b0$: ? b1$: : b2$:
+        .str    b1$: ? b1$: : b2$:
+
+        .str    b0$:?b1$::b2$:
+        .str    b1$:?b1$::b2$:
+
+; -------------------------------
+
+        ; forward reference labels
+
+f2$     .equ    "2"
+f1$     .equ    "1"
+f0$     .equ    ""
+
+f5      .equ    5
+f4      .equ    4
+f3      .equ    3
+f2      .equ    2
+f1      .equ    1
+f0      .equ    0
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,107 @@
+; Hobby Cross-Assembler Test 054
+; Expressions\All Label Forms
+; ok: label recognition; all forms
+
+; by Anton Treuenfels
+
+; first created: 05/27/03
+; last revised:  06/11/10
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston autos       ; list auto-generated symbols
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; try every allowed user form
+
+label1  .word   label1      ; global label
+
+]var1   .word   ]var1       ; variable label
+
+@local1 .word   @local1     ; local label
+
+ -                          ; backward target label
+        .word   :+
+ +                          ; forward target label
+        .word   :-
+
+        .word   :+
+ +-                         ; forward/backward target label
+        .word   :-                                    
+
+        .word   :+
+ -+                         ; backward/forward target label
+        .word   :-
+
+; try every allowed user form (again)
+
+label2:                     ; global label (local label values re-set)
+        .word   label2:
+
+        .word   ]var1:      ; variable label (same label, old value)
+
+]var1:                      ; variable label (same label, new value)
+        .word   ]var1:
+
+@local1:                    ; local label (new label)
+        .word   @local1:
+ -                          ; backward label
+        .word   :+
+ +                          ; forward label
+        .word   :-
+
+        .word   :+
+ +-                         ; forward/backward label
+        .word   :-
+
+        .word   :+
+ -+                         ; backward/forward label
+        .word   :-
+
+; try every allowed user form again (additional name forms)
+
+u_label .word   p.label     ; global label (local labels re-set)
+
+]var.1  .word   ]var.1      ; variable label
+
+@local.1 .word   @local.1   ; local label
+
+ -                          ; branch target label
+        .word   +
+ +                          ; branch target label
+        .word   ---
+ 
+; try every allowed user form again (check label name re-use)
+
+p.label:                    ; global label (local labels re-set)
+        .word   p.u_label
+
+        .word   ]var.1      ; variable label (same label, old value)
+
+]var.1:                     ; variable label (same label, new value)
+        .word   ]var.1
+
+@local.1:                   ; local label (new label)
+        .word   @local.1
+
+ -                          ; branch target label
+        .word   +
+ +                          ; branch target label
+        .word   ----
+ 
+; -------------------------------
+
+; 'end' psop can be labeled (in monolithic programs like this one)
+
+p.u_label   .end                ; global label

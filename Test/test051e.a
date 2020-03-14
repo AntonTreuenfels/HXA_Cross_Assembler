@@ -1,0 +1,45 @@
+; Hobby Cross-Assembler Error Test 051e
+; Expressions\Local Labels
+; error: missing local label (backward ref)
+
+; by Anton Treuenfels
+
+; first created: 06/12/03
+; last revised:  06/12/03
+
+; warning(s):
+
+; error(s): 1
+; - name not found
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos   ; "auto-generated" labels shown in symbol listing
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+@local1                     ; =current value of PC
+
+        .word   global1
+
+        .word   @local1     ; refers to first occurance (backward ref)
+
+global1:                    ; global clears local label(s)
+
+        .word   @local1     ; not found; caught on second pass
+
+        .word   global1
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,85 @@
+; Hobby Cross-Assembler Error Test 085e
+; Expressions\Logical Short Circuit
+; error: unresolvable "&&" and "||" Operators
+
+; by Anton Treuenfels
+
+; first created: 02/06/10
+; last revised:  03/10/10
+
+; warning(s): 0
+
+; error(s): 20
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; non-existent references (numeric expressions)
+
+        .byte   0 && unKnown            ; 0
+        .byte   1 && unKnown            ; unresolvable
+        .byte   0 || unKnown            ; unresolvable
+        .byte   1 || unKnown            ; 1
+
+        .byte   0 && unKnown && 0       ; 0
+        .byte   0 && unKnown && 1       ; 0
+        .byte   1 && unKnown && 0       ; unresolvable
+        .byte   1 && unKnown && 1       ; unresolvable
+
+        .byte   0 || unKnown && 0       ; unresolvable
+        .byte   0 || unKnown && 1       ; unresolvable
+        .byte   1 || unKnown && 0       ; 0
+        .byte   1 || unKnown && 1       ; 1
+
+        .byte   0 && unKnown || 0       ; 0
+        .byte   0 && unKnown || 1       ; 1
+        .byte   1 && unKnown || 0       ; unresolvable
+        .byte   1 && unKnown || 1       ; unresolvable
+
+        .byte   0 || unKnown || 0       ; unresolvable
+        .byte   0 || unKnown || 1       ; unresolvable
+        .byte   1 || unKnown || 0       ; 1
+        .byte   1 || unKnown || 1       ; 1
+
+        ; non-existent references (string expressions)
+
+        .byte   "" && unKnown$          ; 0
+        .byte   "1" && unKnown$         ; unresolvable
+        .byte   "" || unKnown$          ; unresolvable
+        .byte   "1" || unKnown$         ; 1
+
+        .byte   "" && unKnown$ && ""    ; 0
+        .byte   "" && unKnown$ && "1"   ; 0
+        .byte   "1" && unKnown$ && ""   ; unresolvable
+        .byte   "1" && unKnown$ && "1"  ; unresolvable
+
+        .byte   "" || unKnown$ && ""    ; unresolvable
+        .byte   "" || unKnown$ && "1"   ; unresolvable
+        .byte   "1" || unKnown$ && ""   ; 1
+        .byte   "1" || unKnown$ && "1"  ; 1
+
+        .byte   "" && unKnown$ || ""    ; 0
+        .byte   "" && unKnown$ || "1"   ; 1
+        .byte   "1" && unKnown$ || ""   ; unresolvable
+        .byte   "1" && unKnown$ || "1"  ; unresolvable
+
+        .byte   "" || unKnown$ || ""    ; unresolvable
+        .byte   "" || unKnown$ || "1"   ; unresolvable
+        .byte   "1" || unKnown$ || ""   ; 1
+        .byte   "1" || unKnown$ || "1"  ; 1
+
+; -------------------------------
+
+        .end

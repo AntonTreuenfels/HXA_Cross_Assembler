@@ -1,0 +1,183 @@
+; Hobby Cross-Assembler Test 083
+; Expressions\Regular Expression Operators
+; ok: logical
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  05/15/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   "123" ~ /123/
+        .byte   "123" !~ /123/
+        .byte   "123" ~ /abc/
+        .byte   "123" !~ /abc/
+
+        .byte   "123"~/123/,"123"!~/123/
+        .byte   "123"~/abc/, "123"!~/abc/
+
+        .byte   "123" ~ /123/i
+        .byte   "123" !~ /123/i
+        .byte   "123" ~ /abc/i
+        .byte   "123" !~ /abc/i
+
+        .byte   "123"~/123/i ,"123"!~/123/i
+        .byte   "123"~/abc/i , "123"!~/abc/i
+
+        .byte   "abc" ~ /abc/
+        .byte   "abc" ~ /ABC/
+        .byte   "ABC" ~ /abc/
+        .byte   "ABC" ~ /ABC/
+
+        .byte   "abc" ~ /abc/,"abc" ~ /ABC/
+        .byte   "ABC" ~ /abc/, "ABC" ~ /ABC/
+
+        .byte   "abc" ~ /abc/i
+        .byte   "abc" ~ /ABC/i
+        .byte   "ABC" ~ /abc/i
+        .byte   "ABC" ~ /ABC/i
+
+        .byte   "abc" ~ /abc/i,"abc" ~ /ABC/i
+        .byte   "ABC" ~ /abc/i, "ABC" ~ /ABC/i
+
+        .byte   "abc" ~ /ghi/i
+        .byte   "abc" ~ /GHI/i
+        .byte   "ABC" ~ /ghi/i
+        .byte   "ABC" ~ /GHI/i
+
+        .byte   "abc" ~ /ghi/i ,"abc" ~ /GHI/i
+        .byte   "ABC" ~ /ghi/i , "ABC" ~ /GHI/i
+
+        .byte   "abc" ~ /a/
+        .byte   "abc" ~ /b/i
+        .byte   "abc" ~ /c/
+        .byte   "abc" ~ /d/i
+
+        .byte   "abc"~/a/, "abc"~/b/i
+        .byte   "abc" ~ /c/, "abc" ~ /d/i
+
+; -------------------------------
+
+; commas (field split characters) in regular expressions
+
+        .byte   "abc,def" ~ /b*,d*/
+        .byte   "abc,def" !~ /a*,/
+        .byte   "abc,def" ~ /,*e*/
+        .byte   "abc,def" !~ /,/
+
+; -------------------------------
+
+; character classes
+
+        .byte   "abc" ~ /[ac]/
+        .byte   ( "abc" ) !~ /[ac]/
+        .byte   "abc" ~ ( /[ac]/i )
+        .byte   ( "abc" ) !~ ( /[ac]/i )
+
+        .byte   "abc"~/[ac]/, ("abc")!~/[ac]/
+        .byte   ("abc") ~ /[ac]/i,("abc") !~ (/[ac]/i)
+
+        .byte   "abc" ~ /[da]/
+        .byte   "abc" !~ /[da]/
+        .byte   "abc" ~ /[da]/i
+        .byte   "abc" !~ /[da]/i
+
+        .byte   "abc"~/[da]/, "abc"!~/[da]/
+        .byte   "abc" ~ /[da]/i,"abc" !~ /[da]/i
+
+        .byte   "abc" ~ /[dx]/
+        .byte   "abc" !~ /[dx]/
+        .byte   "abc" ~ /[dx]/i
+        .byte   "abc" !~ /[dx]/i
+
+        .byte   "abc"~/[dx]/, "abc"!~/[dx]/
+        .byte   "abc" ~ /[dx]/i,"abc" !~ /[dx]/i
+
+; -------------------------------
+
+; parenthesized grouping in regular expressions
+
+quoted$     =   "\"A quoted string\""
+unquoted$   =   "An unquoted string"
+
+        .byte   quoted$ ~  /^"([^"\\]|\\.)*"/
+        .byte   quoted$ !~ /^"([^"\\]|\\.)*"/
+        .byte   unquoted$ ~  /^"([^"\\]|\\.)*"/
+        .byte   unquoted$ !~ /^"([^"\\]|\\.)*"/
+
+; -------------------------------
+
+; specified count grouping in regular expressions
+
+        .byte   "ab" ~ /a{3}/
+        .byte   "aab" ~ /a{3}/
+        .byte   "aaab" ~ /a{3}/
+        .byte   "aabab" ~ /a{3}/
+        .byte   "aaabab" ~ /a{3}/
+        .byte   "aaaabab" ~ /a{3}/
+
+        .byte   "ab" ~ /a{2,}/
+        .byte   "aab" ~ /a{2,}/
+        .byte   "aaab" ~ /a{2,}/
+        .byte   "aabab" ~ /a{2,}/
+        .byte   "aaabab" ~ /a{2,}/
+        .byte   "aaaabab" ~ /a{2,}/
+
+        .byte   "ab" ~ /a{4,5}/
+        .byte   "aab" ~ /a{4,5}/
+        .byte   "aaab" ~ /a{4,5}/
+        .byte   "aabab" ~ /a{4,5}/
+        .byte   "aaabab" ~ /a{4,5}/
+        .byte   "aaaabab" ~ /a{4,5}/
+
+; -------------------------------
+
+; escape codes
+
+        .byte   "/" ~ /\//
+        .byte   "\t" ~ /\t/
+        .byte   "\$80" ~ /\$80/
+        .byte   "\80H" ~ /\80h/
+        .byte   "/" ~ /\//i
+        .byte   "\t" ~ /\t/i
+        .byte   "\$80" ~ /\$80/i
+        .byte   "\80H" ~ /\80h/i
+
+        .byte   "hello\n" ~ /HELLO\n/i
+
+        .byte   "Embedded spaces\shere" ~ /embedded\sspaces here/i
+
+; -------------------------------
+
+; backward reference
+
+str1$   =   "123"
+
+        .byte   str1$ ~ /123/
+        .byte   str1$ !~ /123/
+        .byte   str1$ ~ /abc/
+        .byte   str1$ !~ /abc/
+
+; forward reference
+
+        .byte   str2$ ~ /123/
+        .byte   str2$ !~ /123/
+        .byte   str2$ ~ /abc/
+        .byte   str2$ !~ /abc/
+
+str2$   =   "123"
+
+; -------------------------------
+
+        .end

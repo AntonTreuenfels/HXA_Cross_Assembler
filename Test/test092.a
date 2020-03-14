@@ -1,0 +1,158 @@
+; Hobby Cross-Assembler Test 092
+; Expressions\Assign Label Value
+; ok: "EQU" psop
+
+; by Anton Treuenfels
+
+; first created: 04/20/04
+; last revised:  05/07/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston autos
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; numeric equates
+
+label1  .equ    1
+]label2 .equ    2
+@label3 .equ    3
+
+        .byte   label1      ; 1
+        .byte   ]label2     ; 2
+        .byte   @label3     ; 3
+
+]label4 .equ    ]label2 * 2
+@label5 .equ    ]label2 + @label3
+
+        .byte   ]label4     ; 4
+        .byte   @label5     ; 5
+
+label6  .equ    ]label2 + ]label4
+label7  .equ    ]label4 * 2 - label1
+label8  .equ    ]label2 * 2 + ]label4
+
+        .byte   label6      ; 6
+        .byte   label7      ; 7
+        .byte   label8      ; 8
+
+    ; duplicate assignment
+
+label6  .equ    ]label2 + ]label4
+label7  .equ    ]label4 * 2 - label1
+label8  .equ    ]label2 * 2 + ]label4
+
+        .byte   label6      ; 6
+        .byte   label7      ; 7
+        .byte   label8      ; 8
+
+; re-assignment of previously used labels
+; "label4" is same label as before
+; "@label5" is a new local label (globals erased previous locals)
+
+]label4 .equ    label8 + 1
+@label5 .equ    ]label4 + 1
+
+        .byte   ]label4     ; 9
+        .byte   @label5     ; 10
+
+; -------------------------------
+
+; forward reference
+
+        .byte   forward1  == forward2 
+        .byte   forward1  != forward2 
+        .byte   forward1  >= forward2 
+        .byte   forward1  <= forward2 
+        .byte   forward1  < forward2 
+        .byte   forward1  > forward2 
+
+forward1    .equ    1
+forward2    .equ    2
+
+; -------------------------------
+
+; string equates
+
+label1$  .equ    "1"
+]label2$ .equ    "2"
+@label3$ .equ    "3"
+
+        .str   label1$
+        .str   ]label2$
+        .str   @label3$
+
+]label4$ .equ   "ab"
+@label5$ .equ   "cd"
+
+        .str   ]label4$
+        .str   @label5$
+
+label6$  .equ   "\$81"              ; should be printable in listing file
+label7$  .equ   "\$91\$92"
+label8$  .equ   "\0A1H\0A2H\0A3H"
+
+        .str   label6$
+        .str   label7$
+        .str   label8$
+
+    ; duplicate assignment        
+
+label6$  .equ   "\$81"              ; should be printable in listing file
+label7$  .equ   "\$91\$92"
+label8$  .equ   "\0A1H\0A2H\0A3H"
+
+        .str   label6$
+        .str   label7$
+        .str   label8$
+
+; re-assignment of previously used labels
+; "label4$" is same label as before
+; "@label5$" is a new local label (globals erased previous locals)
+
+]label4$ .equ    "ef"
+@label5$ .equ    "gh"
+
+        .str   ]label4$    ; 9
+        .str   @label5$    ; 10
+
+; a long string designed to test how its value is shown in the listing
+
+]long$  .equ    "012345abcdefghijklmnopqrstuvwxyz"
+]long$  .equ    ]long$ ]long$ ","
+]long$  .equ    ]long$ " " ]long$
+
+        .str    ]long$
+
+; short and long local labels
+; - tests internal name generation format and limits
+
+@s$     =       "short label"
+@longlabel$ =   "long label"
+
+; -------------------------------
+
+; forward reference to a string label is possible only in a numeric context
+
+        .byte   forward1$ == forward2$
+        .byte   forward1$ != forward2$
+        .byte   forward1$ >= forward2$
+        .byte   forward1$ <= forward2$
+        .byte   forward1$ < forward2$
+        .byte   forward1$ > forward2$
+
+forward1$   .equ    "this"
+forward2$   .equ    "that"
+
+; -------------------------------
+
+        .end

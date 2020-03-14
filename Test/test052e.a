@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 052e
+; Expressions\Variable Labels
+; warn: odd use (forward reference successfully resolved)
+
+; by Anton Treuenfels
+
+; first created: 06/14/03
+; last revised:  06/18/03
+
+; warning(s): 1
+; - unusual use
+
+; error(s):
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .word   global1
+
+        .word   ]var1       ; 'odd use' - will become forward reference to
+                            ; second (last) occurance on second pass
+
+global1:                    ; =current PC
+
+]var1   .word   ]var1       ; refers to first occurance (backward ref)
+
+        .word   global1
+
+]var1                       ; = current PC (value re-set)
+
+        .word   ]var1       ; refers to second occurance (backward ref)
+
+; -------------------------------
+
+        .end

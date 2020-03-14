@@ -1,0 +1,158 @@
+; Hobby Cross-Assembler Test 040
+; Expressions\Character Literals
+; ok: character literals
+
+; by Anton Treuenfels
+
+; first created: 11/26/03
+; last revised:  05/08/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; matches to '.' (quote\any char except quote\quote) pattern
+
+        .byte   '0'
+        .byte   '1'
+        .byte   '2'
+        .byte   'A'
+        .byte   'B'
+        .byte   'C'
+        .byte   'a'
+        .byte   'b'
+        .byte   'c'
+        .byte   ' '
+        .byte   '"'
+        .byte   ';'
+
+        .word   '0','1','2'
+        .word   'A', 'B', 'C'
+
+; the comma char is used as separator in the expression field,
+; and can be escaped for clarity when intended as an operand if desired...
+
+        .word   '\,'
+
+        .word   '\,','\,','\,'
+        .word   '\,', '\,', '\,'
+        .word   '\,' ,'\,' ,'\,'
+        .word   '\,' , '\,' , '\,'
+
+; ...but it doesn't have to be
+
+        .word   ','
+
+        .word   ',',',',','
+        .word   ',', ',', ','
+        .word   ',' ,',' ,','
+        .word   ',' , ',' , ','
+
+; the single quote delimiter itself must be escaped
+
+        .byte   '\''
+
+; escaped escape code
+
+        .byte   '\\'
+
+; mnemonic escape codes
+
+        .byte   '\0'
+        .byte   '\b'
+        .byte   '\f'
+        .byte   '\n'
+        .byte   '\r'
+        .byte   '\s'
+        .byte   '\t'
+        .byte   '\v'
+
+        .byte   '\0','\b','\f','\n','\r','\s','\t','\v'
+
+; numeric escape codes
+
+        ; Motorola hex
+
+        .byte   '\$1'
+        .byte   '\$a'
+        .byte   '\$80'
+
+        ; Intel hex
+
+        .byte   '\2h'
+        .byte   '\0bh'
+        .byte   '\81H'
+
+        ; oops - accepted but not really C-style hex
+
+        .byte   '\0x3'
+        .byte   '\0xc'
+        .byte   '\0x82'
+
+        ; C-style hex
+
+        .byte   '\x4'
+        .byte   '\xd'
+        .byte   '\x83'
+
+; literal escape codes
+; - except '\b' is mnemonic, of course
+
+        .byte   '\A', '\B', '\C'
+        .byte   '\a', '\b', '\c'
+
+; values larger than 255 (one eight-bit byte)
+; - ignores all but last two hex chars (implementation defined)
+
+        .byte   '\$100'
+        .byte   '\100H'
+        .byte   '\0x100'
+        .byte   '\x100'
+
+        .byte   '\$2001'
+        .byte   '\2001H'
+        .byte   '\0x2001'
+        .byte   '\x2001'
+
+        .byte   '\$30002'
+        .byte   '\30002H'
+        .byte   '\0x30002'
+        .byte   '\x30002'
+
+        .byte   '\$401003'
+        .byte   '\401003H'
+        .byte   '\0x401003'
+        .byte   '\x401003'
+
+        .byte   '\$1234567'
+        .byte   '\1234567H'
+        .byte   '\0x1234567'
+        .byte   '\x1234567'
+
+; many ways to express the character value zero
+
+        .byte   '\0'
+        .byte   '\$0'
+        .byte   '\$00'
+        .byte   '\$000'
+        .byte   '\0H'
+        .byte   '\00H'
+        .byte   '\000H'
+        .byte   '\0x0'
+        .byte   '\0x00'
+        .byte   '\0x000'
+        .byte   '\x0'
+        .byte   '\x00'
+        .byte   '\x000'
+
+; ---------------------
+
+        .end

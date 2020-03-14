@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Test 045b
+; Expressions\String Literals
+; ok: ECHO string literals w/ unprintable chars
+
+; by Anton Treuenfels
+
+; first created: 06/06/06
+; last revised:  06/18/11
+
+; no errors to detect (although there will be an error file)
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; we use escape sequences to produce unprintable chars
+
+        .echo   "\$01\$02\$03"
+
+        .echo   "An embedded literal \0DH carriage return doesn't work"
+
+        .echo   "\$80M\$90N\$A0O"
+
+        .echo   "\80H1\90H2\0A0H3"
+
+        .echo   "\0x80M\0x90N\0xA0O"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 067f
+; Expressions\Program Counter Relative Numeric Data Definition
+; error: value out of program counter range
+
+; by Anton Treuenfels
+
+; first created: 02/09/05
+; last revised:  01/09/10
+
+; warning(s): 0
+
+; error(s): 5
+; - value out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; making a pc-relative reference to an address (or any value)
+; outside the program counter range is not allowed
+
+        .rbit24 -1000       ; way low
+
+        .rbit24 -1          ; just low
+
+        .rbit24 $10000      ; just high
+
+        .rbit24 $F00000     ; way high
+
+; program counter can have a value one more than max legal data address,
+; but cannot store anything there or make a relative reference to it
+
+        .org    $FFFD
+
+        .rbit24 +           ; last three legal data locations...
+
+ +                          ; pc = $FFFF+1
+
+; -------------------------------
+
+        .end

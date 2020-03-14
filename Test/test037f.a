@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 037f
+; Expressions\Ranged Numeric Data Definition
+; error: values out of range (pass one)
+
+; by Anton Treuenfels
+
+; first created: 01/05/10
+; last revised:  01/05/10
+
+; warning(s): 0
+
+; error(s): 6
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; four byte values
+
+        .long   4294967296          ; fail (pass one)
+        .ulong  4294967296          ; fail (pass one)
+        .slong  4294967296          ; fail (pass one)
+
+        .long   -2147483649         ; fail (pass one)
+        .ulong  -2147483649         ; fail (pass one)
+        .slong  -2147483649         ; fail (pass one)
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,89 @@
+; Hobby Cross-Assembler Error Test 050e
+; Expressions\Global Labels
+; error: malformed global labels
+
+; by Anton Treuenfels
+
+; first created: 06/12/03
+; last revised:  06/09/12
+
+; warning(s):
+
+; error(s): 26
+; - need label
+; - need operand
+; - need operator
+; - bad EOE
+; - bad name
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 50          ; raise default limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+good1   .org    $1000       ; required psop
+
+; -------------------------------
+
+.       .word   good1       ; "need label"
+
+        .word   .           ; "need operand"
+
+.A      .word   good1       ; "need label"
+
+        .word   .A          ; "need operand"
+
+B.      .word   good1       ; "need label"
+
+        .word   B.          ; "need operator"
+
+%bad1   .word   good1       ; "need label"  (illegal char)
+
+        .word   %bad1       ; "need operand"
+
+ba@d2   .word   good1       ; "need label" (embedded local symbol)
+
+        .word   ba@d2       ; "need operator"
+
+ba]d3   .word   good1       ; "need label" (embedded variable symbol)
+
+        .word   ba]d3       ; "need operator"
+
+bad4+   .word   good1       ; "need label" (illegal char)
+
+        .word   bad4+       ; "unexpected EOE"
+
+ba@@d5  .word   good1       ; "need label"
+
+        .word   ba@@d5      ; "need operator"
+
+6bad    .word   good1       ; "need label"
+
+        .word   6bad        ; "need operator"
+
+.bad7   .word   good1       ; "need label"
+
+        .word   .bad7       ; "need operand"
+
+#bad8   .word   good1       ; "need label"
+
+        .word   #bad8       ; "need operand"
+
+bad..9 .word   good1        ; "need label"
+
+        .word   bad..9      ; "need operator"
+
+bad10.  .word   good1       ; "need label"
+
+        .word   bad10.      ; "need operator"
+
+; -------------------------------
+
+        .end

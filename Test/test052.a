@@ -1,0 +1,103 @@
+; Hobby Cross-Assembler Test 052
+; Expressions\Variable Labels
+; ok: variable labels
+
+; by Anton Treuenfels
+
+; first created: 06/14/03
+; last revised:  08/11/12
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+]var1   .word   global1
+
+        .word   ]var1       ; refers to first occurance (backward ref)
+
+global1:                    ; =current PC (no effect on variable labels)
+
+        .word   ]var1       ; refers to first occurance (backward ref)
+
+        .word   global1
+
+]var1                       ; = current PC (value re-set)
+
+        .word   ]var1       ; refers to second occurance (backward ref)
+
+; -------------------------------
+
+        ; numeric names
+
+]123456789
+
+]0      .word   ]0
+
+]3
+]2
+]1
+
+]99     .word   ]1, ]2, ]3
+
+        .word   ]99
+
+        .word   ]123456789        
+
+global2:                        ; no effect on variable labels
+
+
+        .word   ]0
+
+        .word   ]1, ]2, ]3
+
+        .word   ]99
+
+        .word   ]123456789
+
+        ; show they really are variable labels
+
+]123456789
+
+]0      .word   ]0
+
+]3
+]2
+]1
+
+]99     .word   ]1, ]2, ]3
+
+        .word   ]99
+
+        .word   ]123456789
+
+; -------------------------------
+
+        ; odd but legal names
+
+]
+]_
+]_._
+]___
+]_._._
+
+        .word   ]
+
+        .word   ]_
+
+        .word   ]_._
+
+        .word   ]___
+
+        .word   ]_._._
+
+; -------------------------------
+
+        .end

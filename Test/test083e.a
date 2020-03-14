@@ -1,0 +1,80 @@
+; Hobby Cross-Assembler Error Test 083e
+; Expressions\Regular Expression Operators
+; error: malformed expressions
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  05/15/11
+
+; warning(s): 0
+
+; error(s): 24
+; - need num
+; - bad EOE
+; - need EOE
+; - need regex
+; - need num_op
+; - bad BOE
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   /123/
+
+        .byte   "123" !~
+        .byte   "123" ~
+
+        .byte   ~ /123/
+        .byte   !~ /123/
+
+        .byte   /123/ ~
+        .byte   /123/ !~
+
+        .byte   "123" ~ +
+        .byte   "123" !~ )
+        .byte   "123" ~ "123"
+        .byte   "123" !~ 123
+        .byte   "123" ~ ghi
+
+        .byte   123 ~ /ghi/
+        .byte   "123 ~ /ghi/
+        .byte   123" ~ /ghi/
+        .byte   "123" ~ /ghi
+        .byte   "123" ~ ghi/
+        .byte   "123" ~ /ghi/k
+
+        ; grouping character pair checks
+
+        .byte   "123" ~ /[ghi]/     ; okay
+        .byte   "123" ~ /[ghi/      ; fail
+        .byte   "123" ~ /\[ghi/     ; okay if literal "[" intended
+        .byte   "123" ~ /[/         ; fail
+        .byte   "123" ~ /\[/        ; okay
+
+        .byte   "123" ~ /^(ab|12)/  ; okay
+        .byte   "123" ~ /^(ab|12/   ; fail
+        .byte   "123" ~ /^\(ab|12/  ; okay if literal "(" intended
+        .byte   "123" ~ /(/         ; fail
+        .byte   "123" ~ /\(/        ; okay
+
+        .byte   "123" ~ /abc{1,4}/  ; okay
+        .byte   "123" ~ /abc{1,4/   ; fail
+        .byte   "123" ~ /abc\{1,4/  ; okay if literal "{" intended
+        .byte   "123" ~ /{/         ; fail
+        .byte   "123" ~ /\{/        ; okay
+
+; -------------------------------
+
+        .end

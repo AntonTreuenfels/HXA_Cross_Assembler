@@ -1,0 +1,259 @@
+; Hobby Cross-Assembler Test 080
+; Expressions\Unary Operators
+; ok: arithmetic, bitwise, logical
+
+; by Anton Treuenfels
+
+; first created: 12/30/09
+; last revised:  03/21/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+intMin  .equ    -2147483648     ; -2^31
+intMax  .equ     2147483647     ; 2^31 -1
+
+uintMin .equ     0
+uintMax .equ     4294967295     ;  2^32 - 1
+
+; -------------------------------
+
+        ; minimum signed integer value
+
+        .long    intMin         ;  -2^31
+        .long   +intMin         ;   2^31
+        .long   -intMin         ;   2^31
+        .long   ~intMin
+        .long   !intMin
+        .long   <intMin
+        .long   >intMin
+        .long   ^intMin
+
+        .long    -2147483648
+        .long   +-2147483648
+        .long   --2147483648
+        .long   ~-2147483648
+        .long   !-2147483648
+        .long   <-2147483648
+        .long   >-2147483648
+        .long   ^-2147483648
+
+        .long     (-2147483648)
+        .long    +(-2147483648)
+        .long    -(-2147483648)
+        .long    ~(-2147483648)
+        .long    !(-2147483648)
+        .long    <( -2147483648 )
+        .long    >(-2147483648)
+        .long    ^ ( -2147483648 )
+
+; -------------------------------
+
+        ; maximum signed integer value
+
+        .long    intMax         ; 2^31-1
+        .long   +intMax         ; 2^31-1
+        .long   -intMax         ; -(2^31-1) = -2^31+1
+        .long   ~intMax
+        .long   !intMax
+        .long   <intMax
+        .long   >intMax
+        .long   ^intMax
+
+        .long     2147483647
+        .long    +2147483647
+        .long    -2147483647
+        .long    ~2147483647
+        .long    !2147483647
+        .long    <2147483647
+        .long    >2147483647
+        .long    ^2147483647
+
+        .long     (2147483647)
+        .long    +(2147483647)
+        .long    -(2147483647)
+        .long    ~(2147483647)
+        .long    !(2147483647)
+        .long    <( 2147483647 )
+        .long    >(2147483647)
+        .long    ^ ( 2147483647 )
+
+; -------------------------------
+
+        ; minimum unsigned integer value
+
+        .long    uintMin        ; 0
+        .long   +uintMin        ; 0
+        .long   -uintMin        ; 0
+        .long   ~uintMin
+        .long   !uintMin
+        .long   <uintMin
+        .long   >uintMin
+        .long   ^uintMin
+
+        .long    0
+        .long   +0
+        .long   -0
+        .long   ~0
+        .long   !0
+        .long   <0
+        .long   >0
+        .long   ^0
+
+        .long    (0)
+        .long   +(0)
+        .long   -(0)
+        .long   ~(0)
+        .long   !(0)
+        .long   <( 0 )
+        .long   >(0)
+        .long   ^ ( 0 )
+
+; -------------------------------
+
+        ; maximum unsigned integer value
+
+        .long    uintMax        ; 2^32-1
+        .long   +uintMax        ; 2^32-1
+;        .long   -uintMax       ; -2^32+1 (out of range)
+        .long   ~uintMax
+        .long   !uintMax
+        .long   <uintMax
+        .long   >uintMax
+        .long   ^uintMax
+
+        .long     4294967295
+        .long    +4294967295
+;        .long    -4294967295   ; out of range
+        .long    ~4294967295
+        .long    !4294967295
+        .long    <4294967295
+        .long    >4294967295
+        .long    ^4294967295
+
+        .long     (4294967295)
+        .long    +(4294967295)
+;        .long    -(4294967295) ; out of range
+        .long    ~(4294967295)
+        .long    !(4294967295)
+        .long    <( 4294967295 )
+        .long    >(4294967295)
+        .long    ^ ( 4294967295 )
+
+; -------------------------------
+
+        .word    1
+        .word   +1
+        .word   -1
+        .word   ~1
+        .word   !1
+        .word   <1
+        .word   >1
+        .word   ^1
+
+        .word    $123
+        .word   +$123
+        .word   -$123
+        .word   ~$123
+        .word   !$123
+        .word   <$123
+        .word   >$123
+        .word   ^$123
+
+        .long   1, + 1,- 1,~ 1
+        .long   ! 1, < 1, > 1, ^ 1
+        .long   $123 , + $123 ,- $123 ,~ $123
+        .long   ! $123 , < $123 , > $123 , ^ $123
+
+; -------------------------------
+
+; consecutive unary operators of same precedence
+; - note they execute in right-to-left order
+
+        .word   ++1
+        .word   +-1
+        .word   -+1
+        .word   --1
+
+        .word   !!1
+        .word   -!1
+        .word   !-1
+
+        .word   +++1
+        .word   ---1
+
+        ; byte extraction
+
+        .word    -1
+        .word   <-1         ; negate, then extract
+        .word   >-1
+        .word   ^-1
+
+        .long    -1
+        .long   <-1
+        .long   >-1
+        .long   ^-1
+
+        .long     intMin
+        .long   <>intMin
+        .long   ><intMin
+        .long   <^intMin
+        .long   >^intMin
+        .long   ^<intMin
+        .long   ^>intMin
+
+        .long     intMax
+        .long   <>intMax
+        .long   ><intMax
+        .long   <^intMax
+        .long   >^intMax
+        .long   ^<intMax
+        .long   ^>intMax
+
+        .long     uintMax
+        .long   <>uintMax
+        .long   ><uintMax
+        .long   <^uintMax
+        .long   >^uintMax
+        .long   ^<uintMax
+        .long   ^>uintMax
+
+; for the record, following are how to extract particular bytes
+; -ie., copy them to bits 0->7 and set bits 8->31 to zero
+
+        .long    intMin
+        .long   <intMin     ; bits  0 -> 7
+        .long   >intMin     ; bits  8 -> 15
+        .long   <^intMin    ; bits 16 -> 23
+        .long   >^intMin    ; bits 24 -> 31
+
+        .long    intMax
+        .long   <intMax     ; bits  0 -> 7
+        .long   >intMax     ; bits  8 -> 15
+        .long   <^intMax    ; bits 16 -> 23
+        .long   >^intMax    ; bits 24 -> 31
+
+        .long    uintMax
+        .long   <uintMax    ; bits  0 -> 7
+        .long   >uintMax    ; bits  8 -> 15
+        .long   <^uintMax   ; bits 16 -> 23
+        .long   >^uintMax   ; bits 24 -> 31
+
+        .long    $12345678
+        .long   <$12345678  ; bits  0 -> 7
+        .long   >$12345678  ; bits  8 -> 15
+        .long   <^$12345678 ; bits 16 -> 23
+        .long   >^$12345678 ; bits 24 -> 31
+
+; -------------------------------
+
+        .end

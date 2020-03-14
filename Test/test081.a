@@ -1,0 +1,536 @@
+; Hobby Cross-Assembler Test 081
+; Expressions\Numeric Binary Operators
+; ok: arithmetic, bitwise, logical
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  01/03/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+intMin  .equ    -2147483648     ; -2^31
+intMax  .equ     2147483647     ; 2^31 -1
+
+uintMin .equ     0
+uintMax .equ     4294967295     ;  2^32 - 1
+
+; -------------------------------
+
+; arithmetic results
+
+        .word   0 + 1
+        .word   0 - 1
+        .word   0 * 1
+        .word   0 / 1
+        .word   0 % 1
+
+        .word   123 + 45        ;  168, $00A8
+        .word   123 - 45        ;   78, $004E
+        .word   123 * 45        ; 5535, $159F
+        .word   123 / 45        ;    2, $0002
+        .word   123 % 45        ;   33, $0021
+
+        .long   0+1,0-1,0*1
+        .long   0/1
+        .long   0%1
+
+        .long   123+45 ,123-45 ,123*45
+        .long   123/45 , 123%45
+
+        .long   intMin + 1      ; -2^31+1   $80000001
+;        .long   intMin - 1      ; -2^31-1  out of range
+        .long   intMin * 1      ; -2^31     $80000000
+        .long   intMin / 1      ; -2^31     $80000000
+        .long   intMin % 1      ; 0         $00000000
+
+        .long   intMax + 1      ; 2^31      $80000000
+        .long   intMax - 1      ; 2^31-2    $7ffffffe
+        .long   intMax * 1      ; 2^31-1    $7fffffff
+        .long   intMax / 1      ; 2^31-1    $7fffffff
+        .long   intMax % 1      ; 0         $00000000
+
+        .long   uintMin + 1     ; 1         $00000001
+        .long   uintMin - 1     ; -1        $ffffffff
+        .long   uintMin * 1     ; 0         $00000000
+        .long   uintMin / 1     ; 0         $00000000
+        .long   uintMin % 1     ; 0         $00000000
+
+;        .long   uintMax + 1     ; 2^32     out of range
+        .long   uintMax - 1     ; 2^32-2    $fffffffe
+        .long   uintMax * 1     ; 2^32-1    $ffffffff
+        .long   uintMax / 1     ; 2^32-1    $ffffffff
+        .long   uintMax % 1     ; 0         $00000000
+
+; -------------------------------
+
+; bitwise results
+
+        .word   $00 & $01
+        .word   $00 ^ $01
+        .word   $00 | $01
+
+        .word   $01 << 1
+        .word   $80 >> 1
+                
+        .word   $a55a & $5555
+        .word   $a55a ^ $5555
+        .word   $a55a | $5555
+
+        .word   $0001 << 15
+        .word   $8000 >> 15
+
+        .word   0h&1h,0h^1h,0h|1h
+        .word   01h<<1, 80h>>1
+        .word   0a55aH&5555H ,0a55aH^5555H ,0a55aH|5555H
+        .word   0001H<<15 , 8000H>>15
+
+        .long   1 << 07
+        .long   1 << 15
+        .long   1 << 23
+        .long   1 << 31
+
+        ; accepted as signed integer and sign-extended during shift
+
+        .long   $80000000 >> 07
+        .long   $80000000 >> 15
+        .long   $80000000 >> 23
+        .long   $80000000 >> 31
+
+        .long   intMin & intMax
+        .long   intMin & uintMin
+        .long   intMin & uintMax
+        .long   intMax & uintMin
+        .long   intMax & uintMax
+        .long   uintMin & uintMax
+
+        .long   intMin | intMax
+        .long   intMin | uintMin
+        .long   intMin | uintMax
+        .long   intMax | uintMin
+        .long   intMax | uintMax
+        .long   uintMin | uintMax
+
+        .long   intMin ^ intMax
+        .long   intMin ^ uintMin
+        .long   intMin ^ uintMax
+        .long   intMax ^ uintMin
+        .long   intMax ^ uintMax
+        .long   uintMin ^ uintMax
+
+        .long   intMin << 1
+        .long   intMin << 31
+        .long   intMin << intMax
+
+        .long   intMax << 1
+        .long   intMax << 31
+        .long   intMax << intMax
+
+        .long   uintMin << 1
+        .long   uintMin << 31
+        .long   uintMin << intMax
+
+        .long   uintMax << 1
+        .long   uintMax << 31
+        .long   uintMax << intMax
+
+        .long   intMin >> 1
+        .long   intMin >> 31
+        .long   intMin >> intMax
+
+        .long   intMax >> 1
+        .long   intMax >> 31
+        .long   intMax >> intMax
+
+        .long   uintMin >> 1
+        .long   uintMin >> 31
+        .long   uintMin >> intMax
+
+        .long   uintMax >> 1
+        .long   uintMax >> 31
+        .long   uintMax >> intMax
+
+; -------------------------------
+
+; sign extension during right shifts means the most significant bit
+; of any value retains its value during that shift
+; - this leads to a non-symmetry between right shifts and division by two
+; for the value "-1":
+
+        .long   -4          ; = -4
+        .long   -4 >> 1     ; = -2
+        .long   -4 / 2      ; = -2
+
+        .long   -2          ; = -2
+        .long   -2 >> 1     ; = -1
+        .long   -2 / 2      ; = -1
+
+        .long   -1          ; = -1
+        .long   -1 >> 1     ; = -1 <= no zero bits at right edge to drop off
+        .long   -1 / 2      ; =  0 <= the usually desired result
+
+        .long   1           ; =  1
+        .long   1 >> 1      ; =  0
+        .long   1 / 2       ; =  0
+
+        .long   2           ; =  2
+        .long   2 >> 1      ; =  1
+        .long   2 / 2       ; =  1
+
+        .long   4           ; =  4
+        .long   4 >> 1      ; =  2
+        .long   4 / 2       ; =  2
+
+        ; this same non-symmetry affects affects all values greater than
+        ; "intMax":
+
+        .long   2147483647      ; 2^31 - 1
+        .long   intMax >> 1
+        .long   intMax / 2
+
+        .long   2147483648      ; 2^31
+        .long   2147483648 >> 1
+        .long   2147483648 / 2
+
+        .long   2147483649      ; 2^31 + 1
+        .long   2147483649 >> 1
+        .long   2147483649 / 2
+
+        .long   4294967293      ; = 2^32 - 3
+        .long   4294967293 >> 1
+        .long   4294967293 / 2
+
+        .long   4294967294      ; = 2^32 - 2
+        .long   4294967294 >> 1
+        .long   4294967294 / 2
+
+        .long   4294967295      ; = 2^32 - 1
+        .long   uintMax >> 1
+        .long   uintMax / 2
+
+; -------------------------------
+
+; logical results
+
+        .byte   0 < 1
+        .byte   0 > 1
+        .byte   0 <= 1
+        .byte   0 >= 1
+        .byte   0 == 1
+        .byte   0 != 1
+        .byte   0 && 1
+        .byte   0 || 1
+
+        .byte   123 < 45
+        .byte   123 > 45
+        .byte   123 <= 45
+        .byte   123 >= 45
+        .byte   123 == 45
+        .byte   123 != 45
+        .byte   123 && 45
+        .byte   123 || 45
+
+        .byte   0<1,0>1,0<=1,0>=1
+        .byte   0==1, 0!=1, 0&&1, 0||1
+        .byte   123<45 ,123>45 ,123<=45 ,123>=45
+        .byte   123==45 , 123!=45 , 123&&45 , 123||45
+
+; -------------------------------
+
+        .byte   intMin < intMin     ; $00
+        .byte   intMin > intMin     ; $00
+        .byte   intMin <= intMin    ; $01
+        .byte   intMin >= intMin    ; $01
+        .byte   intMin == intMin    ; $01
+        .byte   intMin != intMin    ; $00
+        .byte   intMin && intMin    ; $01
+        .byte   intMin || intMin    ; $01
+
+        .byte   intMin < intMax     ; $01
+        .byte   intMin > intMax     ; $00
+        .byte   intMin <= intMax    ; $01
+        .byte   intMin >= intMax    ; $00
+        .byte   intMin == intMax    ; $00
+        .byte   intMin != intMax    ; $01
+        .byte   intMin && intMax    ; $01
+        .byte   intMin || intMax    ; $01
+
+        .byte   intMin < uintMin    ; $01
+        .byte   intMin > uintMin    ; $00
+        .byte   intMin <= uintMin   ; $01
+        .byte   intMin >= uintMin   ; $00
+        .byte   intMin == uintMin   ; $00
+        .byte   intMin != uintMin   ; $01
+        .byte   intMin && uintMin   ; $00
+        .byte   intMin || uintMin   ; $01
+
+        .byte   intMin < uintMax    ; $01
+        .byte   intMin > uintMax    ; $00
+        .byte   intMin <= uintMax   ; $01
+        .byte   intMin >= uintMax   ; $00
+        .byte   intMin == uintMax   ; $00
+        .byte   intMin != uintMax   ; $01
+        .byte   intMin && uintMax   ; $01
+        .byte   intMin || uintMax   ; $01
+
+; -------------------------------
+
+        .byte   intMax < intMin     ; $00
+        .byte   intMax > intMin     ; $01
+        .byte   intMax <= intMin    ; $00
+        .byte   intMax >= intMin    ; $01
+        .byte   intMax == intMin    ; $00
+        .byte   intMax != intMin    ; $01
+        .byte   intMax && intMin    ; $01
+        .byte   intMax || intMin    ; $01
+
+        .byte   intMax < intMax     ; $00
+        .byte   intMax > intMax     ; $00
+        .byte   intMax <= intMax    ; $01
+        .byte   intMax >= intMax    ; $01
+        .byte   intMax == intMax    ; $01
+        .byte   intMax != intMax    ; $00
+        .byte   intMax && intMax    ; $01
+        .byte   intMax || intMax    ; $01
+
+        .byte   intMax < uintMin    ; $00
+        .byte   intMax > uintMin    ; $01
+        .byte   intMax <= uintMin   ; $00
+        .byte   intMax >= uintMin   ; $01
+        .byte   intMax == uintMin   ; $00
+        .byte   intMax != uintMin   ; $01
+        .byte   intMax && uintMin   ; $00
+        .byte   intMax || uintMin   ; $01
+
+        .byte   intMax < uintMax    ; $01
+        .byte   intMax > uintMax    ; $00
+        .byte   intMax <= uintMax   ; $01
+        .byte   intMax >= uintMax   ; $00
+        .byte   intMax == uintMax   ; $00
+        .byte   intMax != uintMax   ; $01
+        .byte   intMax && uintMax   ; $01
+        .byte   intMax || uintMax   ; $01
+
+; -------------------------------
+
+        .byte   uintMin < intMin    ; $00
+        .byte   uintMin > intMin    ; $01
+        .byte   uintMin <= intMin   ; $00
+        .byte   uintMin >= intMin   ; $01
+        .byte   uintMin == intMin   ; $00
+        .byte   uintMin != intMin   ; $01
+        .byte   uintMin && intMin   ; $00
+        .byte   uintMin || intMin   ; $01
+
+        .byte   uintMin < intMax    ; $01
+        .byte   uintMin > intMax    ; $00
+        .byte   uintMin <= intMax   ; $01
+        .byte   uintMin >= intMax   ; $00
+        .byte   uintMin == intMax   ; $00
+        .byte   uintMin != intMax   ; $01
+        .byte   uintMin && intMax   ; $00
+        .byte   uintMin || intMax   ; $01
+
+        .byte   uintMin < uintMin   ; $00
+        .byte   uintMin > uintMin   ; $00
+        .byte   uintMin <= uintMin  ; $01
+        .byte   uintMin >= uintMin  ; $01
+        .byte   uintMin == uintMin  ; $01
+        .byte   uintMin != uintMin  ; $00
+        .byte   uintMin && uintMin  ; $00
+        .byte   uintMin || uintMin  ; $00
+
+        .byte   uintMin < uintMax   ; $01
+        .byte   uintMin > uintMax   ; $00
+        .byte   uintMin <= uintMax  ; $01
+        .byte   uintMin >= uintMax  ; $00
+        .byte   uintMin == uintMax  ; $00
+        .byte   uintMin != uintMax  ; $01
+        .byte   uintMin && uintMax  ; $00
+        .byte   uintMin || uintMax  ; $01
+
+; -------------------------------
+
+        .byte   uintMax < intMin    ; $00
+        .byte   uintMax > intMin    ; $01
+        .byte   uintMax <= intMin   ; $00
+        .byte   uintMax >= intMin   ; $01
+        .byte   uintMax == intMin   ; $00
+        .byte   uintMax != intMin   ; $01
+        .byte   uintMax && intMin   ; $01
+        .byte   uintMax || intMin   ; $01
+
+        .byte   uintMax < intMax    ; $00
+        .byte   uintMax > intMax    ; $01
+        .byte   uintMax <= intMax   ; $00
+        .byte   uintMax >= intMax   ; $01
+        .byte   uintMax == intMax   ; $00
+        .byte   uintMax != intMax   ; $01
+        .byte   uintMax && intMax   ; $01
+        .byte   uintMax || intMax   ; $01
+
+        .byte   uintMax < uintMin   ; $00
+        .byte   uintMax > uintMin   ; $01
+        .byte   uintMax <= uintMin  ; $00
+        .byte   uintMax >= uintMin  ; $01
+        .byte   uintMax == uintMin  ; $00
+        .byte   uintMax != uintMin  ; $01
+        .byte   uintMax && uintMin  ; $00
+        .byte   uintMax || uintMin  ; $01
+
+        .byte   uintMax < uintMax   ; $00
+        .byte   uintMax > uintMax   ; $00
+        .byte   uintMax <= uintMax  ; $01
+        .byte   uintMax >= uintMax  ; $01
+        .byte   uintMax == uintMax  ; $01
+        .byte   uintMax != uintMax  ; $00
+        .byte   uintMax && uintMax  ; $01
+        .byte   uintMax || uintMax  ; $01
+
+; -------------------------------
+
+; labels - backward reference
+
+label1  .equ    $4000
+label2  .equ    $8000
+
+        .word   label1/256
+        .word   label1%256
+        .word   label1&$00ff
+
+        .word   label2 > label1
+        .word   label1 < $1000
+
+        .word   label1 - 1
+        .word   label2 - label1
+
+        .word   label2 - label1 / 256
+        .word   label2 - label1 % 256
+        .word   (label2 - label1) / 256
+        .word   (label2 - label1) % 256
+
+; -------------------------------
+
+; labels - forward reference
+; - also re-testing that leading "." really is optional !
+
+        word   label3/256
+        word   label3%256
+        word   label3&$00ff
+
+        word   label4 > label3
+        word   label3 < $1000
+
+        word   label3 - 1
+        word   label4 - label3
+
+        word   label4 - label3 / 256
+        word   label4 - label3 % 256
+        word   (label4 - label3) / 256
+        word   (label4 - label3) % 256
+
+label3  .equ    $2000
+label4  .equ    $6000
+
+; -------------------------------
+
+; branch target referencess in expressions
+; - note a reference operand cannot be directly followed by an operator
+; which matches the name of the reference. There must be an intervening
+; character, or else the operator will be interpreted as part of the operand
+; - it is always safe to surround the reference with parentheses
+
+ -                                          ; backward branch
+
+        .word   -
+        .word   :- - 4, (:-)-2, :-, :-+2, :- + 4
+        .word   +
+        .word   :+ - 4, :+-2, :+, (:+)+2, :+ + 4
+
+ +                                          ; forward branch
+
+; alternatively the operands may be re-arranged so the reference comes last
+
+ -                                          ; backward branch
+        .word   (:-)-2, -2+:-
+        .word   (:+)+2,  2+:+
+ +                                          ; forward branch      
+
+; -------------------------------
+
+; use of parentheses to alter evaluation precedence
+
+        .word   2 * 6 - 1 * 3               ; 09, $0009
+        .word   (2) * (6) - (1) * (3)       ; 09, $0009
+        .word   (2 * 6 - 1) * 3             ; 33, $0021
+        .word   2 + 2 * 6 - 1 + 2 * 3       ; 19, $0013
+        .word   (2 + 2) * 6 - (1 + 2) * 3   ; 15, $000F
+        .word   ((2 + 2) * 6 - 1) + 2 * 3   ; 29, $001D
+
+        .word   'A', '0', 10, 2
+        .word   'A' - '0'
+        .word   'A'-'0'-10
+        .word   'A' - '0' * 2
+        .word   ('A' - '0') * 2
+
+; -------------------------------
+
+; program counter
+
+        .word   * + 3
+        .word   *-2
+
+        .word   $+$100
+        .word   $ - $10
+
+; -------------------------------
+
+; perturbing edge values
+
+;                ---!---!---!---!---!---!---!---!
+
+        .long   %10000000000000000000000000000001-1
+        .long   -2147483647-1
+        .long   $80000001-1
+
+        .long   %10000000000000000000000000000000+1
+        .long   -2147483648+1
+        .long   $80000000+1
+
+        .long   %01111111111111111111111111111111-1
+        .long   2147483647-1
+        .long   $7fffffff-1
+
+        .long   %01111111111111111111111111111110+1
+        .long   2147483646+1
+        .long   $7ffffffe+1
+
+        .long   %10000000000000000000000000000001-1
+        .long   2147483649-1
+        .long   $80000001-1
+
+        .long   %10000000000000000000000000000000+1
+        .long   2147483648+1
+        .long   $80000000+1
+
+        .long   %11111111111111111111111111111111-1
+        .long   4294967295-1
+        .long   $ffffffff-1
+
+        .long   %11111111111111111111111111111110+1
+        .long   4294967294+1
+        .long   $fffffffe+1
+
+; -------------------------------
+
+        .end

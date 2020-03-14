@@ -1,0 +1,96 @@
+; Hobby Cross-Assembler Error Test 086e
+; Expressions\Ternary Conditional
+; error: parse errors
+
+; by Anton Treuenfels
+
+; first created: 04/26/07
+; last revised:  01/10/10
+
+; warning(s): 0
+
+; error(s): 29
+; - bad SOE
+; - bad EOE
+; - bad token
+; - bad number
+; - bad string
+; - bad close par
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 100
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; various null expressions (no nesting)
+
+        .byte   ?
+        .byte   :
+
+        .byte   ? :
+
+        .byte   1 ? :
+        .byte   ? 1 :
+        .byte   ? : 1
+
+        .byte   1 ? 2 :
+        .byte   1 ? : 2
+        .byte   ? 1 : 2
+
+        ; missing operator
+
+        .byte   1 ? 2
+        .byte   1 : 2
+        .byte   1 ? 2 ; 3       ; a semi-colon instead of colon !
+
+        ; type mis-match (need number)
+
+        .byte   1 ? "str" : 3
+        .byte   1 ? 2 : "str"
+
+        .byte   "str1" ? "str2" : 3
+        .byte   "str1" ? 2 : "str2"
+        .byte   1 ? "str2" : "str3"
+
+        .byte   "str1" ? "str2" : "str3"
+
+        .byte   1 ? "s1" "s2" : 3
+        .byte   1 ? 2 : "s1" "s2"
+
+        .byte   1 ? /regex/ : 3
+        .byte   1 ? 2 : /regex/
+
+        ; type mis-match (need string)
+        ; - note numbers are converted to one-char strings
+
+        .str    1 ? "str" : 3       ; okay
+        .str    1 ? 2 : "str"       ; okay
+
+        .str    1 ? 2 : 3           ; okay
+
+        .str    1 ? /regex/ : 3     ; fail
+        .str    1 ? 2 : /regex/     ; fail
+
+        ; bad parenthesis
+
+        .byte   0 + 1 ? 2 + 3 : 4 + 5       ; okay
+        .byte   ( 0 + 1 ? 2 + 3 ) : 4 + 5
+        .byte   0 + ( 1 ? 2 + 3 ) : 4 + 5
+        .byte   0 + 1 ? ( 2 + 3 : 4 ) + 5
+        .byte   0 + 1 ? ( 2 + 3 : 4 + 5 )
+        .byte   0 + 1 ? 2 + ( 3 : 4 + 5 )
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,54 @@
+; Hobby Cross-Assembler Error Test 082e
+; Expressions\String Binary Operators
+; error: malformed expressions
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  03/18/10
+
+; warning(s): 0
+
+; error(s): 10
+; - need str_op
+; - bad BOE
+; - need num
+; - bad EOE
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; unrecognized as operators or operands
+
+        .word   "123" #
+        .word   @"123"
+
+        ; incomplete expressions
+
+        .word   "123"
+        .word   "123" /
+        .word   "123" ==
+        .word   "123" != +
+
+        ; type mismatch
+
+        .word   "123" == 123
+        .word   "123" != ghi
+        .word   "abc" - "def"
+        .word   "abc" * "def"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,80 @@
+; Hobby Cross-Assembler Error Test 084e
+; Expressions\String Expressions
+; error: string concatenation
+
+; by Anton Treuenfels
+
+; first created: 12/19/05
+; last revised:  05/14/11
+
+; warning(s): 4
+; - no effect
+
+; error(s): 12
+; - expecting string
+; - expecting EOE
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; null strings
+
+        .string ""              ; warn
+
+        .string "" ""           ; warn
+
+nul$    .equ    ""
+
+        .string nul$            ; warn
+
+        .string "" nul$         ; warn
+
+; malformed strings
+
+        .string "a              ; error
+
+        .string "a "b"          ; error
+
+        .string a" "b"          ; error
+
+        .string "a" "b          ; error
+
+        .string "a" b"          ; error
+        
+        .string "a\\\" "b"      ; error
+
+        .string "a" "b\\\"      ; error
+
+; illegal parentheses
+; - limitations: due to the way parsing is handled, only the first
+; string operand can be preceeded by one or more open parenthesis
+
+        .string "a" "b"         ; okay
+
+        .string ("a") "b"       ; okay
+
+        .string "a" ("b")       ; error
+
+        .string ("a") ("b")     ; error
+
+        .string ("a" ("b"))     ; error
+
+; illegal operators
+
+        .string "abc" - "def"
+        .string "abc" * "def"
+
+; -------------------------------
+
+        .end

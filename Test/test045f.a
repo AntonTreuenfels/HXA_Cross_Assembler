@@ -1,0 +1,35 @@
+; Hobby Cross-Assembler Error Test 045f
+; Expressions\String Literals
+; warn: null string
+
+; by Anton Treuenfels
+
+; first created: 11/14/05
+; last revised:  11/14/05
+
+; warning(s): 1
+; - no effect
+
+; error(s):
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; null string
+
+        .string ""
+
+; -------------------------------
+
+        .end

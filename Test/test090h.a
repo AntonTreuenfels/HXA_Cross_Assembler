@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Error Test 090h
+; Expressions\Expression Evaluation
+; warn\error: multiple unresolved forward reference in single expression
+
+; by Anton Treuenfels
+
+; first created: 07/25/04
+; last revised:  07/25/04
+
+; warning(s): 16
+; - odd use
+
+; error(s): 24
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+known   =   *
+
+        .word   global1 + global2
+        .word   global1 + ]var2
+        .word   global1 + @local2
+
+        .word   ]var1 + global2
+        .word   ]var1 + ]var2
+        .word   ]var1 + @local2
+
+        .word   @local1 + global2
+        .word   @local1 + ]var2
+        .word   @local1 + @local2
+
+        .word   global1 + global2 + known
+        .word   ]var1 + known + ]var2
+        .word   known + @local1 + @local2
+
+; -------------------------------
+
+        .end

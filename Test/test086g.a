@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 086g
+; Expressions\Ternary Conditional
+; error: bad forward reference (pass 1)
+
+; by Anton Treuenfels
+
+; first created: 05/16/09
+; last revised:  05/16/09
+
+; warning(s): 0
+
+; error(s): 4
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .str    f0$ ? "1" : "2"
+        .str    "" ? f1$ : "2"  ; no error because 'f1$' not evaluated
+        .str    "" ? "1" : f2$
+
+        .str    f1$ ? "2" : "3"
+        .str    "1" ? f2$ : "3"
+        .str    "1" ? "2" : f3$ ; no error because 'f3$' not evaluated
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,74 @@
+; Hobby Cross-Assembler Error Test 053g
+; Expressions\Branch Target Labels
+; warn: odd use (with various pseudo ops)
+
+; by Anton Treuenfels
+
+; first created: 06/18/03
+; last revised:  09/16/12
+
+; warning(s): 24
+; - odd use
+
+; error(s):
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos   ; "auto-generated" labels shown in symbol listing
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop
+ +      .org    $1000       ; required psop
+
+; -------------------------------
+
+        .word   :++         ; = $3000
+
+ -      .equ    $2000       ; "odd use"
+
+        .word   :-          ; = $2000
+
+ +-     .equ    $3000       ; "odd use"
+
+        .word   :+          ; = $5000
+
+ -+     .equ    $4000       ; "odd use"
+
+        .word   :--         ; = $2000
+
+ +      .equ    $5000       ; "odd use"
+
+; -------------------------------
+
+ -      .bit08      $00
+ +      .ubit08     $00
+ +-     .sbit08     $00
+ -+     .rbit08     +
+
+ :      .bit16      $1122
+ -      .ubit16     $1122
+ +      .sbit16     $1122
+ +-     .rbit16     +
+
+ -+     .bit24      $334455
+ :      .ubit24     $334455
+ -      .sbit24     $334455
+ +      .rbit24     +
+
+ +-     .bit32      $66778899
+ -+     .ubit32     $66778899
+ :      .sbit32     $66778899
+ -      .rbit32     +
+
+ +      .string     "Odd Use"
+ +-     .stringr    "Odd Use"
+
+; -------------------------------
+
+ +      .end

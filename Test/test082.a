@@ -1,0 +1,129 @@
+; Hobby Cross-Assembler Test 082
+; Expressions\String Binary Operators
+; ok: logical
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  03/21/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; logical results
+
+        .byte   "123" == "123"
+        .byte   "123" != "123"
+        .byte   "123" == "abc"
+        .byte   "123" != "abc"
+
+        .byte   "123"=="123","123"!="123"
+        .byte   "123"=="abc", "123"!="abc"
+
+        .byte   "123" < "123"
+        .byte   ( "123" ) > ( "123" )
+        .byte   ( ( "123" ) ) == ( ( "123" ) )
+        .byte   "123" < "abc"
+        .byte   ( "123" )  > ( "abc" )
+        .byte   ( ( "123" ) ) != ( ( "abc" ) )
+
+        .byte   "123"<"123",("123")>("123"), (("123"))==(("123"))
+        .byte   "123"<"abc" ,("123")>("abc") , (("123"))!=(("abc"))
+
+        .byte   "123" <= "123"
+        .byte   "123" >= "123"
+        .byte   "123" <= "abc"
+        .byte   "123" >= "abc"
+
+        .byte   "123" <= "123","123" >= "123"
+        .byte   "123" <= "abc", "123" >= "abc"
+
+        .byte   "String with blanks" == "String with blanks"
+        .byte   " String with blanks " != " String with blanks "
+
+; -------------------------------
+
+; backward reference
+
+num$    =   "123"
+alpha$  =   "abc"
+
+        .byte   num$ <  num$
+        .byte   num$ <= num$
+        .byte   num$ == num$
+        .byte   num$ != num$
+        .byte   num$ >= num$
+        .byte   num$ >  num$
+
+        .byte   num$ <  alpha$
+        .byte   num$ <= alpha$
+        .byte   num$ == alpha$
+        .byte   num$ != alpha$
+        .byte   num$ >= alpha$
+        .byte   num$ >  alpha$
+
+; forward reference
+
+        .byte   alpha1$ <  num1$
+        .byte   alpha1$ <= num1$
+        .byte   alpha1$ == num1$
+        .byte   alpha1$ != num1$
+        .byte   alpha1$ >= num1$
+        .byte   alpha1$ >  num1$
+
+        .byte   alpha1$ <  alpha1$
+        .byte   alpha1$ <= alpha1$
+        .byte   alpha1$ == alpha1$
+        .byte   alpha1$ != alpha1$
+        .byte   alpha1$ >= alpha1$
+        .byte   alpha1$ >  alpha1$
+
+num1$   =   "456"
+alpha1$ =   "efg"
+
+; -------------------------------
+
+; parsed as: ("123" strop "abc") numop ("345" strop "efg")
+
+        .byte   "123" == "abc" == "345" == "efg"
+        .byte   "123" != "abc" != "345" != "efg"
+        .byte   "123" < "abc" < "345" < "efg"
+        .byte   "123" > "abc" > "345" > "efg"
+        .byte   "123" <= "abc" <= "345" <= "efg"
+        .byte   "123" >= "abc" >= "345" >= "efg"
+
+; -------------------------------
+
+; unary numeric and binary string operators
+; - string binary have precedence
+
+        .byte   !""
+        .byte   !"" == ""
+        .byte   !("" == "")
+        .byte   !"" == "a"
+        .byte   !("" == "a")
+
+        .byte   !"a"
+        .byte   !"a" == ""
+        .byte   !("a" == "")
+        .byte   !"a" == "a"
+        .byte   !("a" == "a")
+
+        .byte   0 == !""
+        .byte   1 == !""
+
+        .byte   0 == !"a"
+        .byte   1 == !"a"
+
+; -------------------------------
+
+        .end

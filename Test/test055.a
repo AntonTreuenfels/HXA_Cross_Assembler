@@ -1,0 +1,108 @@
+; Hobby Cross-Assembler Test 055
+; Expressions\String Labels
+; ok: string and numeric labels (all forms)
+
+; by Anton Treuenfels
+
+; first created: 06/01/06
+; last revised:  05/07/11
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+         .cpu    "T_16_L"   ; required psop
+         .org    $1000      ; required psop (can be labeled)
+
+         .liston    autos   ; string and numeric listed separately
+
+; -------------------------------
+
+; global form
+
+label1                      ; pc (as number)
+label1$                     ; pc (as string)
+
+        .word   label1
+        .string label1$
+
+_label2                     ; pc (as number)
+label_2$                    ; pc (as string)
+
+        .word   _label2
+        .string label_2$
+
+p.label3                    ; pc (as number)
+P.LABEL3$                   ; pc (as string)
+
+        .word   P.LABEL3
+        .string p.label3$
+
+; variable form
+
+]v_label                    ; pc (as number)
+]v.label$                   ; pc (as string)
+
+        .word   ]v_label
+        .string ]v.label$
+
+]V_label                    ; pc (as number)
+]v.LABEL$                   ; pc (as string)
+
+        .word   ]v_label
+        .string ]v.label$
+
+]v_label                    ; pc (as number)
+]v.label$                   ; pc (as string)
+
+        .word   ]V_LABEL
+        .string ]V.LABEL$
+
+; local form
+
+@local_1                    ; pc (as number)
+@local.1$                   ; pc (as string)
+
+        .word   @local_1
+        .string @local.1$
+
+global_resettus             ; global label causes erase of local labels
+
+@local_1                    ; pc (as number)
+@local.1$                   ; pc (as string)
+
+        .word   @local_1
+        .string @local.1$
+
+global_resettus_redux       ; global label causes erase of local labels
+
+@local_1                    ; pc (as number)
+@local.1$                   ; pc (as string)
+
+        .word   @local_1
+        .string @local.1$
+
+; string labels on most pseudo ops also acquire the value of the pc
+
+ pglabel$   .string pglabel$
+]pvlabel$   .string ]pvlabel$
+@pllabel$   .string @pllabel$
+
+; string labels may end with a colon character
+
+colon$:
+]colon$:
+@colon$:
+
+            .string colon$:
+            .string ]colon$:
+            .string @colon$:
+
+; -------------------------------
+
+    .end

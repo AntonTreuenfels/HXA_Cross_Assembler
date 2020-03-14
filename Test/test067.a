@@ -1,0 +1,228 @@
+; Hobby Cross-Assembler Test 067
+; Expressions\Program Counter Relative Numeric Data Definition
+; ok: "RBIT--" pseudo ops
+
+; by Anton Treuenfels
+
+; first created: 01/31/05
+; last revised:  09/22/12
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (we need a big pc)
+;        .org    $1000       ; overridden psop
+
+; -------------------------------
+
+; notes:
+; - we use "ORG" and "DS" to manipulate the program counter
+; so we can check extreme values easily
+; - the manipulation also backhandedly tests "implicit" segments
+; because the value of the program counter is often decreased
+
+; one byte offset
+
+        .org 0
+
+ -
+        .rbyte  -           ; $FF, -1
+        .rbyte  +           ; $7E, +126
+        .rbyte  -           ; $FD, -3
+        .rbyte  +           ; $7C, +124
+
+        .ds     $80-8       ; 2^7-8
+
+        .rbyte  +           ; $03, +3
+        .rbyte  -           ; $82, -126
+        .rbyte  +           ; $01, +1
+        .rbyte  -           ; $80, -128
+ +
+        .org    $7F
+
+bak08
+        .rbyte  fwd08       ; $7F, +127
+        .rbyte  bak08       ; $FE, -2
+        .rbyte  fwd08       ; $7D, +125
+        .rbyte  bak08       ; $FC, -4
+
+        .ds     $80-8       ; 2^7-8
+
+        .rbyte  bak08       ; $83, -125
+        .rbyte  fwd08       ; $02, +2
+        .rbyte  bak08       ; $81, -127
+        .rbyte  fwd08       ; $00, +0
+fwd08
+
+; -------------------------------
+
+; two bytes
+
+        .org 0
+
+ -
+        .rword  -           ; $FFFE, -2
+        .rword  +           ; $7FFC, +32764
+        .rword  -           ; $FFFA, -6
+        .rword  +           ; $7FF8, +32760
+
+        .ds     $8000-16    ; 2^15-16
+
+        .rword  +           ; $0006, +6
+        .rword  -           ; $8004, -32764
+        .rword  +           ; $0002, +2
+        .rword  -           ; $8000, -32768
+ +
+
+        .org    $7FFF
+
+bak16
+        .rword  fwd16       ; $7FFE, +32766
+        .rword  bak16       ; $FFFC, -4
+        .rword  fwd16       ; $7FFA, +32762
+        .rword  bak16       ; $FFF8, -8
+
+        .ds     $8000-16    ; 2^15-16
+
+        .rword  bak16       ; $8006, -32762
+        .rword  fwd16       ; $0004, +4
+        .rword  bak16       ; $8002, -32766
+        .rword  fwd16       ; $0000, +0
+fwd16
+
+; -------------------------------
+
+; three bytes
+
+        .org 0
+
+ -
+        .rbit24  -          ; $FFFFFD, -3
+        .rbit24  +          ; $7FFFFA, +8388602
+        .rbit24  -          ; $FFFFF7, -9
+        .rbit24  +          ; $7FFFF4, +8388596
+
+        .ds     $800000-24  ; 2^23-24
+
+        .rbit24  +          ; $000009, +9
+        .rbit24  -          ; $800006, -8388602
+        .rbit24  +          ; $000003, +3
+        .rbit24  -          ; $800000, -8388608
+ +
+
+        .org    $7FFFFF
+
+bak24
+        .rbit24  fwd24      ; $7FFFFD, +8388605
+        .rbit24  bak24      ; $FFFFFA, -6
+        .rbit24  fwd24      ; $7FFFF7, +8388599
+        .rbit24  bak24      ; $FFFFF4, -12
+
+        .ds     $800000-24  ; 2^23-24
+
+        .rbit24  bak24      ; $800009, -8388593
+        .rbit24  fwd24      ; $000006, +6
+        .rbit24  bak24      ; $800003, -8388599
+        .rbit24  fwd24      ; $000000, +0
+fwd24
+
+; -------------------------------
+
+; four bytes
+
+        .org 0
+
+ -
+        .rlong  -           ; $FFFFFFFC, -4
+        .rlong  +           ; $7FFFFFF8, +2147483640
+        .rlong  -           ; $FFFFFFF4, -12
+        .rlong  +           ; $7FFFFFF0, +2147483632
+
+        .ds     $80000000-32    ; 2^31-32
+
+        .rlong  +           ; $0000000C, +12
+        .rlong  -           ; $80000008, -2147483640
+        .rlong  +           ; $00000004, +4
+        .rlong  -           ; $80000000, -2147483648
+ +
+
+        .org    $7FFFFFFF
+
+bak32
+        .rlong  fwd32       ; $7FFFFFFC, +2147483644
+        .rlong  bak32       ; $FFFFFFF8, -8
+        .rlong  fwd32       ; $7FFFFFF4, +2147483636
+        .rlong  bak32       ; $FFFFFFF0, -16
+
+        .ds     $80000000-32    ; 2^31-32
+
+        .rlong  bak32       ; $8000000C, -2147483636
+        .rlong  fwd32       ; $00000008, +8
+        .rlong  bak32       ; $80000004, -2147483644
+        .rlong  fwd32       ; $00000000, +0
+fwd32
+
+; -------------------------------
+
+; multiple relative addresses on same source line
+
+        .org    $1000
+
+bsa
+
+       .rbyte bsa,bsa,bsa,bsa,bsa,bsa,bsa,bsa
+
+       .rbyte fsa,fsa,fsa,fsa,fsa,fsa,fsa,fsa
+
+fsa
+
+        .org    $2000
+
+bsa1
+
+       .rword bsa1,bsa1,bsa1,bsa1,bsa1,bsa1,bsa1,bsa1
+
+       .rword fsa1,fsa1,fsa1,fsa1,fsa1,fsa1,fsa1,fsa1
+
+fsa1
+
+; one byte offset
+
+        .org 0
+
+ -
+        .rbyte  -,+         ; $FF/7E, -1/+126
+        .rbyte  +,-         ; $7D/FC, +125/-4
+        .rbyte  -,+         ; $FB/7A, -5/+122
+        .rbyte  +,-         ; $79/F8, +121/-8
+
+        .ds     $80-16       ; 2^7-16
+
+        .rbyte  +,-         ; $07/86, -122/+7
+        .rbyte  -,+         ; $85/04, -123/+4
+        .rbyte  +,-         ; $03/82, +3/-126
+        .rbyte  -,+         ; $81/00, -127/0
+ +
+        .org    $7F
+
+mulbak08
+        .rbyte  mulfwd08,mulbak08       ; $7F/FE, +127/-2
+        .rbyte  mulbak08,mulfwd08       ; $FD/7C, -3/+126
+        .rbyte  mulfwd08,mulbak08       ; $7B/FA, +125/-6
+        .rbyte  mulbak08,mulfwd08       ; $F9/78, -7/+122
+
+        .ds     $80-16                  ; 2^7-16
+
+        .rbyte  mulbak08,mulfwd08       ; $87/06, -121/+6
+        .rbyte  mulfwd08,mulbak08       ; $05/84, +5/-124
+        .rbyte  mulbak08,mulfwd08       ; $83/02, -125/+2
+        .rbyte  mulfwd08,mulbak08       ; $01/80, +1/-128
+mulfwd08
+
+; -------------------------------
+
+        .end                    

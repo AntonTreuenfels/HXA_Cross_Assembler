@@ -1,0 +1,172 @@
+; Hobby Cross-Assembler Test 084
+; Expressions\String Expressions
+; ok: string concatenation
+
+; by Anton Treuenfels
+
+; first created: 12/07/05
+; last revised:  02/25/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+ -                          ; we'll use this later (note LSB is zero)
+
+; -------------------------------
+; string context
+; -------------------------------
+
+        .string "a"         ; "a"
+
+        .string "a" "b"     ; "ab"
+
+        .string "a" "b" "c" ; "abc"
+
+        .string "a""b""c""d"    ; "abcd"
+
+        .string "ab" "cd"   ; "abcd"
+
+; -------------------------------
+
+; null strings
+
+        .string "a" ""      ; "a"
+
+        .string "" "a"      ; "a"
+
+        .string "a" "b" ""  ; "ab"
+
+        .string "a" "" "b"  ; "ab"
+
+        .string "" "a" "b"  ; "ab"
+
+; -------------------------------
+; numeric context
+; -------------------------------
+
+        .byte   "ab" == "ab"
+
+        .byte   "a" "b" == "ab"
+
+        .byte   "ab" == "a" "b"
+
+        .byte   "a" "b" == "a" "b"
+
+        .byte   "ab" == "ab" + 1
+
+        .byte   "a" "b" == "ab" + 1
+
+        .byte   "ab" == "a" "b" + 1
+
+        .byte   "a" "b" == "a" "b" + 1
+
+        .byte   2 + "ab" == "ab"
+
+        .byte   2 + "a" "b" == "ab"
+
+        .byte   2 + "ab" == "a" "b"
+
+        .byte   2 + "a" "b" == "a" "b"
+
+; -------------------------------
+
+; null strings
+
+        .byte   "a" == "a"
+
+        .byte   "a" "" == "" "a"
+
+        .byte   "a" "" "" == "" "" "a"
+
+        .byte   "" "a" "" == "" "a" ""
+
+; -------------------------------
+
+; parentheses
+; - limitations: due to the way parsing is handled, only the first
+; string operand can be preceeded by one or more open parenthesis
+
+        .string ("a")"b"
+
+        .string ("a""b")
+        
+        .string (("a"))"b"
+
+        .string (("a")"b")
+
+        .string (("a" "b"))
+
+        .string ("a") "b" "c"
+
+        .string ("a" "b") "c"
+
+        .string ("a" "b" "c")
+
+        .string (("a")) "b" "c"
+
+        .string (("a") "b") "c"
+
+        .string (("a") "b" "c")
+
+        .string ((("a"))) "b" "c"
+
+        .string ((("a")) "b") "c"
+
+        .string ((("a") "b") "c")
+
+; -------------------------------
+
+; concatenation with string labels
+
+strA$   .equ    "a"
+strB$   .equ    "b"
+strC$   .equ    "c"
+strD$   .equ    "d"
+
+        .string strA$
+
+        .string strA$ "b"
+
+        .string strA$ strB$ "c"
+
+        .string strA$ strB$ strC$ "d"
+
+        .string "a"
+
+        .string "a"strB$
+
+        .string "a"strB$strC$
+
+        .string "a"strB$strC$strD$
+
+; -------------------------------
+
+; implied concatenation of mixed arguments
+
+        .string "Hello, World!", 0x00
+
+        .string "Hello, World!", 0
+
+        .string "Hello, World!", -      ; we're using that label now
+
+; -------------------------------
+
+; numeric escape codes
+; - here we use concatenation to show how to "break up" what would
+; otherwise be accepted as a longer escape code
+
+        .string "\$08"  "\$0"  "8"
+        .string "\19H"  "\1H"  "9"
+        .string "\0x2A" "\0x2" "A"
+        .string "\x3b"  "\x3"  "b"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,136 @@
+; Hobby Cross-Assembler Error Test 090f
+; Expressions\Expression Evaluation
+; error: out-of-range values
+
+; by Anton Treuenfels
+
+; first created: 07/12/03
+; last revised:  01/23/10
+
+; warning(s): 0
+
+; error(s): 21
+; - value out of range
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+minSigned   .equ    -2147483648     ; -2^31
+maxUnsigned .equ     4294967295     ;  2^32-1
+
+GB          .equ     1073741824D    ;  2^30
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; out-of-range at expression end
+
+        .long   minSigned - 1
+        .long   maxUnsigned + 1
+
+        .long   minSigned + 1 - 2
+        .long   maxUnsigned - 1 + 2
+
+        .long   1 + minSigned - 2
+        .long   2 + maxUnsigned - 1
+
+        .long   1 - 2 + minSigned
+        .long   2 - 1 + maxUnsigned
+
+        .long   minSigned + minSigned     ; adds negatives
+        .long   maxUnsigned + maxUnsigned
+
+        .long   2 * minSigned
+        .long   2 * maxUnsigned
+
+; in-range at expression end
+; - in every expression, intermediate results are more than
+; 32 significant bits
+; - all give no error (and correct result) except last in each series,
+; which has an end result greater than 32 significant bits
+; - binary and hexadecimal literals larger than maxUnsigned will cause an
+; error as soon as detected (and the expression as a whole won't be evaluated)
+
+
+        .long   5 * GB - 3 * GB     ; = 2GB
+        .long   5 * GB - 4 * GB     ; = 1GB
+        .long   5 * GB - 5 * GB     ; = 0
+        .long   5 * GB - 6 * GB     ; = -1GB
+        .long   5 * GB - 7 * GB     ; = -2GB
+        .long   5 * GB - 8 * GB     ; = -3GB (out of range)
+
+        .long  -4 * GB + 3 * GB     ; = -1GB
+        .long  -4 * GB + 4 * GB     ; = 0
+        .long  -4 * GB + 5 * GB     ; = 1GB
+        .long  -4 * GB + 6 * GB     ; = 2GB
+        .long  -4 * GB + 7 * GB     ; = 3GB
+        .long  -4 * GB + 8 * GB     ; = 4GB (out of range)
+        .long  -4 * GB + 9 * GB     ; = 5GB (out of range)
+
+        .long   1 + maxUnsigned - 2
+        .long   10 + maxUnsigned - 20
+        .long   100 + maxUnsigned - 200
+        .long   1000 + maxUnsigned - 2000
+        .long   10000 + maxUnsigned - 20000
+        .long   100000 + maxUnsigned - 200000
+        .long   1000000 + maxUnsigned - 2000000
+        .long   10000000 + maxUnsigned - 20000000
+        .long   100000000 + maxUnsigned - 200000000
+        .long   1000000000 + maxUnsigned - 2000000000
+        .long   10000000000 + maxUnsigned - 2000000000  ; not fully evaluated
+
+        .long  -1d + minSigned + 2d
+        .long  -10d + minSigned + 20d
+        .long  -100d + minSigned + 200d
+        .long  -1000d + minSigned + 2000d
+        .long  -10000d + minSigned + 20000d
+        .long  -100000d + minSigned + 200000d
+        .long  -1000000d + minSigned + 2000000d
+        .long  -10000000d + minSigned + 20000000d
+        .long  -100000000d + minSigned + 200000000d
+        .long  -1000000000d + minSigned + 200000000d
+        .long  -10000000000d + minSigned + 200000000d   ; not fully evaluated
+
+        .long   $1 + maxUnsigned - $2
+        .long   $10 + maxUnsigned - $20
+        .long   $100 + maxUnsigned - $200
+        .long   $1000 + maxUnsigned - $2000
+        .long   $10000 + maxUnsigned - $20000
+        .long   $100000 + maxUnsigned - $200000
+        .long   $1000000 + maxUnsigned - $2000000
+        .long   $10000000 + maxUnsigned - $20000000
+        .long   $100000000 + maxUnsigned - $200000000   ; not fully evaluated
+
+        .long   1H+ maxUnsigned - 2H
+        .long   10H+ maxUnsigned - 20H
+        .long   100H+ maxUnsigned - 200H
+        .long   1000H+ maxUnsigned - 2000H
+        .long   10000H+ maxUnsigned - 20000H
+        .long   100000H+ maxUnsigned - 200000H
+        .long   1000000H+ maxUnsigned - 2000000H
+        .long   10000000H+ maxUnsigned - 20000000H
+        .long   100000000H+ maxUnsigned - 200000000H    ; not fully evaluated
+
+        .long   0x1 + maxUnsigned - 0x2
+        .long   0x10 + maxUnsigned - 0x20
+        .long   0x100 + maxUnsigned - 0x200
+        .long   0x1000 + maxUnsigned - 0x2000
+        .long   0x10000 + maxUnsigned - 0x20000
+        .long   0x100000 + maxUnsigned - 0x200000
+        .long   0x1000000 + maxUnsigned - 0x2000000
+        .long   0x10000000 + maxUnsigned - 0x20000000
+        .long   0x100000000 + maxUnsigned - 0x200000000 ; not fully evaluated
+
+;-------------------------------
+
+        .end

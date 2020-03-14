@@ -1,0 +1,96 @@
+; Hobby Cross-Assembler Test 051
+; Expressions\Local Labels
+; ok: local labels
+
+; by Anton Treuenfels
+
+; first created: 06/12/03
+; last revised:  08/11/12
+
+; no errors to detect
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos   ; "auto-generated" labels shown in symbol listing
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+@local1                     ; =current value of PC
+
+        .word   global1
+
+        .word   @local1     ; refers to first occurance (backward ref)
+
+global1:                    ; global clears local label(s)
+
+        .word   @local1     ; refers to second occurance (forward ref)
+
+        .word   global1
+
+@local1
+
+; -------------------------------
+
+        ; numeric names
+
+@123456789
+
+@99     .word   @0
+
+@3
+
+@2      .word   @1, @2, @3
+
+@1
+
+@0      .word   @99
+
+        .word   @123456789
+
+global2:                        ; global clears local label(s)
+
+        ; numeric names again (new values to each)
+
+@123456789
+
+@99     .word   @0
+
+@3
+
+@2      .word   @1, @2, @3
+
+@1
+
+@0      .word   @99
+
+        .word   @123456789
+
+; -------------------------------
+
+        ; odd but legal names
+
+        .word   @
+
+        .word   @_
+
+        .word   @._
+
+        .word   @__
+
+        .word   @_._._
+
+@
+@_
+@._
+@__
+@_._._
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,177 @@
+; Hobby Cross-Assembler Error Test 067e
+; Expressions\Program Counter Relative Numeric Data Definition
+; error: value out of relative range
+
+; by Anton Treuenfels
+
+; first created: 01/31/05
+; last revised:  01/09/10
+
+; warning(s): 0
+
+; error(s): 8
+; - value out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop (we need a big pc)
+;        .org    $1000       ; overridden psop
+
+; -------------------------------
+
+; the same as test067.a, except we increase the size of the gaps
+; the size of the data type
+; - the largest backward and forward references in each group will
+; become out of range
+
+; one byte offset
+
+        .org 0
+
+ -
+        .rbyte  -           ; $FF, -1
+        .rbyte  +           ; $7F, +127
+        .rbyte  -           ; $FD, -3
+        .rbyte  +           ; $7D, +125
+
+        .ds     $80-8+1     ; 2^7-8+1
+
+        .rbyte  +           ; $03, +3
+        .rbyte  -           ; $81, -127
+        .rbyte  +           ; $01, +1
+        .rbyte  -           ; ($7F), -129
+ +
+        .org    $7F-1
+
+bak08
+        .rbyte  fwd08       ; ($80), +128
+        .rbyte  bak08       ; $FE, -2
+        .rbyte  fwd08       ; $7E, +126
+        .rbyte  bak08       ; $FC, -4
+
+        .ds     $80-8+1     ; 2^7-8+1
+
+        .rbyte  bak08       ; $82, -126
+        .rbyte  fwd08       ; $02, +2
+        .rbyte  bak08       ; $80, -128
+        .rbyte  fwd08       ; $00, +0
+fwd08
+
+; -------------------------------
+
+; two bytes
+
+        .org 0
+
+ -
+        .rword  -           ; $FFFE, -2
+        .rword  +           ; $7FFE, +32766
+        .rword  -           ; $FFFA, -6
+        .rword  +           ; $7FFA, +32762
+
+        .ds     $8000-16+2  ; 2^15-16+2
+
+        .rword  +           ; $0006, +6
+        .rword  -           ; $8002, -32766
+        .rword  +           ; $0002, +2
+        .rword  -           ; ($7FFE), -32770
+ +
+
+        .org    $7FFF-2
+
+bak16
+        .rword  fwd16       ; ($8000), +32768
+        .rword  bak16       ; $FFFC, -4
+        .rword  fwd16       ; $7FFF, +32764
+        .rword  bak16       ; $FFF8, -8
+
+        .ds     $8000-16+2  ; 2^15-16+2
+
+        .rword  bak16       ; $8004, -32760
+        .rword  fwd16       ; $0004, +4
+        .rword  bak16       ; $8000, -32768
+        .rword  fwd16       ; $0000, +0
+fwd16
+
+; -------------------------------
+
+; three bytes
+
+        .org 0
+
+ -
+        .rbit24  -          ; $FFFFFD, -3
+        .rbit24  +          ; $7FFFFD, +8388605
+        .rbit24  -          ; $FFFFF7, -9
+        .rbit24  +          ; $7FFFF7, +8388599
+
+        .ds     $800000-24+3    ; 2^23-24+3
+
+        .rbit24  +          ; $000009, +9
+        .rbit24  -          ; $800003, -8388605
+        .rbit24  +          ; $000003, +3
+        .rbit24  -          ; ($7FFFFC), -8388611
+ +
+
+        .org    $7FFFFF-3
+
+bak24
+        .rbit24  fwd24      ; ($800000), +8388608
+        .rbit24  bak24      ; $FFFFFA, -6
+        .rbit24  fwd24      ; $7FFFFA, +8388602
+        .rbit24  bak24      ; $FFFFF4, -12
+
+        .ds     $800000-24+3    ; 2^23-24+3
+
+        .rbit24  bak24      ; $800006, -8388602
+        .rbit24  fwd24      ; $000006, +6
+        .rbit24  bak24      ; $800000, -8388608
+        .rbit24  fwd24      ; $000000, +0
+fwd24
+
+; -------------------------------
+
+; four bytes
+
+        .org 0
+
+ -
+        .rlong  -           ; $FFFFFFFC, -4
+        .rlong  +           ; $7FFFFFFC, +2147483644
+        .rlong  -           ; $FFFFFFF4, -12
+        .rlong  +           ; $7FFFFFF4, +2147483636
+
+        .ds     $80000000-32+4  ; 2^31-32+4
+
+        .rlong  +           ; $0000000C, +12
+        .rlong  -           ; $80000004, -2147483644
+        .rlong  +           ; $00000004, +4
+        .rlong  -           ; ($7FFFFFFC), -2147483652
+ +
+
+        .org    $7FFFFFFF-4
+
+bak32
+        .rlong  fwd32       ; ($80000000), +2147483648
+        .rlong  bak32       ; $FFFFFFF8, -8
+        .rlong  fwd32       ; $7FFFFFF8, +2147483640
+        .rlong  bak32       ; $FFFFFFF0, -16
+
+        .ds     $80000000-32+4  ; 2^31-32+4
+
+        .rlong  bak32       ; $80000008, -2147483640
+        .rlong  fwd32       ; $00000008, +8
+        .rlong  bak32       ; $80000000, -2147483648
+        .rlong  fwd32       ; $00000000, +0
+fwd32
+
+; -------------------------------
+
+        .end

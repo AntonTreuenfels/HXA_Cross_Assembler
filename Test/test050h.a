@@ -1,0 +1,46 @@
+; Hobby Cross-Assembler Error Test 050h
+; Expressions\Global Labels
+; error: duplicate labels
+
+; by Anton Treuenfels
+
+; first created: 07/28/05
+; last revised:  05/28/11
+
+; warning(s): 1
+; - odd use
+
+; error(s): 1
+; - duplicate name
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; global labels can be assigned the same value any number of times
+
+label1                      ; = pc ($1000)
+
+label1                      ; ok - value not changed ($1000)
+
+label1  .byte   $00         ; ok - value not changed ($1000)
+
+label1  .equ    $1000       ; ok - value not changed ($1000)
+
+label1  .equ    $1001 - 1   ; ok - value not changed ($1000)
+
+label1  .byte   $00         ; error - value changed ($1001)
+
+; -------------------------------
+
+        .end

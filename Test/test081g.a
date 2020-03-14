@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Error Test 081g
+; Expressions\Numeric Binary Operators
+; error: modulus by zero
+
+; by Anton Treuenfels
+
+; first created: 01/02/10
+; last revised:  06/23/12
+
+; warning(s): 0
+
+; error(s): 1
+; - divide by zero
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+zero    =   0
+nonzero =   123
+
+        .word   nonzero % zero  ; error
+
+; -------------------------------
+
+        .end

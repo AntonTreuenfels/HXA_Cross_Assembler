@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Error Test 086f
+; Expressions\Ternary Conditional
+; error: bad forward reference (pass 2)
+
+; by Anton Treuenfels
+
+; first created: 04/29/07
+; last revised:  05/16/09
+
+; warning(s): 0
+
+; error(s): 8
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; unresolved forward reference
+
+        .byte   f0 ? 1 : 2
+        .byte   0 ? f1 : 2      ; no error because 'f1' not evaluated
+        .byte   0 ? 1 : f2
+
+        .byte   f1 ? 2 : 3
+        .byte   1 ? f2 : 3
+        .byte   1 ? 2 : f3      ; no error because 'f3' not evaluated
+
+        .byte   f0$ ? 1 : 2
+        .byte   "" ? f1 : 2     ; no error because 'f1' not evaluated
+        .byte   "" ? 1 : f2
+
+        .byte   f1$ ? 2 : 3
+        .byte   "1" ? f2 : 3
+        .byte   "1" ? 2 : f3    ; no error because 'f3' not evaluated
+
+; -------------------------------
+
+        .end
