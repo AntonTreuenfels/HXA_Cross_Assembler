@@ -1,0 +1,32 @@
+; Hobby Cross-Assembler Error Test 281h
+; Motorola SRecord Object\Start Records
+; error: start address not numeric
+
+; by Anton Treuenfels
+
+; first created: 12/04/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - need number
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .srecfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    "a string"      ; error

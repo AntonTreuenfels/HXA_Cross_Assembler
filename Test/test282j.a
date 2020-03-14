@@ -1,0 +1,33 @@
+; Hobby Cross-Assembler Error Test 282j
+; Motorola SRecord Object\Assume Wider Address Type
+; error: 16 bit to 32 bits, bad start address
+
+; by Anton Treuenfels
+
+; first created: 12/05/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .srecfile               ; create an object file...
+        .assume srecfile:s37    ; ...with a wider than default type
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    $10000          ; 17 bits (more than cpu bits)

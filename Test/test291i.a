@@ -1,0 +1,32 @@
+; Hobby Cross-Assembler Error Test 291i
+; Intel Hexadecimal Object\Start Records
+; error: start address not found
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    _unknownLabel   ; error (not found)

@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 290b
+; Intel Hexadecimal Object\Basic Records
+; ok: 20-bit (data, EOF and extended segment address records)
+
+; by Anton Treuenfels
+
+; first created: 07/18/05
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+		.cpu	"T_20_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end

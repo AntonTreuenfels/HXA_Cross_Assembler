@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 291b
+; Intel Hexadecimal Object\Start Records
+; ok: 20-bit (data, EOF, extended and start segment address records)
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+		.cpu	"T_20_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

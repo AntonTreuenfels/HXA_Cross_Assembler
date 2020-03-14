@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 293g
+; Intel Hexadecimal Object\Assume Narrower Address Type
+; error: 32 bits to 20 bits; bad data address (late assumption)
+
+; by Anton Treuenfels
+
+; first created: 12/06/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+;        .assume hexfile:segmented   ; ...with segmented address
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "inarrow.a"
+
+        .org    $100000             ; we can set this address...
+        .word   $00                 ; ...but putting something there is bad !
+
+        .assume hexfile:segmented   ; ...with segmented address
+
+; -------------------------------
+
+        .end    start

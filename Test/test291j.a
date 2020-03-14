@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 291j
+; Intel Hexadecimal Object\Start Records
+; error: "END" w/ start expression within macro
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; warning(s): 1
+; - odd use
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+; put start address expression inside macro
+
+        .macro  do_end
+        .end    _unknownLabel   ; expression is never evaluated
+        .endm
+
+; try it
+
+        do_end

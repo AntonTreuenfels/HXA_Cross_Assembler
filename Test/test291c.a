@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 291c
+; Intel Hexadecimal Object\Start Records
+; ok: 32-bit (data, EOF, extended and start linear address records)
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

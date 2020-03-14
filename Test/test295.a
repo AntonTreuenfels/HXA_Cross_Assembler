@@ -1,0 +1,30 @@
+; Hobby Cross-Assembler Test 295
+; Intel Hexadecimal Object\Output Greater than 64K
+; ok: 20-bit (data, EOF and extended segment address records)
+
+; by Anton Treuenfels
+
+; first created: 10/18/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_20_L"    ; required psop
+        .org    0           ; required psop
+
+; -------------------------------
+
+        ; a LOT of output
+
+        .fill   70*1024, 00112233445566778899AABBCCDDEEFF
+
+; -------------------------------
+
+        .end

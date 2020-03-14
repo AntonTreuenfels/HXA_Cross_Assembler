@@ -1,0 +1,26 @@
+; Hobby Cross-Assembler Test 286
+; Motorola SRecord Object\Assume More Data
+; ok: assume 32 hex data bytes per record (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 03/24/10
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile                   ; create an object file...
+        .assume hexdatasize=32      ; ...with 32 data bytes per record
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

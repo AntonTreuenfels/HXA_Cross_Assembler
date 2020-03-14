@@ -1,0 +1,29 @@
+; Hobby Cross-Assembler Test 287
+; Motorola SRecord Object\Overlapping Addresses (Monolithic)
+; ok: 16-bit (header, data, count and EOF records)
+
+; by Anton Treuenfels
+
+; first created: 03/26/11
+; last revised:  03/26/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile           ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_16_M"
+
+        .include "ihexdata.a"
+
+        ; the simple way to test...
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end

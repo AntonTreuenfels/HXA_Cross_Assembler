@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 292f
+; Intel Hexadecimal Object\Assume Wider Address Type
+; warn: 16 bits to 20 bits, cannot change
+
+; by Anton Treuenfels
+
+; first created: 08/06/05
+; last revised:  02/05/11
+
+; warning(s): 1
+; - already set
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexfile:segmented   ; ...with segmented address
+
+        .assume hexfile:segmented   ; okay
+
+        .assume hexfile:linear      ; warn - can't change
+
+        .assume hexfile:segmented   ; okay
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

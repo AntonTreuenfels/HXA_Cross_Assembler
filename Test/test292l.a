@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Error Test 292l
+; Intel Hexadecimal Object\Assume Wider Address Type
+; error: 16 bits to 20 bits; bad data address
+
+; by Anton Treuenfels
+
+; first created: 12/05/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexfile:segmented   ; ...with segmented address
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+        .org    $10000              ; we can set this address...
+        .word   $00                 ; ...but putting something there is bad !
+
+; -------------------------------
+
+        .end    start

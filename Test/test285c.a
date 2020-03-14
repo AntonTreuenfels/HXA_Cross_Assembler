@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Test 285d
+; Motorola SRecord Object\Assume Record Supressed
+; ok: assume no header or count (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/12/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile                   ; create an object file...
+        .assume srecfile:noheader   ; ...with no header record...
+        .assume srecfile:nocount    ; ...or count record
+
+        ; also show we can specify these more than once w/o problems
+
+        .assume srecfile:noheader   ; ...with no header record...
+        .assume srecfile:nocount    ; ...count record
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+        ; yes we can...
+
+        .assume srecfile:noheader   ; ...with no header record...
+        .assume srecfile:nocount    ; ...count record
+
+; -------------------------------
+
+        .end    start

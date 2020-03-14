@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 283g
+; Motorola SRecord Object\Assume Narrower Address Type
+; error: 32-bit to 24-bit, bad data address (late assumption)
+
+; by Anton Treuenfels
+
+; first created: 12/06/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .srecfile                   ; create an object file...
+;        .assume srecfile:s28        ; ...with 20-bit addresses
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "inarrow.a"
+
+        .org    $1000000            ; we can set this address...
+        .word   $00                 ; ...but putting something there is bad !
+
+        .assume srecfile:s28        ; ...with 20-bit addresses
+
+; -------------------------------
+
+        .end    start               ; okay

@@ -1,0 +1,35 @@
+; Hobby Cross-Assembler Error Test 291e
+; Intel Hexadecimal Object\Start Records
+; error: start address out of range (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 08/04/05
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+; any expression following 'END' is evaluated and range-checked,
+; even if it won't be used to create a record in a hex output file
+
+        .end    maxaddr+1       ; error

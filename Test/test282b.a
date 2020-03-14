@@ -1,0 +1,26 @@
+; Hobby Cross-Assembler Test 282b
+; Motorola SRecord Object\Assume Wider Address Type
+; ok: 16-bit to 32-bit
+
+; by Anton Treuenfels
+
+; first created: 12/05/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile               ; create an object file...
+        .assume srecfile:s37    ; ...with a wider than default type
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

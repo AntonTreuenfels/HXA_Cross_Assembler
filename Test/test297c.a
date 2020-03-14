@@ -1,0 +1,29 @@
+; Hobby Cross-Assembler Test 297c
+; Intel Hexadecimal Object\Overlapping Addresses (Monolithic)
+; ok:32-bit (data and EOF records)
+
+; by Anton Treuenfels
+
+; first created: 05/27/11
+; last revised:  05/27/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_32_L"
+
+        .include "ihexdata.a"
+
+        ; the simple way to test...
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end

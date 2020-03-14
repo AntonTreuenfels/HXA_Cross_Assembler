@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Error Test 286e
+; Motorola SRecord Object\Assume More Data
+; warn\error: malformed; out-of-range; unique value
+
+; by Anton Treuenfels
+
+; first created: 03/24/10
+; last revised:  02/05/11
+
+; warning(s): 2
+; - already set
+
+; error(s): 7
+; - null expr
+; - blank field
+; - too small
+; - too big
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; malformed/out-of-range
+
+        .assume hexdatasize             ; null expr
+
+        .assume hexdatasize:            ; blank field
+
+        .assume hexdatasize=7           ; too small
+
+        .assume hexdatasize:8 - 1       ; too small
+
+        .assume hexdatasize=33          ; too big
+
+        .assume hexdatasize:16*2 + 1    ; too big
+
+; -------------------------------
+
+; cannot set more than once
+
+        .assume hexdatasize:24          ; okay
+
+        .assume hexdatasize=12 * 2      ; okay
+
+        .assume hexdatasize:32          ; already set
+
+        .assume hexdatasize=33          ; too big (takes precedence)
+
+        .assume hexdatasize:16          ; already set
+
+        .assume hexdatasize=4+4+4+4+4+4 ; okay
+
+; -------------------------------
+
+; we don't actually do anything more because we're not testing anything more
+
+; -------------------------------
+
+        .end    start

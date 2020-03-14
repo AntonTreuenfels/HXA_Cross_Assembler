@@ -1,0 +1,58 @@
+; Hobby Cross-Assembler Test 298b
+; Intel Hexadecimal Object\Address Jumps Force New Address Records
+; ok: 32-bit (data, EOF and extended segment address records)
+
+; by Anton Treuenfels
+
+; first created: 08/13/13
+; last revised:  08/13/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop
+
+; -------------------------------
+
+; each 'org' should produce a new extended address record
+
+        .org    $EFFF0000
+
+]temp    =   $FFFF0000
+
+        .repeat 64
+        .bit32  ]temp
+]temp    = ]temp - $FFFF
+        .endr
+
+; jump address about 64K higher
+
+        .org    $F0000000
+
+]temp    =   $FFFF0000
+
+        .repeat 64
+        .bit32  ]temp
+]temp    = ]temp - $FFFF
+        .endr
+
+; jump address about 4K lower
+
+        .org    $EFFFF000
+
+]temp    =   $FFFF0000
+
+        .repeat 64
+        .bit32  ]temp
+]temp    = ]temp - $FFFF
+        .endr
+
+; -------------------------------
+
+        .end

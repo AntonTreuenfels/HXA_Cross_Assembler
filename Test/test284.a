@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 284
+; Motorola SRecord Object\Named Output File
+; ok: user-specified name
+
+; by Anton Treuenfels
+
+; first created: 12/07/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile   "srecname.s19"  ; create a named object file
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end

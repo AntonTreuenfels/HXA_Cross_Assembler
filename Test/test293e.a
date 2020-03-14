@@ -1,0 +1,33 @@
+; Hobby Cross-Assembler Error Test 293e
+; Intel Hexadecimal Object\Assume Narrower Address Type
+; error: 32 bits to 20 bits; bad start address
+
+; by Anton Treuenfels
+
+; first created: 12/06/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexfile:segmented   ; ...with 20-bit addresses
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "inarrow.a"
+
+; -------------------------------
+
+        .end    $100000             ; 21 bits (wider than output format)

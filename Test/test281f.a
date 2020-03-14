@@ -1,0 +1,32 @@
+; Hobby Cross-Assembler Error Test 281f
+; Motorola SRecord Object\Start Records
+; error: start address out of range (24-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/04/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .srecfile
+
+; -------------------------------
+
+        .cpu    "T_24_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    maxaddr+1      ; error

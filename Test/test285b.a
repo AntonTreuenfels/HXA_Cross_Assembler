@@ -1,0 +1,26 @@
+; Hobby Cross-Assembler Test 285b
+; Motorola SRecord Object\Assume Record Supressed
+; ok: assume no S5/S6 (count) record (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 12/12/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile                   ; create an object file...
+        .assume srecfile:nocount    ; ...with no count record
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

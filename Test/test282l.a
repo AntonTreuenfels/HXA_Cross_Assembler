@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Error Test 282l
+; Motorola SRecord Object\Assume Wider Address Type
+; error: 16 bit to 24 bits, bad data address
+
+; by Anton Treuenfels
+
+; first created: 12/05/09
+; last revised:  02/05/11
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .srecfile               ; create an object file...
+        .assume srecfile:s28    ; ...with a wider than default type
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+        .org    $10000              ; we can set this address...
+        .word   $00                 ; ...but putting something there is bad !
+
+; -------------------------------
+
+        .end    start           ; okay

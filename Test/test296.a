@@ -1,0 +1,26 @@
+; Hobby Cross-Assembler Test 296
+; Intel Hexadecimal Object\Assume More Data
+; ok: assume 32 hex data bytes per record (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 02/05/11
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexdatasize=32      ; ...with 32 data bytes per record
+
+; -------------------------------
+
+        .cpu    "T_16_L"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

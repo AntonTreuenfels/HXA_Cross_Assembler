@@ -1,0 +1,32 @@
+; Hobby Cross-Assembler Error Test 291f
+; Intel Hexadecimal Object\Start Records
+; error: start address out of range (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; warning(s): 
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    maxaddr+1       ; error

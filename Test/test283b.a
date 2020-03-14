@@ -1,0 +1,26 @@
+; Hobby Cross-Assembler Test 283b
+; Motorola SRecord Object\Assume Narrower Address Type
+; ok: 32-bit to 16-bit
+
+; by Anton Treuenfels
+
+; first created: 12/06/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile               ; create an object file...
+        .assume srecfile:s19    ; ...with a narrower than default type
+
+; -------------------------------
+
+		.cpu	"T_32_M"
+
+        .include "inarrow.a"
+
+; -------------------------------
+
+        .end    start

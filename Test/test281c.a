@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 281c
+; Motorola SRecord Object\Start Records
+; ok: 32-bit (header, data, count and non-zero EOF records)
+
+; by Anton Treuenfels
+
+; first created: 12/04/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile           ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_32_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

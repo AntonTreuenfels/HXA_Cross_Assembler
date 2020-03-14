@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 284e
+; Motorola SRecord Object\Named Output File
+; warn\error: malformed name
+
+; by Anton Treuenfels
+
+; first created: 12/07/09
+; last revised:  05/28/11
+
+; warning(s): 3
+; - ignored
+; - odd value
+
+; error(s): 4
+; - need string op
+; - need filename
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+label1  .srecfile   "srecerr1" .txt     ; bad string expression
+
+        .srecfile   ""                  ; null name
+
+        .srecfile   mid$( "abc", 100 )  ; null name
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

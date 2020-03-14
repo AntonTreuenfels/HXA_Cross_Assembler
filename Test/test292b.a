@@ -1,0 +1,28 @@
+; Hobby Cross-Assembler Test 292b
+; Intel Hexadecimal Object\Assume Wider Address Type
+; ok: 16-bit to 32-bit
+
+; by Anton Treuenfels
+
+; first created: 07/18/05
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexfile:linear      ; ...with linear address
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+; segmented and linear address records *do* use start records
+
+        .end    start

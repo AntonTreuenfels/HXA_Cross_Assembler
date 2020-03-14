@@ -1,0 +1,39 @@
+; Hobby Cross-Assembler Error Test 292g
+; Intel Hexadecimal Object\Assume Wider Address Type
+; warn: 16 bits to 32 bits, cannot change
+
+; by Anton Treuenfels
+
+; first created: 08/06/05
+; last revised:  02/05/11
+
+; warning(s): 1
+; - already set
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .hexfile                    ; create an object file...
+        .assume hexfile:linear      ; ...with linear address
+
+        .assume hexfile:linear      ; okay
+
+        .assume hexfile:segmented   ; warn - can't change
+
+        .assume hexfile:linear      ; okay
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end    start

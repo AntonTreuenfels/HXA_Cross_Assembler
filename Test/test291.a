@@ -1,0 +1,27 @@
+; Hobby Cross-Assembler Test 291
+; Intel Hexadecimal Object\Start Records
+; ok: 16-bit (data and EOF records)
+
+; by Anton Treuenfels
+
+; first created: 07/19/05
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile            ; create an object file
+
+; -------------------------------
+
+		.cpu	"T_16_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+; there is no start record format specified for 16-bit hex files
+
+        .end    start       ; evaluated and range-checked (but no record)

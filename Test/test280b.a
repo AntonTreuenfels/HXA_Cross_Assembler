@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 280b
+; Motorola SRecord Object\Basic Records
+; ok: 24-bit (header, data, count and EOF records)
+
+; by Anton Treuenfels
+
+; first created: 12/03/09
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile           ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_24_M"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end
