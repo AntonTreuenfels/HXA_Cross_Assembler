@@ -1,0 +1,425 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Hobby Cross Assembler T_XX</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Hobby Cross Assembler T_XX</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l05">License and Terms</A>
+<LI><A HREF="#l02">Contact Information</A>
+<LI><A HREF="#l08">Scope of This Document</A>
+<LI><A HREF="#l07">Related Resources</A>
+<LI><A HREF="#l04">Hardware and Software Requirements</A>
+<LI><A HREF="#l03">Executing HXA_T</A>
+<LI><A HREF="#l06">Predefined Label</A>
+<LI><A HREF="#l09">T_XX Processors</A>
+<UL>
+<LI><A HREF="#l0b">Instruction Set</A>
+<LI><A HREF="#l0a">CPU Descriptor</A>
+</UL>
+<LI><A HREF="#l01">ASSUME Pseudo Opcode</A>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">License and Terms</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+<P>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+<P>
+You should have received a copy of the
+<A HREF="license.gpl">GNU General Public License</A>
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Contact Information</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Snail-mail:
+<UL>
+<LI>
+Anton Treuenfels
+<LI>
+5248 Horizon Dr
+<LI>
+Fridley MN 55421
+</UL>
+<P>
+E-mail:
+<UL>
+<LI>
+<A HREF="mailto:hxa@earthlink.net">hxa@earthlink.net</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA is designed to be fairly portable between various processors.
+<P>
+This document describes the imaginary "T_XX" family of test processors and
+the portions of the HXA_T variant of HXA dependent upon them.
+<P>
+HXA_T is the assembler used for all general
+<A HREF="hxa_test.htm">test</A>
+ and 
+<A HREF="hxa_demo.htm">demonstration</A>
+ programs.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA
+<UL>
+<LI>
+<A HREF="hxa.htm">Main Documentation</A>
+</UL>
+<P>
+HXA_T
+<UL>
+<LI>
+<A HREF="hxa_test.htm">General Tests</A>
+ : basic functionality tests
+<LI>
+<A HREF="hxa_demo.htm">General Demos</A>
+ : intermediate functionality tests
+<LI>
+<A HREF="../source/a_instst.awk">Module Source</A>
+ : customization of HXA
+to create HXA_T
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Hardware and Software Requirements</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA for Windows
+<UL>
+<LI>
+Win 95 or higher (tested on Win98SE, WinME, WinVista 64-bit)
+<LI>
+execute at Command Line Interface (MS-DOS prompt)
+</UL>
+<P>
+HXA for MS-DOS
+<UL>
+<LI>
+PC compatible (floating point unit used if available)
+<LI>
+512 KB or more memory (extended or expanded memory used if available)
+<LI>
+MS-DOS 2.1 or higher
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Executing HXA_T</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA_T accepts a single filename as a command-line argument:
+<P>
+<CODE>
+<STRONG>HXA_T</STRONG>
+<EM>filename</EM>
+</CODE>
+<P>
+There are no other command-line arguments, options or switches.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Predefined Label</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+In addition to the 
+<A HREF="hxa.htm#l3a">__HXA__</A>
+ built-in label defined
+by all HXA variants, HXA_T defines a variant identifier label:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Value</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+__HXA_T__
+<TD>
+TRUE
+</TABLE>
+<P>
+This label may be used anywhere but is intended mainly
+for &lt;hxa:IF--DEF|"IFDEF"&gt; conditional blocks.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">T_XX Processors</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The "T_XX" family is an imaginary processor series created for the
+purpose of testing all the components of HXA which do not depend upon
+any particular processor.
+<P>
+"T_XX" processors currently share only three attributes with real processors:
+<P>
+<UL>
+<LI>
+a program counter size (8- to 32-bits)
+<LI>
+a native byte ordering convention (MSB or LSB)
+<LI>
+a native byte size (8-, 16- or 32-bits)
+</UL>
+<P>
+The "T_xx" family was created in 2004.
+Although primarily created to test HXA, this variant can also be used
+to assemble real processor instruction sets implemented as macro include
+files.
+Examples of these are found among the 
+<A HREF="hxa_demo.htm">general demo</A>
+ programs.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0b">Instruction Set</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+None.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">CPU Descriptor</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+A cpu 
+<EM>descriptor</EM>
+ is a string with a defined format that specifies
+processor-specific information such as program counter width and
+native byte orientation.
+All supported processors are required to provide one in order that
+the remainder of HXA "understands" how to deal with them.
+<P>
+In the case of the "T_XX" family there is no distinction between
+a cpu 
+<EM>name</EM>
+ and a cpu 
+<EM>descriptor</EM>
+.
+That is, a "T_XX" descriptor 
+<EM>is</EM>
+ its name.
+The descriptor is publicly exposed, as oppsed to other processors,
+which generally hide their descriptors.
+<P>
+Descriptors take the form 
+<STRONG>T_</STRONG>
+<EM>PC_Width</EM>
+<STRONG>_</STRONG>
+<EM>Byte_Order[Byte_Size]</EM>
+.
+<P>
+<UL>
+<LI>
+<EM>PC_Width</EM>
+ is a two-digit decimal number in the range eight to 32
+indicating the program counter size in bits
+<LI>
+<EM>Byte_Order</EM>
+ is either the character 
+<EM>L</EM>
+ or 
+<EM>M</EM>
+ and indicates which
+8-bit octet of a 32-bit value natively appears first in multi-octet sequences
+<LI>
+<EM>Byte_Size</EM>
+ can be one of "08", "16" or "32" and specifies how many
+bits comprise the smallest addressable unit (or "byte").
+It is optional and defaults to "08" if not present
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Examples:</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>PC Size</STRONG>
+<TD>
+<STRONG>Multi-Octet Order</STRONG>
+<TD>
+<STRONG>"Byte" Size</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>T_08_L</STRONG>
+<TD>
+8 bits
+<TD>
+least significant first
+<TD>
+8 bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>T_16_L08</STRONG>
+<TD>
+16 bits
+<TD>
+least significant first
+<TD>
+8 bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>T_24_M16</STRONG>
+<TD>
+24 bits
+<TD>
+most significant first
+<TD>
+16 bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>T_32_M32</STRONG>
+<TD>
+32 bits
+<TD>
+most significant first
+<TD>
+32 bits
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">ASSUME Pseudo Opcode</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA_T simply echoes every string given to it by the "ASSUME" pseudo op.
+<P>
+For testing purposes HXA_T also reports an error for any string
+which contains the substring 
+<EM>reject</EM>
+.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:43 2013</EM>
+</BODY>
+</HTML>

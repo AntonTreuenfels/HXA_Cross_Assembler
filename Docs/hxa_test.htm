@@ -1,0 +1,6237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Hobby Cross Assembler v0.201 General Tests</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Hobby Cross Assembler v0.201 General Tests</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">General Tests</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<UL>
+<LI><A HREF="#lbd">Test Templates</A>
+<UL>
+<LI><A HREF="#lbe">Templates</A>
+</UL>
+<LI><A HREF="#l9a">Required</A>
+<UL>
+<LI><A HREF="#l9b">Set CPU</A>
+<LI><A HREF="#l9c">Set Program Counter</A>
+</UL>
+<LI><A HREF="#l5b">Messages</A>
+<UL>
+<LI><A HREF="#l5e">User Messages</A>
+<LI><A HREF="#l5f">Warn Count</A>
+<LI><A HREF="#l5d">Error Count</A>
+<LI><A HREF="#l5c">Assert Messages</A>
+</UL>
+<LI><A HREF="#l7d">Output Files</A>
+<UL>
+<LI><A HREF="#l80">Same Directory</A>
+<LI><A HREF="#l7f">Other Directory</A>
+<LI><A HREF="#l7e">No Object Code</A>
+</UL>
+<LI><A HREF="#l81">Pass Termination</A>
+<UL>
+<LI><A HREF="#l82">Termination</A>
+</UL>
+<LI><A HREF="#l0c">Customization</A>
+<UL>
+<LI><A HREF="#l0f">Pseudo Op Names</A>
+<LI><A HREF="#l10">Pseudo Op Nullification</A>
+<LI><A HREF="#l0d">Assembler Messages</A>
+<LI><A HREF="#l0e">ASSUME Strings</A>
+</UL>
+<LI><A HREF="#l11">Expressions</A>
+<UL>
+<LI><A HREF="#l1c">Numeric Literals</A>
+<LI><A HREF="#l1b">Numeric Data Definition</A>
+<LI><A HREF="#l1f">Ranged Numeric Data Definition</A>
+<LI><A HREF="#l15">Character Literals</A>
+<LI><A HREF="#l24">String Literals</A>
+<LI><A HREF="#l28">XLATE() and XLATE</A>
+<LI><A HREF="#l17">Global Labels</A>
+<LI><A HREF="#l18">Local Labels</A>
+<LI><A HREF="#l27">Variable Labels</A>
+<LI><A HREF="#l14">Branch Target Labels</A>
+<LI><A HREF="#l12">All Label Forms</A>
+<LI><A HREF="#l23">String Labels</A>
+<LI><A HREF="#l1d">Program Counter Reference</A>
+<LI><A HREF="#l1e">Program Counter Relative Numeric Data Definition</A>
+<LI><A HREF="#l26">Unary Operators</A>
+<LI><A HREF="#l1a">Numeric Binary Operators</A>
+<LI><A HREF="#l21">String Binary Operators</A>
+<LI><A HREF="#l20">Regular Expression Operators</A>
+<LI><A HREF="#l22">String Expressions</A>
+<LI><A HREF="#l19">Logical Short Circuit</A>
+<LI><A HREF="#l25">Ternary Conditional</A>
+<LI><A HREF="#l16">Expression Evaluation</A>
+<LI><A HREF="#l13">Assign Label Value</A>
+</UL>
+<LI><A HREF="#l4f">Macros</A>
+<UL>
+<LI><A HREF="#l55">Macro Definition</A>
+<LI><A HREF="#l57">Nested Macros</A>
+<LI><A HREF="#l53">EXIT from Macro</A>
+<LI><A HREF="#l54">EXITIF from Macro</A>
+<LI><A HREF="#l52">DEFINED() and UNDEF</A>
+<LI><A HREF="#l56">Macros and Labels</A>
+<LI><A HREF="#l58">Odd Macro Arguments</A>
+<LI><A HREF="#l51">Default Macro Arguments</A>
+<LI><A HREF="#l59">PUTBACK pseudo op</A>
+<LI><A HREF="#l5a">PUTBACKS pseudo op</A>
+<LI><A HREF="#l50">Assignable Formal Arguments</A>
+</UL>
+<LI><A HREF="#l4d">Local Scope</A>
+<UL>
+<LI><A HREF="#l4e">Nesting Depth</A>
+</UL>
+<LI><A HREF="#l95">Repeats</A>
+<UL>
+<LI><A HREF="#l99">Repeat Definition</A>
+<LI><A HREF="#l98">Macros and Repeats</A>
+<LI><A HREF="#l97">EXIT from Repeat</A>
+<LI><A HREF="#l96">EXIT from Nested Macro/Repeats</A>
+</UL>
+<LI><A HREF="#lbf">Whiles</A>
+<UL>
+<LI><A HREF="#lc3">While Definition</A>
+<LI><A HREF="#lc2">Macros and Whiles</A>
+<LI><A HREF="#lc1">EXIT from While</A>
+<LI><A HREF="#lc0">EXIT from Nested Macro/Whiles</A>
+</UL>
+<LI><A HREF="#l04">Conditional Assembly</A>
+<UL>
+<LI><A HREF="#l07">IF..ELSEIF..ELSE..ENDIF Blocks</A>
+<LI><A HREF="#l09">Odd Conditional Blocks</A>
+<LI><A HREF="#l06">EXIT Inside Conditional</A>
+<LI><A HREF="#l05">Deep Nesting</A>
+<LI><A HREF="#l08">IFDEF and IFNDEF Blocks</A>
+</UL>
+<LI><A HREF="#l29">File Inclusion</A>
+<UL>
+<LI><A HREF="#l2e">Inclusion</A>
+<LI><A HREF="#l2c">File Label Scoping</A>
+<LI><A HREF="#l2a">Default Output File Names</A>
+<LI><A HREF="#l2f">Read Exclusion</A>
+<LI><A HREF="#l2b">Early Read Termination</A>
+<LI><A HREF="#l2d">Include File as Last Line of Root File</A>
+</UL>
+<LI><A HREF="#l02">Binary File Inclusion</A>
+<UL>
+<LI><A HREF="#l03">Binary Inclusion</A>
+</UL>
+<LI><A HREF="#l67">Motorola SRecord Object</A>
+<UL>
+<LI><A HREF="#l6c">Basic Records</A>
+<LI><A HREF="#l6f">Start Records</A>
+<LI><A HREF="#l6b">Assume Wider Address Type</A>
+<LI><A HREF="#l69">Assume Narrower Address Type</A>
+<LI><A HREF="#l6d">Named Output File</A>
+<LI><A HREF="#l6a">Assume Record Supressed</A>
+<LI><A HREF="#l68">Assume More Data</A>
+<LI><A HREF="#l6e">Overlapping Addresses (Monolithic)</A>
+</UL>
+<LI><A HREF="#l43">Intel Hexadecimal Object</A>
+<UL>
+<LI><A HREF="#l48">Basic Records</A>
+<LI><A HREF="#l4c">Start Records</A>
+<LI><A HREF="#l47">Assume Wider Address Type</A>
+<LI><A HREF="#l46">Assume Narrower Address Type</A>
+<LI><A HREF="#l49">Named Output File</A>
+<LI><A HREF="#l4a">Output Greater than 64K</A>
+<LI><A HREF="#l45">Assume More Data</A>
+<LI><A HREF="#l4b">Overlapping Addresses (Monolithic)</A>
+<LI><A HREF="#l44">Address Jumps Force New Address Records</A>
+</UL>
+<LI><A HREF="#l9d">Segments</A>
+<UL>
+<LI><A HREF="#la1">Basic Definition</A>
+<LI><A HREF="#lbb">Segments Re-Used</A>
+<LI><A HREF="#lab">Legal Data Storage</A>
+<LI><A HREF="#laa">Labels</A>
+<LI><A HREF="#lb9">Program Counter (Implicit)</A>
+<LI><A HREF="#lb8">Program Counter (Explicit)</A>
+<LI><A HREF="#la0">"USESEGMENTS" psop</A>
+<LI><A HREF="#la9">Intel Hexfile Output (Single File)</A>
+<LI><A HREF="#la8">Intel Hexfile Output (By Segments, Default Names)</A>
+<LI><A HREF="#la7">Intel Hexfile Output (By Segments, "%03d." Template)</A>
+<LI><A HREF="#la6">Intel Hexfile Output (By Segment)</A>
+<LI><A HREF="#la4">Intel Hexfile Output (By Blocks, Default Names)</A>
+<LI><A HREF="#la3">Intel Hexfile Output (By Blocks, ".%03d" Template)</A>
+<LI><A HREF="#la5">Intel Hexfile Output (By Blocks, Overlapping)</A>
+<LI><A HREF="#lb2">Motorola Hexfile Output (Single File)</A>
+<LI><A HREF="#lb0">Motorola Hexfile Output (By Segments, Default Names)</A>
+<LI><A HREF="#laf">Motorola Hexfile Output (By Segments, "%02x." Template)</A>
+<LI><A HREF="#lb1">Motorola Hexfile Output (By Segments, Default Names, No Header)</A>
+<LI><A HREF="#lae">Motorola Hexfile Output (By Blocks, Default Names, No Header)</A>
+<LI><A HREF="#lad">Motorola Hexfile Output (By Blocks, Default Names)</A>
+<LI><A HREF="#lac">Motorola Hexfile Output (By Blocks, ".%03X" Template)</A>
+<LI><A HREF="#lb7">Object Output (By Segments, Default Names)</A>
+<LI><A HREF="#lb6">Object Output (By Segments, "%04d." Template)</A>
+<LI><A HREF="#lb5">Object Output (By Blocks, Default Names)</A>
+<LI><A HREF="#lb4">Object Output (By Blocks, ".%0x" Template)</A>
+<LI><A HREF="#lbc">Uninitialized Segments</A>
+<LI><A HREF="#la2">Common Segments</A>
+<LI><A HREF="#l9f">"RELORG" Pseudo Op</A>
+<LI><A HREF="#l9e">"ABSEND" and "RELEND" Pseudo Ops</A>
+<LI><A HREF="#lba">Segment Map Identification</A>
+<LI><A HREF="#lb3">Nested Segments</A>
+</UL>
+<LI><A HREF="#l83">Program Counter Manipulation</A>
+<UL>
+<LI><A HREF="#l84">Define Uninitialized Storage</A>
+<LI><A HREF="#l85">Fill Block With Constant Data</A>
+<LI><A HREF="#l86">Pad To Specific Byte Boundary</A>
+</UL>
+<LI><A HREF="#l87">Program Listing</A>
+<UL>
+<LI><A HREF="#l8e">Listing</A>
+<LI><A HREF="#l92">No Flags Specified</A>
+<LI><A HREF="#l90">Long Lines (Wrapped)</A>
+<LI><A HREF="#l8f">Long Lines (Truncated)</A>
+<LI><A HREF="#l94">Show Line Numbers</A>
+<LI><A HREF="#l8b">Change Page Width</A>
+<LI><A HREF="#l89">Change Left Margin</A>
+<LI><A HREF="#l93">Pagination</A>
+<LI><A HREF="#l8a">Change Line Spacing</A>
+<LI><A HREF="#l88">Change Header</A>
+<LI><A HREF="#l91">Macro Cross-Reference</A>
+<LI><A HREF="#l8d">Global Label Cross-Reference</A>
+<LI><A HREF="#l8c">Formfeed</A>
+</UL>
+<LI><A HREF="#l30">Functions</A>
+<UL>
+<LI><A HREF="#l42">VER() and VER$()</A>
+<LI><A HREF="#l39">LEN()</A>
+<LI><A HREF="#l36">INDEX()</A>
+<LI><A HREF="#l3c">MID$()</A>
+<LI><A HREF="#l41">VAL()</A>
+<LI><A HREF="#l3e">STR$()</A>
+<LI><A HREF="#l37">INDEXR()</A>
+<LI><A HREF="#l40">TOLOWER$() and TOUPPER$()</A>
+<LI><A HREF="#l34">FORWARD()</A>
+<LI><A HREF="#l31">CHR$() and ORD()</A>
+<LI><A HREF="#l3a">MATCH$()</A>
+<LI><A HREF="#l3d">SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()</A>
+<LI><A HREF="#l32">CPU$()</A>
+<LI><A HREF="#l3f">TIME$()</A>
+<LI><A HREF="#l3b">MESG$()</A>
+<LI><A HREF="#l33">FILE$()</A>
+<LI><A HREF="#l38">LABEL()</A>
+<LI><A HREF="#l35">Function Evaluation</A>
+</UL>
+<LI><A HREF="#l0a">Custom Byte Order</A>
+<UL>
+<LI><A HREF="#l0b">Assume Non-Default Order</A>
+</UL>
+<LI><A HREF="#l70">Nonstandard Byte</A>
+<UL>
+<LI><A HREF="#l71">16-bit BYTE</A>
+<LI><A HREF="#l76">16-bit String Literals</A>
+<LI><A HREF="#l75">16-bit Motorola Basic SRecord</A>
+<LI><A HREF="#l74">16-bit Intel Basic Hex Record</A>
+<LI><A HREF="#l72">16-bit FILL and PADTO</A>
+<LI><A HREF="#l73">16-bit HEX and INCBIN</A>
+<LI><A HREF="#l77">32-bit BYTE</A>
+<LI><A HREF="#l7c">32-bit String Literals</A>
+<LI><A HREF="#l7b">32-bit Motorola Basic SRecord</A>
+<LI><A HREF="#l7a">32-bit Intel Basic Hex Record</A>
+<LI><A HREF="#l78">32-bit FILL and PADTO</A>
+<LI><A HREF="#l79">32-bit HEX and INCBIN</A>
+</UL>
+<LI><A HREF="#l60">Miscellaneous</A>
+<UL>
+<LI><A HREF="#l64">Timers</A>
+<LI><A HREF="#l62">Numbers and BIT--</A>
+<LI><A HREF="#l61">HEX</A>
+<LI><A HREF="#l65">User Messages w/ String Expressions</A>
+<LI><A HREF="#l63">Reserved Names</A>
+<LI><A HREF="#l66">User Stack</A>
+</UL>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lbd">Test Templates</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lbe">Templates</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test000.a">../test/test000.a</A>
+<LI>
+ok: tests should succeed; check response to correct input
+<LI>
+<A HREF="../test/test000e.a">../test/test000e.a</A>
+<LI>
+error: tests should fail; check response to incorrect input
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9a">Required</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9b">Set CPU</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test001.a">../test/test001.a</A>
+<LI>
+ok: "CPU" psop
+<LI>
+<A HREF="../test/test001b.a">../test/test001b.a</A>
+<LI>
+ok: "CPU" psop (undelimited arguments)
+<LI>
+<A HREF="../test/test001e.a">../test/test001e.a</A>
+<LI>
+error\fatal: missing "CPU" psop
+<LI>
+<A HREF="../test/test001f.a">../test/test001f.a</A>
+<LI>
+warn\error: unknown CPU; unique CPU
+<LI>
+<A HREF="../test/test001g.a">../test/test001g.a</A>
+<LI>
+warn/error/fatal: pc width too small
+<LI>
+<A HREF="../test/test001h.a">../test/test001h.a</A>
+<LI>
+warn/error/fatal: pc width too large
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9c">Set Program Counter</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test002.a">../test/test002.a</A>
+<LI>
+ok: "ORG" psop
+<LI>
+<A HREF="../test/test002b.a">../test/test002b.a</A>
+<LI>
+ok: "ORG" psop (24-bit Processor)
+<LI>
+<A HREF="../test/test002c.a">../test/test002c.a</A>
+<LI>
+ok: "ORG" psop (32-bit Processor)
+<LI>
+<A HREF="../test/test002e.a">../test/test002e.a</A>
+<LI>
+fatal: missing "ORG"
+<LI>
+<A HREF="../test/test002f.a">../test/test002f.a</A>
+<LI>
+fatal: unintialized program counter
+<LI>
+<A HREF="../test/test002g.a">../test/test002g.a</A>
+<LI>
+error\fatal: missing expression
+<LI>
+<A HREF="../test/test002h.a">../test/test002h.a</A>
+<LI>
+warn\error\fatal: 16-bit PC out of range (negative)
+<LI>
+<A HREF="../test/test002i.a">../test/test002i.a</A>
+<LI>
+error\fatal: 16-bit PC out of range (too big; by ORG)
+<LI>
+<A HREF="../test/test002j.a">../test/test002j.a</A>
+<LI>
+error\fatal: 16-bit PC out of range (too big; by pc advance)
+<LI>
+<A HREF="../test/test002k.a">../test/test002k.a</A>
+<LI>
+warn\error\fatal: 24-bit PC out of range (negative)
+<LI>
+<A HREF="../test/test002l.a">../test/test002l.a</A>
+<LI>
+error\fatal: 24-bit PC out of range (too big; by ORG)
+<LI>
+<A HREF="../test/test002m.a">../test/test002m.a</A>
+<LI>
+error\fatal: 24-bit PC out of range (too big; by pc advance)
+<LI>
+<A HREF="../test/test002n.a">../test/test002n.a</A>
+<LI>
+warn\error\fatal: 32-bit PC out of range (negative)
+<LI>
+<A HREF="../test/test002o.a">../test/test002o.a</A>
+<LI>
+error\fatal: 32-bit PC out of range (too big; by ORG)
+<LI>
+<A HREF="../test/test002p.a">../test/test002p.a</A>
+<LI>
+error\fatal: 32-bit PC out of range (too big; by pc advance)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5b">Messages</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5e">User Messages</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test005.a">../test/test005.a</A>
+<LI>
+ok: "ECHO" psop
+<LI>
+<A HREF="../test/test005e.a">../test/test005e.a</A>
+<LI>
+warn\error: "ECHO" psop
+<LI>
+<A HREF="../test/test005f.a">../test/test005f.a</A>
+<LI>
+warn\error: "WARN" psop
+<LI>
+<A HREF="../test/test005g.a">../test/test005g.a</A>
+<LI>
+warn\error: "ERROR" psop
+<LI>
+<A HREF="../test/test005h.a">../test/test005h.a</A>
+<LI>
+fatal: "FATAL" psop
+<LI>
+<A HREF="../test/test005i.a">../test/test005i.a</A>
+<LI>
+fatal: "FATAL" psop
+<LI>
+<A HREF="../test/test005j.a">../test/test005j.a</A>
+<LI>
+warn\fatal: "FATAL" psop
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5f">Warn Count</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test006e.a">../test/test006e.a</A>
+<LI>
+warn\fatal: "MAXWARN" psop set to negative value
+<LI>
+<A HREF="../test/test006f.a">../test/test006f.a</A>
+<LI>
+warn\fatal: "MAXWARN" psop set to zero
+<LI>
+<A HREF="../test/test006g.a">../test/test006g.a</A>
+<LI>
+warn\fatal: "MAXWARN" psop set to one
+<LI>
+<A HREF="../test/test006h.a">../test/test006h.a</A>
+<LI>
+warn\fatal: "MAXWARN" psop set to three
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5d">Error Count</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test007e.a">../test/test007e.a</A>
+<LI>
+warn\error\fatal: "MAXERR" psop set to negative value
+<LI>
+<A HREF="../test/test007f.a">../test/test007f.a</A>
+<LI>
+error\fatal: "MAXERR" psop set to zero
+<LI>
+<A HREF="../test/test007g.a">../test/test007g.a</A>
+<LI>
+error\fatal: "MAXERR" psop set to one
+<LI>
+<A HREF="../test/test007h.a">../test/test007h.a</A>
+<LI>
+error\fatal: "MAXERR" psop set to three
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5c">Assert Messages</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test008.a">../test/test008.a</A>
+<LI>
+ok: "ASSERT" psop
+<LI>
+<A HREF="../test/test008e.a">../test/test008e.a</A>
+<LI>
+error: failures detected on first pass
+<LI>
+<A HREF="../test/test008f.a">../test/test008f.a</A>
+<LI>
+error: failures detected on second pass
+<LI>
+<A HREF="../test/test008g.a">../test/test008g.a</A>
+<LI>
+error: failures detected on first pass (BDD1)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7d">Output Files</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l80">Same Directory</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test010.a">../test/test010.a</A>
+<LI>
+ok: specified name
+<LI>
+<A HREF="../test/test010e.a">../test/test010e.a</A>
+<LI>
+warn\error: malformed name
+<LI>
+<A HREF="../test/test010f.a">../test/test010f.a</A>
+<LI>
+warn: name changed
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7f">Other Directory</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test011.a">../test/test011.a</A>
+<LI>
+ok: specified name
+<LI>
+<A HREF="../test/test011e.a">../test/test011e.a</A>
+<LI>
+error: non-existent list/object directories
+<LI>
+<A HREF="../test/test011f.a">../test/test011f.a</A>
+<LI>
+error: non-existent error directory
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7e">No Object Code</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test014.a">../test/test014.a</A>
+<LI>
+ok: no object code
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l81">Pass Termination</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l82">Termination</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test015.a">../test/test015.a</A>
+<LI>
+ok: "END" psop
+<LI>
+<A HREF="../test/test015e.a">../test/test015e.a</A>
+<LI>
+error: "END" w/ un-resolvable start expression
+<LI>
+<A HREF="../test/test015f.a">../test/test015f.a</A>
+<LI>
+error: "END" w/ resolvable start expression but no CPU defined
+<LI>
+<A HREF="../test/test015g.a">../test/test015g.a</A>
+<LI>
+error: "END" w/ resolvable start expression out of range
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0c">Customization</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0f">Pseudo Op Names</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test020.a">../test/test020.a</A>
+<LI>
+ok: "PSALIAS" pseudo-op
+<LI>
+<A HREF="../test/test020b.a">../test/test020b.a</A>
+<LI>
+ok: "PSALIAS" pseudo-op (undelimited arguments)
+<LI>
+<A HREF="../test/test020e.a">../test/test020e.a</A>
+<LI>
+error: malformed "PSALIAS" pseudo-op
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l10">Pseudo Op Nullification</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test021.a">../test/test021.a</A>
+<LI>
+ok: "PSNULL" pseudo op
+<LI>
+<A HREF="../test/test021e.a">../test/test021e.a</A>
+<LI>
+error: "PSNULL" pseudo op (when not used)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0d">Assembler Messages</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test022.a">../test/test022.a</A>
+<LI>
+ok: "MESGTEXT" pseudo-op
+<LI>
+<A HREF="../test/test022e.a">../test/test022e.a</A>
+<LI>
+warn\error: malformed "MESGTEXT" pseudo-op
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0e">ASSUME Strings</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test025.a">../test/test025.a</A>
+<LI>
+ok: "ASSUME" pseudo-op
+<LI>
+<A HREF="../test/test025e.a">../test/test025e.a</A>
+<LI>
+error: unrecognized flag value
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l11">Expressions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1c">Numeric Literals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test035.a">../test/test035.a</A>
+<LI>
+ok: Motorola, Intel and C formats (LSB Processor)
+<LI>
+<A HREF="../test/test035b.a">../test/test035b.a</A>
+<LI>
+ok: Motorola, Intel and C formats (MSB Processor)
+<LI>
+<A HREF="../test/test035e.a">../test/test035e.a</A>
+<LI>
+error: malformed numeric literals
+<LI>
+<A HREF="../test/test035f.a">../test/test035f.a</A>
+<LI>
+error: malformed Intel numbers (during pass two)
+<LI>
+<A HREF="../test/test035g.a">../test/test035g.a</A>
+<LI>
+warn: out of range numbers (signed integers more than 32 bits in size)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1b">Numeric Data Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test036.a">../test/test036.a</A>
+<LI>
+ok: "BIT--" pseudo ops
+<LI>
+<A HREF="../test/test036b.a">../test/test036b.a</A>
+<LI>
+ok: "BIT--" pseudo ops (MSB Processor)
+<LI>
+<A HREF="../test/test036e.a">../test/test036e.a</A>
+<LI>
+error: blank expression field(s)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1f">Ranged Numeric Data Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test037.a">../test/test037.a</A>
+<LI>
+ok: "UBIT--" and "SBIT--" pseudo ops
+<LI>
+<A HREF="../test/test037b.a">../test/test037b.a</A>
+<LI>
+ok: "UBIT--" and "SBIT--" pseudo ops (MSB Processor)
+<LI>
+<A HREF="../test/test037e.a">../test/test037e.a</A>
+<LI>
+error: values out of range (pass two)
+<LI>
+<A HREF="../test/test037f.a">../test/test037f.a</A>
+<LI>
+error: values out of range (pass one)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l15">Character Literals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test040.a">../test/test040.a</A>
+<LI>
+ok: character literals
+<LI>
+<A HREF="../test/test040e.a">../test/test040e.a</A>
+<LI>
+error: malformed characters
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l24">String Literals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test045.a">../test/test045.a</A>
+<LI>
+ok: string literals
+<LI>
+<A HREF="../test/test045b.a">../test/test045b.a</A>
+<LI>
+ok: ECHO string literals w/ unprintable chars
+<LI>
+<A HREF="../test/test045e.a">../test/test045e.a</A>
+<LI>
+error: malformed strings
+<LI>
+<A HREF="../test/test045f.a">../test/test045f.a</A>
+<LI>
+warn: null string
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l28">XLATE() and XLATE</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test046.a">../test/test046.a</A>
+<LI>
+ok: character set re-mapping
+<LI>
+<A HREF="../test/test046e.a">../test/test046e.a</A>
+<LI>
+warn\error: malformed translation patterns
+<LI>
+<A HREF="../test/test046f.a">../test/test046f.a</A>
+<LI>
+error: malformed char translation function
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l17">Global Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test050.a">../test/test050.a</A>
+<LI>
+ok: global labels
+<LI>
+<A HREF="../test/test050e.a">../test/test050e.a</A>
+<LI>
+error: malformed global labels
+<LI>
+<A HREF="../test/test050f.a">../test/test050f.a</A>
+<LI>
+error: global labels (non-existent)
+<LI>
+<A HREF="../test/test050g.a">../test/test050g.a</A>
+<LI>
+error: global label ok; rest of source line malformed
+<LI>
+<A HREF="../test/test050h.a">../test/test050h.a</A>
+<LI>
+error: duplicate labels
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l18">Local Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test051.a">../test/test051.a</A>
+<LI>
+ok: local labels
+<LI>
+<A HREF="../test/test051e.a">../test/test051e.a</A>
+<LI>
+error: missing local label (backward ref)
+<LI>
+<A HREF="../test/test051f.a">../test/test051f.a</A>
+<LI>
+error: missing local label (forward ref)
+<LI>
+<A HREF="../test/test051g.a">../test/test051g.a</A>
+<LI>
+error: duplicate labels
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l27">Variable Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test052.a">../test/test052.a</A>
+<LI>
+ok: variable labels
+<LI>
+<A HREF="../test/test052e.a">../test/test052e.a</A>
+<LI>
+warn: odd use (forward reference successfully resolved)
+<LI>
+<A HREF="../test/test052f.a">../test/test052f.a</A>
+<LI>
+warn\error: odd use (forward reference unsuccessfully resolved)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l14">Branch Target Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test053.a">../test/test053.a</A>
+<LI>
+ok: branch target labels
+<LI>
+<A HREF="../test/test053b.a">../test/test053b.a</A>
+<LI>
+ok: colons as synomyms for "+-" and "-+" labels
+<LI>
+<A HREF="../test/test053c.a">../test/test053c.a</A>
+<LI>
+ok: only colons as branch targets
+<LI>
+<A HREF="../test/test053e.a">../test/test053e.a</A>
+<LI>
+error: malformed branch target labels
+<LI>
+<A HREF="../test/test053f.a">../test/test053f.a</A>
+<LI>
+error: missing labels (forward reference)
+<LI>
+<A HREF="../test/test053g.a">../test/test053g.a</A>
+<LI>
+warn: odd use (with various pseudo ops)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l12">All Label Forms</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test054.a">../test/test054.a</A>
+<LI>
+ok: label recognition; all forms
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l23">String Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test055.a">../test/test055.a</A>
+<LI>
+ok: string and numeric labels (all forms)
+<LI>
+<A HREF="../test/test055b.a">../test/test055b.a</A>
+<LI>
+ok: string and numeric labels (variable forms only)
+<LI>
+<A HREF="../test/test055c.a">../test/test055c.a</A>
+<LI>
+ok: string and numeric labels (local forms only)
+<LI>
+<A HREF="../test/test055d.a">../test/test055d.a</A>
+<LI>
+ok: string and numeric labels (variable and local forms)
+<LI>
+<A HREF="../test/test055e.a">../test/test055e.a</A>
+<LI>
+error: string labels
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1d">Program Counter Reference</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test060.a">../test/test060.a</A>
+<LI>
+ok: program counter (w/aliases)
+<LI>
+<A HREF="../test/test060e.a">../test/test060e.a</A>
+<LI>
+error: "*" and "$" aliases not legal in label field
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1e">Program Counter Relative Numeric Data Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test067.a">../test/test067.a</A>
+<LI>
+ok: "RBIT--" pseudo ops
+<LI>
+<A HREF="../test/test067e.a">../test/test067e.a</A>
+<LI>
+error: value out of relative range
+<LI>
+<A HREF="../test/test067f.a">../test/test067f.a</A>
+<LI>
+error: value out of program counter range
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l26">Unary Operators</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test080.a">../test/test080.a</A>
+<LI>
+ok: arithmetic, bitwise, logical
+<LI>
+<A HREF="../test/test080b.a">../test/test080b.a</A>
+<LI>
+ok: arithmetic, bitwise, logical (string operands)
+<LI>
+<A HREF="../test/test080e.a">../test/test080e.a</A>
+<LI>
+error: malformed expressions
+<LI>
+<A HREF="../test/test080f.a">../test/test080f.a</A>
+<LI>
+error: out-of-range values
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1a">Numeric Binary Operators</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test081.a">../test/test081.a</A>
+<LI>
+ok: arithmetic, bitwise, logical
+<LI>
+<A HREF="../test/test081e.a">../test/test081e.a</A>
+<LI>
+error: malformed expressions
+<LI>
+<A HREF="../test/test081f.a">../test/test081f.a</A>
+<LI>
+error: out-of-range values
+<LI>
+<A HREF="../test/test081g.a">../test/test081g.a</A>
+<LI>
+error: modulus by zero
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l21">String Binary Operators</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test082.a">../test/test082.a</A>
+<LI>
+ok: logical
+<LI>
+<A HREF="../test/test082e.a">../test/test082e.a</A>
+<LI>
+error: malformed expressions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l20">Regular Expression Operators</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test083.a">../test/test083.a</A>
+<LI>
+ok: logical
+<LI>
+<A HREF="../test/test083e.a">../test/test083e.a</A>
+<LI>
+error: malformed expressions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l22">String Expressions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test084.a">../test/test084.a</A>
+<LI>
+ok: string concatenation
+<LI>
+<A HREF="../test/test084e.a">../test/test084e.a</A>
+<LI>
+error: string concatenation
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l19">Logical Short Circuit</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test085.a">../test/test085.a</A>
+<LI>
+ok: "&&" and "||" Operators
+<LI>
+<A HREF="../test/test085b.a">../test/test085b.a</A>
+<LI>
+ok: "&&" and "||" Operators (string expressions)
+<LI>
+<A HREF="../test/test085c.a">../test/test085c.a</A>
+<LI>
+ok: "&&" and "||" Operators (mixed expressions)
+<LI>
+<A HREF="../test/test085e.a">../test/test085e.a</A>
+<LI>
+error: unresolvable "&&" and "||" Operators
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l25">Ternary Conditional</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test086.a">../test/test086.a</A>
+<LI>
+ok: "?:" Operator
+<LI>
+<A HREF="../test/test086e.a">../test/test086e.a</A>
+<LI>
+error: parse errors
+<LI>
+<A HREF="../test/test086f.a">../test/test086f.a</A>
+<LI>
+error: bad forward reference (pass 2)
+<LI>
+<A HREF="../test/test086g.a">../test/test086g.a</A>
+<LI>
+error: bad forward reference (pass 1)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l16">Expression Evaluation</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test090.a">../test/test090.a</A>
+<LI>
+ok: expression evaluation
+<LI>
+<A HREF="../test/test090b.a">../test/test090b.a</A>
+<LI>
+ok: expression evaluation (MSB processor)
+<LI>
+<A HREF="../test/test090e.a">../test/test090e.a</A>
+<LI>
+error: malformed expressions
+<LI>
+<A HREF="../test/test090f.a">../test/test090f.a</A>
+<LI>
+error: out-of-range values
+<LI>
+<A HREF="../test/test090g.a">../test/test090g.a</A>
+<LI>
+error: divide by zero
+<LI>
+<A HREF="../test/test090h.a">../test/test090h.a</A>
+<LI>
+warn\error: multiple unresolved forward reference in single expression
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l13">Assign Label Value</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test092.a">../test/test092.a</A>
+<LI>
+ok: "EQU" psop
+<LI>
+<A HREF="../test/test092b.a">../test/test092b.a</A>
+<LI>
+ok: "EQU" psop (all label type values shown in object section)
+<LI>
+<A HREF="../test/test092e.a">../test/test092e.a</A>
+<LI>
+error: bad "EQU" use
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4f">Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l55">Macro Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test100.a">../test/test100.a</A>
+<LI>
+ok: basic macro definition and expansion
+<LI>
+<A HREF="../test/test100e.a">../test/test100e.a</A>
+<LI>
+warn\error: basic macro definition
+<LI>
+<A HREF="../test/test100f.a">../test/test100f.a</A>
+<LI>
+warn\error: basic macro expansion
+<LI>
+<A HREF="../test/test100g.a">../test/test100g.a</A>
+<LI>
+error: error in body of definition (first pass)
+<LI>
+<A HREF="../test/test100h.a">../test/test100h.a</A>
+<LI>
+error: unresolved forward reference within macro (second pass)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l57">Nested Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test101.a">../test/test101.a</A>
+<LI>
+ok: nested macro definitions
+<LI>
+<A HREF="../test/test101e.a">../test/test101e.a</A>
+<LI>
+error: nested macro definition
+<LI>
+<A HREF="../test/test101f.a">../test/test101f.a</A>
+<LI>
+error: error in body of definition (first pass)
+<LI>
+<A HREF="../test/test101g.a">../test/test101g.a</A>
+<LI>
+error: unresolved forward reference within nested macro (first pass)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l53">EXIT from Macro</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test103.a">../test/test103.a</A>
+<LI>
+ok: unconditional "EXIT" psop within macro
+<LI>
+<A HREF="../test/test103b.a">../test/test103b.a</A>
+<LI>
+ok: unconditional "EXIT" psop within macro (labelled endpoint)
+<LI>
+<A HREF="../test/test103e.a">../test/test103e.a</A>
+<LI>
+warn\error: unconditional "EXIT" outside of macro
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l54">EXITIF from Macro</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test104.a">../test/test104.a</A>
+<LI>
+ok: conditional exit psop within macro (all TRUE)
+<LI>
+<A HREF="../test/test104b.a">../test/test104b.a</A>
+<LI>
+ok: conditional exit psop within macro (all FALSE)
+<LI>
+<A HREF="../test/test104e.a">../test/test104e.a</A>
+<LI>
+warn\error: unconditional "EXIT" outside of macro
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l52">DEFINED() and UNDEF</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test105.a">../test/test105.a</A>
+<LI>
+ok: macro definition existence testing and deletion
+<LI>
+<A HREF="../test/test105e.a">../test/test105e.a</A>
+<LI>
+error: malformed "defined()" function and "undef" psop
+<LI>
+<A HREF="../test/test105f.a">../test/test105f.a</A>
+<LI>
+error: illegal DEFINED() variable name
+<LI>
+<A HREF="../test/test105g.a">../test/test105g.a</A>
+<LI>
+error: illegal UNDEF variable name
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l56">Macros and Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test106.a">../test/test106.a</A>
+<LI>
+ok: macros with the same names as labels
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l58">Odd Macro Arguments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test107.a">../test/test107.a</A>
+<LI>
+ok: actual arguments which match formal argument names
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l51">Default Macro Arguments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test110.a">../test/test110.a</A>
+<LI>
+ok: macros with default argument values
+<LI>
+<A HREF="../test/test110e.a">../test/test110e.a</A>
+<LI>
+error: malformed macro defaults
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l59">PUTBACK pseudo op</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test112.a">../test/test112.a</A>
+<LI>
+ok: "PUTBACK" psop
+<LI>
+<A HREF="../test/test112e.a">../test/test112e.a</A>
+<LI>
+warn\error: "PUTBACK" psop
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l5a">PUTBACKS pseudo op</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test113.a">../test/test113.a</A>
+<LI>
+ok: "PUTBACKS" psop
+<LI>
+<A HREF="../test/test113e.a">../test/test113e.a</A>
+<LI>
+warn\error: "PUTBACKS" psop
+<LI>
+<A HREF="../test/test113f.a">../test/test113f.a</A>
+<LI>
+fatal: maximum putback count exceeded
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l50">Assignable Formal Arguments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test115.a">../test/test115.a</A>
+<LI>
+ok: local and variable label names used as formal macro arguments
+<LI>
+<A HREF="../test/test115b.a">../test/test115b.a</A>
+<LI>
+ok: object listing shows full macro expansion and all equate values
+<LI>
+<A HREF="../test/test115e.a">../test/test115e.a</A>
+<LI>
+error: definition errors
+<LI>
+<A HREF="../test/test115f.a">../test/test115f.a</A>
+<LI>
+error: forward reference (fail) and backward reference (ok)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4d">Local Scope</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4e">Nesting Depth</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test125e.a">../test/test125e.a</A>
+<LI>
+warn\fatal: "MAXDEPTH" psop set to negative value
+<LI>
+<A HREF="../test/test125f.a">../test/test125f.a</A>
+<LI>
+warn\fatal: "MAXDEPTH" psop set to zero
+<LI>
+<A HREF="../test/test125g.a">../test/test125g.a</A>
+<LI>
+warn\fatal: "MAXDEPTH" psop set to one
+<LI>
+<A HREF="../test/test125h.a">../test/test125h.a</A>
+<LI>
+warn\fatal: "MAXDEPTH" psop set to three
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l95">Repeats</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l99">Repeat Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test150.a">../test/test150.a</A>
+<LI>
+ok: basic repeat block definition and expansion
+<LI>
+<A HREF="../test/test150e.a">../test/test150e.a</A>
+<LI>
+warn\error: repeat block definition errors
+<LI>
+<A HREF="../test/test150f.a">../test/test150f.a</A>
+<LI>
+warn\error: repeat block expansion errors
+<LI>
+<A HREF="../test/test150g.a">../test/test150g.a</A>
+<LI>
+error: unresolved forward reference within repeat
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l98">Macros and Repeats</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test151.a">../test/test151.a</A>
+<LI>
+ok: repeats within macros
+<LI>
+<A HREF="../test/test151e.a">../test/test151e.a</A>
+<LI>
+error: macro definitions within repeat blocks
+<LI>
+<A HREF="../test/test151f.a">../test/test151f.a</A>
+<LI>
+error: crossed macro/repeat blocks (variation 1)
+<LI>
+<A HREF="../test/test151g.a">../test/test151g.a</A>
+<LI>
+error: crossed macro/repeat blocks (variation 2)
+<LI>
+<A HREF="../test/test151h.a">../test/test151h.a</A>
+<LI>
+error: non-constant repeat control expression within macro expansion
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l97">EXIT from Repeat</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test153.a">../test/test153.a</A>
+<LI>
+ok: unconditional "EXIT" psop within repeat block
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l96">EXIT from Nested Macro/Repeats</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test155.a">../test/test155.a</A>
+<LI>
+ok: unconditional "EXIT" from nested macro/repeat blocks
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lbf">Whiles</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lc3">While Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test160.a">../test/test160.a</A>
+<LI>
+ok: basic while block definition and expansion (numeric control expressions)
+<LI>
+<A HREF="../test/test160b.a">../test/test160b.a</A>
+<LI>
+ok: basic while block definition and expansion (string control expressions)
+<LI>
+<A HREF="../test/test160e.a">../test/test160e.a</A>
+<LI>
+warn\error: while block definition errors
+<LI>
+<A HREF="../test/test160f.a">../test/test160f.a</A>
+<LI>
+warn\error: while block expansion errors
+<LI>
+<A HREF="../test/test160g.a">../test/test160g.a</A>
+<LI>
+error: unresolved forward reference within while
+<LI>
+<A HREF="../test/test160h.a">../test/test160h.a</A>
+<LI>
+error: crossed WHILE and REPEAT blocks
+<LI>
+<A HREF="../test/test160i.a">../test/test160i.a</A>
+<LI>
+error: control expression goes out of range
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lc2">Macros and Whiles</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test161.a">../test/test161.a</A>
+<LI>
+ok: whiles within macros
+<LI>
+<A HREF="../test/test161e.a">../test/test161e.a</A>
+<LI>
+error: macro definitions within while blocks
+<LI>
+<A HREF="../test/test161f.a">../test/test161f.a</A>
+<LI>
+error: crossed macro/while blocks (variation 1)
+<LI>
+<A HREF="../test/test161g.a">../test/test161g.a</A>
+<LI>
+error: crossed macro/while blocks (variation 2)
+<LI>
+<A HREF="../test/test161h.a">../test/test161h.a</A>
+<LI>
+error: non-constant while control expression within macro expansion
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lc1">EXIT from While</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test163.a">../test/test163.a</A>
+<LI>
+ok: unconditional "EXIT" psop within while block
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lc0">EXIT from Nested Macro/Whiles</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test165.a">../test/test165.a</A>
+<LI>
+ok: unconditional "EXIT" from nested macro/while blocks
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Conditional Assembly</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">IF..ELSEIF..ELSE..ENDIF Blocks</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test200.a">../test/test200.a</A>
+<LI>
+ok: IF..ELSEIF..ELSE..ENDIF conditionals
+<LI>
+<A HREF="../test/test200b.a">../test/test200b.a</A>
+<LI>
+ok: IF..ELSEIF..ELSE..ENDIF conditionals (string expressions)
+<LI>
+<A HREF="../test/test200e.a">../test/test200e.a</A>
+<LI>
+warning\error: malformed conditionals
+<LI>
+<A HREF="../test/test200f.a">../test/test200f.a</A>
+<LI>
+error: unclosed conditional blocks within macros
+<LI>
+<A HREF="../test/test200g.a">../test/test200g.a</A>
+<LI>
+error: no forward reference in conditional
+<LI>
+<A HREF="../test/test200h.a">../test/test200h.a</A>
+<LI>
+error: crossed macro/if blocks
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">Odd Conditional Blocks</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test201.a">../test/test201.a</A>
+<LI>
+ok: odd but legal uses of conditional assembly blocks
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">EXIT Inside Conditional</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test203.a">../test/test203.a</A>
+<LI>
+ok: "EXIT" from macros inside nested conditionals
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Deep Nesting</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test205.a">../test/test205.a</A>
+<LI>
+ok: recursive macros; depth = 128
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">IFDEF and IFNDEF Blocks</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test210.a">../test/test210.a</A>
+<LI>
+ok: IFDEF and INDEF conditionals
+<LI>
+<A HREF="../test/test210e.a">../test/test210e.a</A>
+<LI>
+warning\error: malformed conditionals
+<LI>
+<A HREF="../test/test210f.a">../test/test210f.a</A>
+<LI>
+error: undetected errors
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l29">File Inclusion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2e">Inclusion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test250.a">../test/test250.a</A>
+<LI>
+ok: file inclusion; depth = 128
+<LI>
+<A HREF="../test/test250e.a">../test/test250e.a</A>
+<LI>
+warn\error: malformed "INCLUDE"
+<LI>
+<A HREF="../test/test250f.a">../test/test250f.a</A>
+<LI>
+error: unclosed IF conditional in include file
+<LI>
+<A HREF="../test/test250g.a">../test/test250g.a</A>
+<LI>
+error: file inclusion within block expansion
+<LI>
+<A HREF="../test/test250h.a">../test/test250h.a</A>
+<LI>
+warn\error: correct filename reported for error
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2c">File Label Scoping</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test251.a">../test/test251.a</A>
+<LI>
+ok: local and variable labels
+<LI>
+<A HREF="../test/test251e.a">../test/test251e.a</A>
+<LI>
+error: global labels
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2a">Default Output File Names</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test252.a">../test/test252.a</A>
+<LI>
+ok: default output file names set within include file
+<LI>
+<A HREF="../test/test252b.a">../test/test252b.a</A>
+<LI>
+ok: default output file names set within include file
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2f">Read Exclusion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test253.a">../test/test253.a</A>
+<LI>
+ok: "READONCE" psop
+<LI>
+<A HREF="../test/test253e.a">../test/test253e.a</A>
+<LI>
+warn: circular inclusion (stacked inclusions)
+<LI>
+<A HREF="../test/test253f.a">../test/test253f.a</A>
+<LI>
+warning: circular inclusion (no stacked inclusions)
+<LI>
+<A HREF="../test/test253g.a">../test/test253g.a</A>
+<LI>
+warn: previous inclusion
+<LI>
+<A HREF="../test/test253h.a">../test/test253h.a</A>
+<LI>
+warn: same base filename in another directory
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2b">Early Read Termination</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test255.a">../test/test255.a</A>
+<LI>
+ok: "END" psop (w/o start address)
+<LI>
+<A HREF="../test/test255b.a">../test/test255b.a</A>
+<LI>
+ok: "END" psop (w/ start address)
+<LI>
+<A HREF="../test/test255e.a">../test/test255e.a</A>
+<LI>
+warn: "END" psop in include files (w/ + w/o start address)
+<LI>
+<A HREF="../test/test255f.a">../test/test255f.a</A>
+<LI>
+warn\error\fatal: "END" psop in macro expansion (w/o start address)
+<LI>
+<A HREF="../test/test255g.a">../test/test255g.a</A>
+<LI>
+warn\error\fatal: "END" psop in macro expansion (w/ start address)
+<LI>
+<A HREF="../test/test255h.a">../test/test255h.a</A>
+<LI>
+warn\error\fatal: "END" psop in "IF" block (w/o start address)
+<LI>
+<A HREF="../test/test255i.a">../test/test255i.a</A>
+<LI>
+warn\error\fatal: "END" psop in "IF" block (w/ start address)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2d">Include File as Last Line of Root File</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test257.a">../test/test257.a</A>
+<LI>
+ok: file inclusion; no END psop in any file
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Binary File Inclusion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Binary Inclusion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test260.a">../test/test260.a</A>
+<LI>
+ok: binary file inclusion
+<LI>
+<A HREF="../test/test260b.a">../test/test260b.a</A>
+<LI>
+ok: binary inclusion data file generator (run first)
+<LI>
+<A HREF="../test/test260e.a">../test/test260e.a</A>
+<LI>
+warn\error: malformed "INCBIN"
+<LI>
+<A HREF="../test/test260f.a">../test/test260f.a</A>
+<LI>
+warn: odd argument values
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l67">Motorola SRecord Object</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6c">Basic Records</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test280.a">../test/test280.a</A>
+<LI>
+ok: 16-bit (header, data, count and EOF records)
+<LI>
+<A HREF="../test/test280b.a">../test/test280b.a</A>
+<LI>
+ok: 24-bit (header, data, count and EOF records)
+<LI>
+<A HREF="../test/test280c.a">../test/test280c.a</A>
+<LI>
+ok: 32-bit (header, data, count and EOF records)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6f">Start Records</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test281.a">../test/test281.a</A>
+<LI>
+ok: 16-bit (header, data, count and non-zero EOF records)
+<LI>
+<A HREF="../test/test281b.a">../test/test281b.a</A>
+<LI>
+ok: 24-bit (header, data, count and non-zero EOF records)
+<LI>
+<A HREF="../test/test281c.a">../test/test281c.a</A>
+<LI>
+ok: 32-bit (header, data, count and non-zero EOF records)
+<LI>
+<A HREF="../test/test281e.a">../test/test281e.a</A>
+<LI>
+error: start address out of range (16-bit)
+<LI>
+<A HREF="../test/test281f.a">../test/test281f.a</A>
+<LI>
+error: start address out of range (24-bit)
+<LI>
+<A HREF="../test/test281g.a">../test/test281g.a</A>
+<LI>
+error: start address out of range (32-bit)
+<LI>
+<A HREF="../test/test281h.a">../test/test281h.a</A>
+<LI>
+error: start address not numeric
+<LI>
+<A HREF="../test/test281i.a">../test/test281i.a</A>
+<LI>
+error: start address not found
+<LI>
+<A HREF="../test/test281j.a">../test/test281j.a</A>
+<LI>
+error: "END" w/ start expression within macro
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6b">Assume Wider Address Type</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test282.a">../test/test282.a</A>
+<LI>
+ok: 16-bit to 24-bit
+<LI>
+<A HREF="../test/test282b.a">../test/test282b.a</A>
+<LI>
+ok: 16-bit to 32-bit
+<LI>
+<A HREF="../test/test282c.a">../test/test282c.a</A>
+<LI>
+ok: 24-bit to 32-bit
+<LI>
+<A HREF="../test/test282e.a">../test/test282e.a</A>
+<LI>
+warn: unrecognized assumption
+<LI>
+<A HREF="../test/test282f.a">../test/test282f.a</A>
+<LI>
+warn: 16 bit to 24 bits, cannot change
+<LI>
+<A HREF="../test/test282g.a">../test/test282g.a</A>
+<LI>
+warn: 16 bit to 32 bits, cannot change
+<LI>
+<A HREF="../test/test282h.a">../test/test282h.a</A>
+<LI>
+warn: 24 bit to 32 bits, cannot change
+<LI>
+<A HREF="../test/test282i.a">../test/test282i.a</A>
+<LI>
+error: 16 bit to 24 bits, bad start address
+<LI>
+<A HREF="../test/test282j.a">../test/test282j.a</A>
+<LI>
+error: 16 bit to 32 bits, bad start address
+<LI>
+<A HREF="../test/test282k.a">../test/test282k.a</A>
+<LI>
+error: 24 bit to 32 bits, bad start address
+<LI>
+<A HREF="../test/test282l.a">../test/test282l.a</A>
+<LI>
+error: 16 bit to 24 bits, bad data address
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l69">Assume Narrower Address Type</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test283.a">../test/test283.a</A>
+<LI>
+ok: 32-bit to 24-bit
+<LI>
+<A HREF="../test/test283b.a">../test/test283b.a</A>
+<LI>
+ok: 32-bit to 16-bit
+<LI>
+<A HREF="../test/test283c.a">../test/test283c.a</A>
+<LI>
+ok: 24-bit to 16-bit
+<LI>
+<A HREF="../test/test283e.a">../test/test283e.a</A>
+<LI>
+error: 32-bit to 24-bit, bad start address
+<LI>
+<A HREF="../test/test283f.a">../test/test283f.a</A>
+<LI>
+error: 32-bit to 24-bit, bad data address (early assumption)
+<LI>
+<A HREF="../test/test283g.a">../test/test283g.a</A>
+<LI>
+error: 32-bit to 24-bit, bad data address (late assumption)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6d">Named Output File</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test284.a">../test/test284.a</A>
+<LI>
+ok: user-specified name
+<LI>
+<A HREF="../test/test284e.a">../test/test284e.a</A>
+<LI>
+warn\error: malformed name
+<LI>
+<A HREF="../test/test284f.a">../test/test284f.a</A>
+<LI>
+warn: cannot change name once set
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6a">Assume Record Supressed</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test285.a">../test/test285.a</A>
+<LI>
+ok: assume no S0 (header) record (16-bit)
+<LI>
+<A HREF="../test/test285b.a">../test/test285b.a</A>
+<LI>
+ok: assume no S5/S6 (count) record (16-bit)
+<LI>
+<A HREF="../test/test285c.a">../test/test285c.a</A>
+<LI>
+ok: assume no header or count (16-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l68">Assume More Data</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test286.a">../test/test286.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (16-bit)
+<LI>
+<A HREF="../test/test286b.a">../test/test286b.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (24-bit)
+<LI>
+<A HREF="../test/test286c.a">../test/test286c.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (32-bit)
+<LI>
+<A HREF="../test/test286e.a">../test/test286e.a</A>
+<LI>
+warn\error: malformed; out-of-range; unique value
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l6e">Overlapping Addresses (Monolithic)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test287.a">../test/test287.a</A>
+<LI>
+ok: 16-bit (header, data, count and EOF records)
+<LI>
+<A HREF="../test/test287b.a">../test/test287b.a</A>
+<LI>
+ok: 24-bit (header, data, count and EOF records)
+<LI>
+<A HREF="../test/test287c.a">../test/test287c.a</A>
+<LI>
+ok: 32-bit (header, data, count and EOF records)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l43">Intel Hexadecimal Object</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l48">Basic Records</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test290.a">../test/test290.a</A>
+<LI>
+ok: 16-bit (data and EOF records)
+<LI>
+<A HREF="../test/test290b.a">../test/test290b.a</A>
+<LI>
+ok: 20-bit (data, EOF and extended segment address records)
+<LI>
+<A HREF="../test/test290c.a">../test/test290c.a</A>
+<LI>
+ok: 32-bit (data, EOF and extended linear address records)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4c">Start Records</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test291.a">../test/test291.a</A>
+<LI>
+ok: 16-bit (data and EOF records)
+<LI>
+<A HREF="../test/test291b.a">../test/test291b.a</A>
+<LI>
+ok: 20-bit (data, EOF, extended and start segment address records)
+<LI>
+<A HREF="../test/test291c.a">../test/test291c.a</A>
+<LI>
+ok: 32-bit (data, EOF, extended and start linear address records)
+<LI>
+<A HREF="../test/test291e.a">../test/test291e.a</A>
+<LI>
+error: start address out of range (16-bit)
+<LI>
+<A HREF="../test/test291f.a">../test/test291f.a</A>
+<LI>
+error: start address out of range (20-bit)
+<LI>
+<A HREF="../test/test291g.a">../test/test291g.a</A>
+<LI>
+error: start address out of range (32-bit)
+<LI>
+<A HREF="../test/test291h.a">../test/test291h.a</A>
+<LI>
+error: start address not numeric
+<LI>
+<A HREF="../test/test291i.a">../test/test291i.a</A>
+<LI>
+error: start address not found
+<LI>
+<A HREF="../test/test291j.a">../test/test291j.a</A>
+<LI>
+error: "END" w/ start expression within macro
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l47">Assume Wider Address Type</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test292.a">../test/test292.a</A>
+<LI>
+ok: 16-bit to 20-bit
+<LI>
+<A HREF="../test/test292b.a">../test/test292b.a</A>
+<LI>
+ok: 16-bit to 32-bit
+<LI>
+<A HREF="../test/test292c.a">../test/test292c.a</A>
+<LI>
+ok: 20-bit to 32-bit
+<LI>
+<A HREF="../test/test292e.a">../test/test292e.a</A>
+<LI>
+warn: unrecognized assumption
+<LI>
+<A HREF="../test/test292f.a">../test/test292f.a</A>
+<LI>
+warn: 16 bits to 20 bits, cannot change
+<LI>
+<A HREF="../test/test292g.a">../test/test292g.a</A>
+<LI>
+warn: 16 bits to 32 bits, cannot change
+<LI>
+<A HREF="../test/test292h.a">../test/test292h.a</A>
+<LI>
+error: 20 bits to 32 bits; cannot change
+<LI>
+<A HREF="../test/test292i.a">../test/test292i.a</A>
+<LI>
+error: 16 bits to 20 bits; bad start address
+<LI>
+<A HREF="../test/test292j.a">../test/test292j.a</A>
+<LI>
+error: 16 bits to 32 bits; bad start address
+<LI>
+<A HREF="../test/test292k.a">../test/test292k.a</A>
+<LI>
+error: 20 bits to 32 bits; bad start address
+<LI>
+<A HREF="../test/test292l.a">../test/test292l.a</A>
+<LI>
+error: 16 bits to 20 bits; bad data address
+<LI>
+<A HREF="../test/test292m.a">../test/test292m.a</A>
+<LI>
+error: 20 bits to 32 bits; bad data address
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l46">Assume Narrower Address Type</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test293.a">../test/test293.a</A>
+<LI>
+ok: 32-bit to 20-bit
+<LI>
+<A HREF="../test/test293e.a">../test/test293e.a</A>
+<LI>
+error: 32 bits to 20 bits; bad start address
+<LI>
+<A HREF="../test/test293f.a">../test/test293f.a</A>
+<LI>
+error: 32 bits to 20 bits; bad data address (early assumption)
+<LI>
+<A HREF="../test/test293g.a">../test/test293g.a</A>
+<LI>
+error: 32 bits to 20 bits; bad data address (late assumption)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l49">Named Output File</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test294.a">../test/test294.a</A>
+<LI>
+ok: user-specified name
+<LI>
+<A HREF="../test/test294e.a">../test/test294e.a</A>
+<LI>
+warn\error: malformed name
+<LI>
+<A HREF="../test/test294f.a">../test/test294f.a</A>
+<LI>
+warn: cannot change name once set
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4a">Output Greater than 64K</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test295.a">../test/test295.a</A>
+<LI>
+ok: 20-bit (data, EOF and extended segment address records)
+<LI>
+<A HREF="../test/test295b.a">../test/test295b.a</A>
+<LI>
+ok: 32-bit (data, EOF and extended segment address records)
+<LI>
+<A HREF="../test/test295e.a">../test/test295e.a</A>
+<LI>
+fatal: 16-bit
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l45">Assume More Data</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test296.a">../test/test296.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (16-bit)
+<LI>
+<A HREF="../test/test296b.a">../test/test296b.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (20-bit)
+<LI>
+<A HREF="../test/test296c.a">../test/test296c.a</A>
+<LI>
+ok: assume 32 hex data bytes per record (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l4b">Overlapping Addresses (Monolithic)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test297.a">../test/test297.a</A>
+<LI>
+ok: 16-bit (data and EOF records)
+<LI>
+<A HREF="../test/test297b.a">../test/test297b.a</A>
+<LI>
+ok:20-bit (data and EOF records)
+<LI>
+<A HREF="../test/test297c.a">../test/test297c.a</A>
+<LI>
+ok:32-bit (data and EOF records)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l44">Address Jumps Force New Address Records</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test298.a">../test/test298.a</A>
+<LI>
+ok: 20-bit (data, EOF and extended segment address records)
+<LI>
+<A HREF="../test/test298b.a">../test/test298b.a</A>
+<LI>
+ok: 32-bit (data, EOF and extended segment address records)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9d">Segments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la1">Basic Definition</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test300.a">../test/test300.a</A>
+<LI>
+ok: correct addresses of relative segment data (16-bit)
+<LI>
+<A HREF="../test/test300b.a">../test/test300b.a</A>
+<LI>
+ok: correct addresses of relative segment data (24-bit)
+<LI>
+<A HREF="../test/test300c.a">../test/test300c.a</A>
+<LI>
+ok: correct addresses of relative segment data (32-bit)
+<LI>
+<A HREF="../test/test300e.a">../test/test300e.a</A>
+<LI>
+error: bad segment names and unmatched block
+<LI>
+<A HREF="../test/test300f.a">../test/test300f.a</A>
+<LI>
+fatal: SEGMENT after first ORG outside of segment (therefore monolithic)
+<LI>
+<A HREF="../test/test300g.a">../test/test300g.a</A>
+<LI>
+error: mis-matched segment names
+<LI>
+<A HREF="../test/test300h.a">../test/test300h.a</A>
+<LI>
+error: no absolute segment
+<LI>
+<A HREF="../test/test300i.a">../test/test300i.a</A>
+<LI>
+error\fatal: ORG outside of any segment
+<LI>
+<A HREF="../test/test300j.a">../test/test300j.a</A>
+<LI>
+error: repeat ORGs of one segment must have same value
+<LI>
+<A HREF="../test/test300k.a">../test/test300k.a</A>
+<LI>
+error\fatal: 16-bit relative segment exceeds max pc value (at fixup)
+<LI>
+<A HREF="../test/test300l.a">../test/test300l.a</A>
+<LI>
+error\fatal: 24-bit relative segment exceeds max pc value (at fixup)
+<LI>
+<A HREF="../test/test300m.a">../test/test300m.a</A>
+<LI>
+error\fatal: 32-bit relative segment exceeds max pc value (at fixup)
+<LI>
+<A HREF="../test/test300n.a">../test/test300n.a</A>
+<LI>
+error\fatal: 16-bit relative segment exceeds max pc value (during assembly)
+<LI>
+<A HREF="../test/test300o.a">../test/test300o.a</A>
+<LI>
+error\fatal: 24-bit relative segment exceeds max pc value (during assembly)
+<LI>
+<A HREF="../test/test300p.a">../test/test300p.a</A>
+<LI>
+error\fatal: 32-bit relative segment exceeds max pc value (during assembly)
+<LI>
+<A HREF="../test/test300q.a">../test/test300q.a</A>
+<LI>
+error\fatal: too many segments (Monolithic, by ORG)
+<LI>
+<A HREF="../test/test300r.a">../test/test300r.a</A>
+<LI>
+error\fatal: too many segments (Monolithic, by DS)
+<LI>
+<A HREF="../test/test300s.a">../test/test300s.a</A>
+<LI>
+error: segment ORG must come before data storage
+<LI>
+<A HREF="../test/test300t.a">../test/test300t.a</A>
+<LI>
+error: crossed block structures in segment fragments
+<LI>
+<A HREF="../test/test300u.a">../test/test300u.a</A>
+<LI>
+error\fatal: data storage outside of any segment
+<LI>
+<A HREF="../test/test300v.a">../test/test300v.a</A>
+<LI>
+error\fatal: DS outside of any segment
+<LI>
+<A HREF="../test/test300w.a">../test/test300w.a</A>
+<LI>
+error\fatal: implicit label value assignment outside of any segment
+<LI>
+<A HREF="../test/test300x.a">../test/test300x.a</A>
+<LI>
+error\fatal: program counter in expression outside of any segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lbb">Segments Re-Used</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test301.a">../test/test301.a</A>
+<LI>
+ok: correct addresses of absolute and relative data (16-bit)
+<LI>
+<A HREF="../test/test301b.a">../test/test301b.a</A>
+<LI>
+ok: correct addresses of absolute and relative data (24-bit)
+<LI>
+<A HREF="../test/test301c.a">../test/test301c.a</A>
+<LI>
+ok: correct addresses of absolute and relative data (32-bit)
+<LI>
+<A HREF="../test/test301e.a">../test/test301e.a</A>
+<LI>
+error\fatal: 16-bit relative segment exceeds max pc value (at fixup)
+<LI>
+<A HREF="../test/test301f.a">../test/test301f.a</A>
+<LI>
+error\fatal: 24-bit relative segment exceeds max pc value (at fixup)
+<LI>
+<A HREF="../test/test301g.a">../test/test301g.a</A>
+<LI>
+error\fatal: 32-bit relative segment exceeds max pc value (at fixup)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lab">Legal Data Storage</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test302.a">../test/test302.a</A>
+<LI>
+ok: first named segment must be absolute before end of source
+<LI>
+<A HREF="../test/test302e.a">../test/test302e.a</A>
+<LI>
+error: first named segment must be absolute before end of source
+<LI>
+<A HREF="../test/test302f.a">../test/test302f.a</A>
+<LI>
+error: storing data in first segment before making it absolute
+<LI>
+<A HREF="../test/test302g.a">../test/test302g.a</A>
+<LI>
+error\fatal: cannot store data outside of any segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="laa">Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test303.a">../test/test303.a</A>
+<LI>
+ok: implicit assignment of program counter to numeric labels
+<LI>
+<A HREF="../test/test303b.a">../test/test303b.a</A>
+<LI>
+ok: implicit assignment of program counter to string labels
+<LI>
+<A HREF="../test/test303e.a">../test/test303e.a</A>
+<LI>
+error: missing global labels
+<LI>
+<A HREF="../test/test303f.a">../test/test303f.a</A>
+<LI>
+error: reference to locals in other segments
+<LI>
+<A HREF="../test/test303g.a">../test/test303g.a</A>
+<LI>
+warn: forward reference to variable label
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb9">Program Counter (Implicit)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test304.a">../test/test304.a</A>
+<LI>
+ok: implicit use of program counter (relative offsets)
+<LI>
+<A HREF="../test/test304e.a">../test/test304e.a</A>
+<LI>
+fatal: pc invalid outside segments
+<LI>
+<A HREF="../test/test304f.a">../test/test304f.a</A>
+<LI>
+warn\error\fatal: "DS" psop with negative values (relative segment)
+<LI>
+<A HREF="../test/test304g.a">../test/test304g.a</A>
+<LI>
+fatal: "END" psop cannot be labeled
+<LI>
+<A HREF="../test/test304h.a">../test/test304h.a</A>
+<LI>
+error: cannot make absolute ( so cannot resolve data )
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb8">Program Counter (Explicit)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test305.a">../test/test305.a</A>
+<LI>
+ok: PC expressions in relative segments
+<LI>
+<A HREF="../test/test305e.a">../test/test305e.a</A>
+<LI>
+error: illegal forward reference to pc in relative segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la0">"USESEGMENTS" psop</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test306.a">../test/test306.a</A>
+<LI>
+ok: explicit declaration of segment use
+<LI>
+<A HREF="../test/test306b.a">../test/test306b.a</A>
+<LI>
+ok: explicit declaration of segment use (first use inside segment)
+<LI>
+<A HREF="../test/test306e.a">../test/test306e.a</A>
+<LI>
+fatal: explicit declaration of segment use after "ORG" used
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la9">Intel Hexfile Output (Single File)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test310.a">../test/test310.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test310b.a">../test/test310b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test310c.a">../test/test310c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la8">Intel Hexfile Output (By Segments, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test311.a">../test/test311.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test311b.a">../test/test311b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test311c.a">../test/test311c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la7">Intel Hexfile Output (By Segments, "%03d." Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test312.a">../test/test312.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test312b.a">../test/test312b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test312c.a">../test/test312c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+<LI>
+<A HREF="../test/test312e.a">../test/test312e.a</A>
+<LI>
+error: bad template names
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la6">Intel Hexfile Output (By Segment)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test313.a">../test/test313.a</A>
+<LI>
+ok: non-segmented program produces no output (16-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la4">Intel Hexfile Output (By Blocks, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test315.a">../test/test315.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test315b.a">../test/test315b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test315c.a">../test/test315c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la3">Intel Hexfile Output (By Blocks, ".%03d" Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test316.a">../test/test316.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test316b.a">../test/test316b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test316c.a">../test/test316c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la5">Intel Hexfile Output (By Blocks, Overlapping)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test317.a">../test/test317.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test317b.a">../test/test317b.a</A>
+<LI>
+ok: correct output sequence and start address (20-bit)
+<LI>
+<A HREF="../test/test317c.a">../test/test317c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb2">Motorola Hexfile Output (Single File)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test320.a">../test/test320.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test320b.a">../test/test320b.a</A>
+<LI>
+ok: correct output sequence and start address (24-bit)
+<LI>
+<A HREF="../test/test320c.a">../test/test320c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb0">Motorola Hexfile Output (By Segments, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test321.a">../test/test321.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test321b.a">../test/test321b.a</A>
+<LI>
+ok: correct output sequence and start address (24-bit)
+<LI>
+<A HREF="../test/test321c.a">../test/test321c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="laf">Motorola Hexfile Output (By Segments, "%02x." Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test322.a">../test/test322.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test322b.a">../test/test322b.a</A>
+<LI>
+ok: correct output sequence and start address (24-bit)
+<LI>
+<A HREF="../test/test322c.a">../test/test322c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb1">Motorola Hexfile Output (By Segments, Default Names, No Header)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test323.a">../test/test323.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lae">Motorola Hexfile Output (By Blocks, Default Names, No Header)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test323b.a">../test/test323b.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lad">Motorola Hexfile Output (By Blocks, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test325.a">../test/test325.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test325b.a">../test/test325b.a</A>
+<LI>
+ok: correct output sequence and start address (24-bit)
+<LI>
+<A HREF="../test/test325c.a">../test/test325c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lac">Motorola Hexfile Output (By Blocks, ".%03X" Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test326.a">../test/test326.a</A>
+<LI>
+ok: correct output sequence and start address (16-bit)
+<LI>
+<A HREF="../test/test326b.a">../test/test326b.a</A>
+<LI>
+ok: correct output sequence and start address (24-bit)
+<LI>
+<A HREF="../test/test326c.a">../test/test326c.a</A>
+<LI>
+ok: correct output sequence and start address (32-bit)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb7">Object Output (By Segments, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test331.a">../test/test331.a</A>
+<LI>
+ok: 16-bit
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb6">Object Output (By Segments, "%04d." Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test332.a">../test/test332.a</A>
+<LI>
+ok: 16-bit
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb5">Object Output (By Blocks, Default Names)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test335.a">../test/test335.a</A>
+<LI>
+ok: 16-bit
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb4">Object Output (By Blocks, ".%0x" Template)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test336.a">../test/test336.a</A>
+<LI>
+ok: 16-bit
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lbc">Uninitialized Segments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test350.a">../test/test350.a</A>
+<LI>
+ok: basic definition
+<LI>
+<A HREF="../test/test350e.a">../test/test350e.a</A>
+<LI>
+warn\error\fatal: declaration errors
+<LI>
+<A HREF="../test/test350f.a">../test/test350f.a</A>
+<LI>
+fatal: cannot store data in "uninitialized" segments
+<LI>
+<A HREF="../test/test350g.a">../test/test350g.a</A>
+<LI>
+error: no "uninitialized" after "padto"
+<LI>
+<A HREF="../test/test350h.a">../test/test350h.a</A>
+<LI>
+error: no "padto" after "uninitialized"
+<LI>
+<A HREF="../test/test350i.a">../test/test350i.a</A>
+<LI>
+fatal: can't use in monolithic program
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="la2">Common Segments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test352.a">../test/test352.a</A>
+<LI>
+ok: basic definition
+<LI>
+<A HREF="../test/test352e.a">../test/test352e.a</A>
+<LI>
+warn\error\fatal: declaration errors
+<LI>
+<A HREF="../test/test352f.a">../test/test352f.a</A>
+<LI>
+fatal: cannot store data in "common" segments
+<LI>
+<A HREF="../test/test352g.a">../test/test352g.a</A>
+<LI>
+error: no "common" after "padto"
+<LI>
+<A HREF="../test/test352h.a">../test/test352h.a</A>
+<LI>
+error: no "padto" after "common"
+<LI>
+<A HREF="../test/test352i.a">../test/test352i.a</A>
+<LI>
+fatal: can't use in monolithic program
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9f">"RELORG" Pseudo Op</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test354.a">../test/test354.a</A>
+<LI>
+ok: correct addresses of relative segment data (16-bit)
+<LI>
+<A HREF="../test/test354b.a">../test/test354b.a</A>
+<LI>
+ok: correct addresses of relative segment data (24-bit)
+<LI>
+<A HREF="../test/test354c.a">../test/test354c.a</A>
+<LI>
+ok: correct addresses of relative segment data (32-bit)
+<LI>
+<A HREF="../test/test354e.a">../test/test354e.a</A>
+<LI>
+error: segments cannot be re-typed
+<LI>
+<A HREF="../test/test354f.a">../test/test354f.a</A>
+<LI>
+warn: labels and expressions
+<LI>
+<A HREF="../test/test354g.a">../test/test354g.a</A>
+<LI>
+error\fatal: outside segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l9e">"ABSEND" and "RELEND" Pseudo Ops</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test356.a">../test/test356.a</A>
+<LI>
+ok: correct addresses of relative segment data (16-bit)
+<LI>
+<A HREF="../test/test356b.a">../test/test356b.a</A>
+<LI>
+ok: correct addresses of relative segment data (24-bit)
+<LI>
+<A HREF="../test/test356c.a">../test/test356c.a</A>
+<LI>
+ok: correct addresses of relative segment data (32-bit)
+<LI>
+<A HREF="../test/test356e.a">../test/test356e.a</A>
+<LI>
+error: segments cannot be re-typed
+<LI>
+<A HREF="../test/test356f.a">../test/test356f.a</A>
+<LI>
+warn\error: labels and expressions
+<LI>
+<A HREF="../test/test356g.a">../test/test356g.a</A>
+<LI>
+error\fatal: ABSEND outside segment
+<LI>
+<A HREF="../test/test356h.a">../test/test356h.a</A>
+<LI>
+error\fatal: RELEND outside segment
+<LI>
+<A HREF="../test/test356i.a">../test/test356i.a</A>
+<LI>
+error: cannot make segments absolute
+<LI>
+<A HREF="../test/test356j.a">../test/test356j.a</A>
+<LI>
+error: ---END segments cannot be padded
+<LI>
+<A HREF="../test/test356k.a">../test/test356k.a</A>
+<LI>
+error: program counter pushed below zero
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lba">Segment Map Identification</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test360.a">../test/test360.a</A>
+<LI>
+ok: correct identification of segment type
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="lb3">Nested Segments</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test370.a">../test/test370.a</A>
+<LI>
+ok: correct addresses of segment data (16-bit)
+<LI>
+<A HREF="../test/test370b.a">../test/test370b.a</A>
+<LI>
+ok: correct addresses of segment data (24-bit)
+<LI>
+<A HREF="../test/test370c.a">../test/test370c.a</A>
+<LI>
+ok: correct addresses of segment data (32-bit)
+<LI>
+<A HREF="../test/test370e.a">../test/test370e.a</A>
+<LI>
+error: segment without endsegment (outer, named)
+<LI>
+<A HREF="../test/test370f.a">../test/test370f.a</A>
+<LI>
+error: segment without endsegment (inner, named)
+<LI>
+<A HREF="../test/test370g.a">../test/test370g.a</A>
+<LI>
+error: segment without endsegment (unnamed)
+<LI>
+<A HREF="../test/test370h.a">../test/test370h.a</A>
+<LI>
+error: endsegment without segment
+<LI>
+<A HREF="../test/test370i.a">../test/test370i.a</A>
+<LI>
+error: self-nesting exceeds max depth
+<LI>
+<A HREF="../test/test370j.a">../test/test370j.a</A>
+<LI>
+error: nested segments have nested local scopes
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l83">Program Counter Manipulation</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l84">Define Uninitialized Storage</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test400.a">../test/test400.a</A>
+<LI>
+ok: "DS" psop (monolithic)
+<LI>
+<A HREF="../test/test400b.a">../test/test400b.a</A>
+<LI>
+ok: "DS" psop (segmented)
+<LI>
+<A HREF="../test/test400e.a">../test/test400e.a</A>
+<LI>
+error: malformed "DS" psop
+<LI>
+<A HREF="../test/test400f.a">../test/test400f.a</A>
+<LI>
+warn: odd "DS" psop useage
+<LI>
+<A HREF="../test/test400g.a">../test/test400g.a</A>
+<LI>
+error: 16-bit program counter out of range (negative)
+<LI>
+<A HREF="../test/test400h.a">../test/test400h.a</A>
+<LI>
+error: 16-bit program counter out of range (too big)
+<LI>
+<A HREF="../test/test400i.a">../test/test400i.a</A>
+<LI>
+error: 24-bit program counter out of range (negative)
+<LI>
+<A HREF="../test/test400j.a">../test/test400j.a</A>
+<LI>
+error: 24-bit program counter out of range (too big)
+<LI>
+<A HREF="../test/test400k.a">../test/test400k.a</A>
+<LI>
+error: 32-bit program counter out of range (negative)
+<LI>
+<A HREF="../test/test400l.a">../test/test400l.a</A>
+<LI>
+error: 32-bit program counter out of range (too big)
+<LI>
+<A HREF="../test/test400m.a">../test/test400m.a</A>
+<LI>
+error: uninitialized program counter
+<LI>
+<A HREF="../test/test400n.a">../test/test400n.a</A>
+<LI>
+error\fatal: DS outside of any segment (explicit segments)
+<LI>
+<A HREF="../test/test400o.a">../test/test400o.a</A>
+<LI>
+error\fatal: negative DS (explicit segments)
+<LI>
+<A HREF="../test/test400p.a">../test/test400p.a</A>
+<LI>
+error\fatal: negative DS outside segment (explicit segments)
+<LI>
+<A HREF="../test/test400q.a">../test/test400q.a</A>
+<LI>
+fatal: cannot store data in uninitialized segment
+<LI>
+<A HREF="../test/test400r.a">../test/test400r.a</A>
+<LI>
+fatal: cannot use DS in data segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l85">Fill Block With Constant Data</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test402.a">../test/test402.a</A>
+<LI>
+ok: "FILL" psop
+<LI>
+<A HREF="../test/test402e.a">../test/test402e.a</A>
+<LI>
+error: malformed "FILL" psop
+<LI>
+<A HREF="../test/test402f.a">../test/test402f.a</A>
+<LI>
+warn: odd "FILL" psop useage
+<LI>
+<A HREF="../test/test402g.a">../test/test402g.a</A>
+<LI>
+error: uninitialized program counter
+<LI>
+<A HREF="../test/test402h.a">../test/test402h.a</A>
+<LI>
+error\fatal: FILL outside of any segment (explicit segments)
+<LI>
+<A HREF="../test/test402i.a">../test/test402i.a</A>
+<LI>
+error\fatal: 16-bit program counter pushed out of range (too big)
+<LI>
+<A HREF="../test/test402j.a">../test/test402j.a</A>
+<LI>
+error\fatal: 24-bit program counter pushed out of range (too big)
+<LI>
+<A HREF="../test/test402k.a">../test/test402k.a</A>
+<LI>
+error\fatal: 32-bit program counter pushed out of range (too big)
+<LI>
+<A HREF="../test/test402l.a">../test/test402l.a</A>
+<LI>
+fatal: cannot use FILL in uninitialized segment
+<LI>
+<A HREF="../test/test402m.a">../test/test402m.a</A>
+<LI>
+error\fatal: segmented 16-bit pc pushed out of range (too small)
+<LI>
+<A HREF="../test/test402n.a">../test/test402n.a</A>
+<LI>
+error\fatal: segmented 16-bit pc pushed out of range (too big)
+<LI>
+<A HREF="../test/test402o.a">../test/test402o.a</A>
+<LI>
+error\fatal: segmented 16-bit pc pushed out of range (too big)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l86">Pad To Specific Byte Boundary</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test404.a">../test/test404.a</A>
+<LI>
+ok: "PADTO" pseudo op (monolithic)
+<LI>
+<A HREF="../test/test404b.a">../test/test404b.a</A>
+<LI>
+ok: "PADTO" pseudo op (segmented)
+<LI>
+<A HREF="../test/test404e.a">../test/test404e.a</A>
+<LI>
+warn\error: boundary value out of range
+<LI>
+<A HREF="../test/test404f.a">../test/test404f.a</A>
+<LI>
+warn: only one PADTO per explicit segment
+<LI>
+<A HREF="../test/test404g.a">../test/test404g.a</A>
+<LI>
+error\fatal: program counter forced out of range (implicit segments)
+<LI>
+<A HREF="../test/test404h.a">../test/test404h.a</A>
+<LI>
+error\fatal: program counter forced out of range (explicit segments)
+<LI>
+<A HREF="../test/test404i.a">../test/test404i.a</A>
+<LI>
+error\fatal: program counter forced out of range (explicit segments)
+<LI>
+<A HREF="../test/test404j.a">../test/test404j.a</A>
+<LI>
+error\fatal: PADTO before CPU set (monolithic)
+<LI>
+<A HREF="../test/test404k.a">../test/test404k.a</A>
+<LI>
+error\fatal: PADTO before first ORG (monolithic)
+<LI>
+<A HREF="../test/test404l.a">../test/test404l.a</A>
+<LI>
+error\fatal: PADTO outside of any segment (explicit segments)
+<LI>
+<A HREF="../test/test404m.a">../test/test404m.a</A>
+<LI>
+fatal: cannot use PADTO in uninitialized segment
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l87">Program Listing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8e">Listing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test450.a">../test/test450.a</A>
+<LI>
+ok: "LIST--" psops
+<LI>
+<A HREF="../test/test450e.a">../test/test450e.a</A>
+<LI>
+warn: unrecognized LIST options
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l92">No Flags Specified</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test451.a">../test/test451.a</A>
+<LI>
+ok: "LIST--" defaults
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l90">Long Lines (Wrapped)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test452.a">../test/test452.a</A>
+<LI>
+ok: source lines too long to list on one line
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8f">Long Lines (Truncated)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test453.a">../test/test453.a</A>
+<LI>
+ok: source lines too long to list on one line
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l94">Show Line Numbers</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test454.a">../test/test454.a</A>
+<LI>
+ok: prefix line numbers to listing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8b">Change Page Width</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test455.a">../test/test455.a</A>
+<LI>
+ok: "PAGESIZE" psop (page width=132)
+<LI>
+<A HREF="../test/test455b.a">../test/test455b.a</A>
+<LI>
+ok: "PAGESIZE" psop (page width=250)
+<LI>
+<A HREF="../test/test455c.a">../test/test455c.a</A>
+<LI>
+ok: "PAGESIZE" psop (page width=50)
+<LI>
+<A HREF="../test/test455d.a">../test/test455d.a</A>
+<LI>
+ok: "PAGESIZE" psop (page width=0; no right edge)
+<LI>
+<A HREF="../test/test455e.a">../test/test455e.a</A>
+<LI>
+warn\error: bad values
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l89">Change Left Margin</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test457.a">../test/test457.a</A>
+<LI>
+ok: "MARGIN" psop (left margin=2, w/o line numbers)
+<LI>
+<A HREF="../test/test457b.a">../test/test457b.a</A>
+<LI>
+ok: "MARGIN" psop (left margin=5, w/ line numbers)
+<LI>
+<A HREF="../test/test457e.a">../test/test457e.a</A>
+<LI>
+warn\error: bad values
+<LI>
+<A HREF="../test/test457f.a">../test/test457f.a</A>
+<LI>
+warn\fatal: no printable width
+<LI>
+<A HREF="../test/test457g.a">../test/test457g.a</A>
+<LI>
+warn: no printable width (recovers by changing page size)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l93">Pagination</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test459.a">../test/test459.a</A>
+<LI>
+ok: "PAGESIZE" and "MARGIN" psops (w/o line numbers)
+<LI>
+<A HREF="../test/test459b.a">../test/test459b.a</A>
+<LI>
+ok: "PAGESIZE" and "MARGIN" psops (w/ line numbers)
+<LI>
+<A HREF="../test/test459c.a">../test/test459c.a</A>
+<LI>
+ok: "PAGESIZE" and "MARGIN" psops (3-line pages w/ line numbers)
+<LI>
+<A HREF="../test/test459e.a">../test/test459e.a</A>
+<LI>
+warn\fatal: "PAGESIZE" and "MARGIN" psops (no printable length)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8a">Change Line Spacing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test461.a">../test/test461.a</A>
+<LI>
+ok: "LINESPACE" psop (w/o pagination)
+<LI>
+<A HREF="../test/test461b.a">../test/test461b.a</A>
+<LI>
+ok: "LINESPACE" psop (w/ pagination)
+<LI>
+<A HREF="../test/test461c.a">../test/test461c.a</A>
+<LI>
+ok: "LINESPACE" psop (each line on its own page)
+<LI>
+<A HREF="../test/test461e.a">../test/test461e.a</A>
+<LI>
+warn\error: bad values
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l88">Change Header</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test463.a">../test/test463.a</A>
+<LI>
+ok: "TITLE" psop (w/ string expression)
+<LI>
+<A HREF="../test/test463b.a">../test/test463b.a</A>
+<LI>
+ok: "TITLE" psop (w/ optional non-string argument)
+<LI>
+<A HREF="../test/test463c.a">../test/test463c.a</A>
+<LI>
+ok: "TITLE" psop (w/ null expression)
+<LI>
+<A HREF="../test/test463e.a">../test/test463e.a</A>
+<LI>
+error: bad arguments
+<LI>
+<A HREF="../test/test463f.a">../test/test463f.a</A>
+<LI>
+warn: title is unique
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l91">Macro Cross-Reference</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test470.a">../test/test470.a</A>
+<LI>
+ok: w/o line numbers (source x-ref only)
+<LI>
+<A HREF="../test/test470b.a">../test/test470b.a</A>
+<LI>
+ok: w line numbers (both source and listing x-ref)
+<LI>
+<A HREF="../test/test470c.a">../test/test470c.a</A>
+<LI>
+ok: source and listing x-ref; listed and un-listed macro expansions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8d">Global Label Cross-Reference</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test472.a">../test/test472.a</A>
+<LI>
+ok: w/o line numbers (source x-ref only)
+<LI>
+<A HREF="../test/test472b.a">../test/test472b.a</A>
+<LI>
+ok: w/ line numbers (both source and listing x-ref)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l8c">Formfeed</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test474.a">../test/test474.a</A>
+<LI>
+ok: "PAGE" psop (10-line page)
+<LI>
+<A HREF="../test/test474b.a">../test/test474b.a</A>
+<LI>
+ok: "PAGE" psop (w/o pagination enabled)
+<LI>
+<A HREF="../test/test474c.a">../test/test474c.a</A>
+<LI>
+ok: "PAGE" psop (10-line page; no effect in unlisted section)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l30">Functions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l42">VER() and VER$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test500.a">../test/test500.a</A>
+<LI>
+ok: HXA version number
+<LI>
+<A HREF="../test/test500e.a">../test/test500e.a</A>
+<LI>
+error: malformed
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l39">LEN()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test502.a">../test/test502.a</A>
+<LI>
+ok: string length
+<LI>
+<A HREF="../test/test502e.a">../test/test502e.a</A>
+<LI>
+error: mis-use
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l36">INDEX()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test504.a">../test/test504.a</A>
+<LI>
+ok: substring position (from left)
+<LI>
+<A HREF="../test/test504e.a">../test/test504e.a</A>
+<LI>
+error: substring position
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3c">MID$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test506.a">../test/test506.a</A>
+<LI>
+ok: substring extraction (by numeric index)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l41">VAL()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test508.a">../test/test508.a</A>
+<LI>
+ok: evaluate string expression as numeric
+<LI>
+<A HREF="../test/test508e.a">../test/test508e.a</A>
+<LI>
+error: strings not legal numeric expressions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3e">STR$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test510.a">../test/test510.a</A>
+<LI>
+ok: evaluate numeric expression as string
+<LI>
+<A HREF="../test/test510e.a">../test/test510e.a</A>
+<LI>
+error: malformed and mis-applied
+<LI>
+<A HREF="../test/test510f.a">../test/test510f.a</A>
+<LI>
+error: forward reference in string context
+<LI>
+<A HREF="../test/test510g.a">../test/test510g.a</A>
+<LI>
+error: out of range conversion
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l37">INDEXR()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test512.a">../test/test512.a</A>
+<LI>
+ok: substring position (from right)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l40">TOLOWER$() and TOUPPER$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test514.a">../test/test514.a</A>
+<LI>
+ok: convert string case
+<LI>
+<A HREF="../test/test514e.a">../test/test514e.a</A>
+<LI>
+error: tests should fail; check response to incorrect input
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l34">FORWARD()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test516.a">../test/test516.a</A>
+<LI>
+ok: check expression for forward reference
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l31">CHR$() and ORD()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test518.a">../test/test518.a</A>
+<LI>
+ok: convert numeric value to single-character string and vice-versa
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3a">MATCH$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test520.a">../test/test520.a</A>
+<LI>
+ok: substring extraction (by pattern match)
+<LI>
+<A HREF="../test/test520e.a">../test/test520e.a</A>
+<LI>
+error: substring position
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3d">SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test522.a">../test/test522.a</A>
+<LI>
+ok: correct segment data (16-bit)
+<LI>
+<A HREF="../test/test522b.a">../test/test522b.a</A>
+<LI>
+ok: correct segment data (24-bit)
+<LI>
+<A HREF="../test/test522c.a">../test/test522c.a</A>
+<LI>
+ok: correct segment data (32-bit)
+<LI>
+<A HREF="../test/test522e.a">../test/test522e.a</A>
+<LI>
+error: malformed
+<LI>
+<A HREF="../test/test522f.a">../test/test522f.a</A>
+<LI>
+error: reference to unknown segments (segmented source)
+<LI>
+<A HREF="../test/test522g.a">../test/test522g.a</A>
+<LI>
+error: reference to unknown segments (monolithic source)
+<LI>
+<A HREF="../test/test522h.a">../test/test522h.a</A>
+<LI>
+error: uninitialized segments have no segment offset
+<LI>
+<A HREF="../test/test522i.a">../test/test522i.a</A>
+<LI>
+error: bad segment names
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l32">CPU$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test524.a">../test/test524.a</A>
+<LI>
+ok: name of current CPU
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3f">TIME$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test526.a">../test/test526.a</A>
+<LI>
+ok: time and date
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3b">MESG$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test528.a">../test/test528.a</A>
+<LI>
+ok: internal message texts
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l33">FILE$()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test530.a">../test/test530.a</A>
+<LI>
+ok: current file name
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l38">LABEL()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test532.a">../test/test532.a</A>
+<LI>
+ok: symbol name existence testing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l35">Function Evaluation</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test550.a">../test/test550.a</A>
+<LI>
+ok: function evaluation
+<LI>
+<A HREF="../test/test550e.a">../test/test550e.a</A>
+<LI>
+error: non-existent
+<LI>
+<A HREF="../test/test550f.a">../test/test550f.a</A>
+<LI>
+error: labels with same name as functions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">Custom Byte Order</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0b">Assume Non-Default Order</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test560.a">../test/test560.a</A>
+<LI>
+ok: non-default BIT16
+<LI>
+<A HREF="../test/test560b.a">../test/test560b.a</A>
+<LI>
+ok: non-default BIT32
+<LI>
+<A HREF="../test/test560e.a">../test/test560e.a</A>
+<LI>
+warn\error: bad useage
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l70">Nonstandard Byte</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l71">16-bit BYTE</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test570.a">../test/test570.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test570b.a">../test/test570b.a</A>
+<LI>
+ok: 24-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test570c.a">../test/test570c.a</A>
+<LI>
+ok: 32-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test570e.a">../test/test570e.a</A>
+<LI>
+error:non-existent data storage pseudo ops
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l76">16-bit String Literals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test572.a">../test/test572.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l75">16-bit Motorola Basic SRecord</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test574.a">../test/test574.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test574b.a">../test/test574b.a</A>
+<LI>
+ok: 24-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test574c.a">../test/test574c.a</A>
+<LI>
+ok: 32-bit PC, 16-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l74">16-bit Intel Basic Hex Record</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test575.a">../test/test575.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test575b.a">../test/test575b.a</A>
+<LI>
+ok: 20-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test575c.a">../test/test575c.a</A>
+<LI>
+ok: 32-bit PC, 16-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l72">16-bit FILL and PADTO</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test576.a">../test/test576.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test576b.a">../test/test576b.a</A>
+<LI>
+ok: 24-bit PC, 16-bit Byte
+<LI>
+<A HREF="../test/test576c.a">../test/test576c.a</A>
+<LI>
+ok: 32-bit PC, 16-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l73">16-bit HEX and INCBIN</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test578.a">../test/test578.a</A>
+<LI>
+ok: 16-bit PC, 16-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l77">32-bit BYTE</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test580.a">../test/test580.a</A>
+<LI>
+ok: 16-Bit PC, 32-Bit Byte
+<LI>
+<A HREF="../test/test580b.a">../test/test580b.a</A>
+<LI>
+ok: 20-Bit PC, 32-Bit Byte
+<LI>
+<A HREF="../test/test580c.a">../test/test580c.a</A>
+<LI>
+ok: 32-Bit PC, 32-Bit Byte
+<LI>
+<A HREF="../test/test580e.a">../test/test580e.a</A>
+<LI>
+error:non-existent data storage pseudo ops
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7c">32-bit String Literals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test582.a">../test/test582.a</A>
+<LI>
+ok: 16-bit PC, 32-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7b">32-bit Motorola Basic SRecord</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test584.a">../test/test584.a</A>
+<LI>
+ok: 16-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test584b.a">../test/test584b.a</A>
+<LI>
+ok: 24-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test584c.a">../test/test584c.a</A>
+<LI>
+ok: 32-bit PC, 32-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l7a">32-bit Intel Basic Hex Record</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test585.a">../test/test585.a</A>
+<LI>
+ok: 16-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test585b.a">../test/test585b.a</A>
+<LI>
+ok: 20-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test585c.a">../test/test585c.a</A>
+<LI>
+ok: 32-bit PC, 32-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l78">32-bit FILL and PADTO</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test586.a">../test/test586.a</A>
+<LI>
+ok: 16-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test586b.a">../test/test586b.a</A>
+<LI>
+ok: 24-bit PC, 32-bit Byte
+<LI>
+<A HREF="../test/test586c.a">../test/test586c.a</A>
+<LI>
+ok: 32-bit PC, 32-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l79">32-bit HEX and INCBIN</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test588.a">../test/test588.a</A>
+<LI>
+ok: 16-bit PC, 32-bit Byte
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l60">Miscellaneous</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l64">Timers</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test600.a">../test/test600.a</A>
+<LI>
+ok: "--TIMER" pseudo ops
+<LI>
+<A HREF="../test/test600e.a">../test/test600e.a</A>
+<LI>
+error: "--TIMER" pseudo ops
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l62">Numbers and BIT--</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test601.a">../test/test601.a</A>
+<LI>
+ok: numbers and "BYTE", "WORD", "REVWORD", "LONG" and "REVLONG" pseudo-ops
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l61">HEX</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test602.a">../test/test602.a</A>
+<LI>
+ok: HEX pseudo op
+<LI>
+<A HREF="../test/test602e.a">../test/test602e.a</A>
+<LI>
+error: HEX pseudo op
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l65">User Messages w/ String Expressions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test604.a">../test/test604.a</A>
+<LI>
+ok: ECHO
+<LI>
+<A HREF="../test/test604e.a">../test/test604e.a</A>
+<LI>
+warn: WARN
+<LI>
+<A HREF="../test/test604f.a">../test/test604f.a</A>
+<LI>
+error: ERROR
+<LI>
+<A HREF="../test/test604g.a">../test/test604g.a</A>
+<LI>
+fatal: FATAL
+<LI>
+<A HREF="../test/test604h.a">../test/test604h.a</A>
+<LI>
+fatal: FATAL
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l63">Reserved Names</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../test/test605.a">../test/test605.a</A>
+<LI>
+ok: reserved name detection
+<LI>
+<A HREF="../test/test605e.a">../test/test605e.a</A>
+<LI>
+error: assignment to reserved names
+<LI>
+<A HREF="../test/test605f.a">../test/test605f.a</A>
+<LI>
+error: reserved names in expressions (detected second pass)
+<LI>
+<A HREF="../test/test605g.a">../test/test605g.a</A>
+<LI>
+error: user names which cannot match reserved names
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l66">User Stack</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../test/test610.a">../test/test610.a</A>
+<LI>
+ok: "PUSHS" pseudo op and "POP$()" function
+<LI>
+<A HREF="../test/test610b.a">../test/test610b.a</A>
+<LI>
+ok: "PUSHS" pseudo op and "POP$()" and "EMPTY()" functions
+<LI>
+<A HREF="../test/test610c.a">../test/test610c.a</A>
+<LI>
+ok: "PUSHS" pseudo op and "PEEK$()" and "POP$()" functions
+<LI>
+<A HREF="../test/test610e.a">../test/test610e.a</A>
+<LI>
+error: bad arguments to "PUSHS" pseudo op
+<LI>
+<A HREF="../test/test610f.a">../test/test610f.a</A>
+<LI>
+fatal: stack overflow (default stack size)
+<LI>
+<A HREF="../test/test610g.a">../test/test610g.a</A>
+<LI>
+fatal: stack overflow ("MAXSTACK" stack size)
+<LI>
+<A HREF="../test/test610h.a">../test/test610h.a</A>
+<LI>
+error: stack not empty at end of pass one
+<LI>
+<A HREF="../test/test610i.a">../test/test610i.a</A>
+<LI>
+error: malformed "PEEK$()" function
+<LI>
+<A HREF="../test/test610j.a">../test/test610j.a</A>
+<LI>
+error: "PEEK$()" function and empty stack and out of range arguments
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:43 2013</EM>
+</BODY>
+</HTML>

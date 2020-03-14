@@ -1,0 +1,469 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Intel Hexadecimal Output Files</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Intel Hexadecimal Output Files</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l06">Scope of This Document</A>
+<LI><A HREF="#l05">Related Resources</A>
+<LI><A HREF="#l03">Intel Hexadecimal Object File Format</A>
+<UL>
+<LI><A HREF="#l04">Non-Standard Byte Sizes</A>
+</UL>
+<LI><A HREF="#l02">HXA Implementation Notes</A>
+<LI><A HREF="#l01">ASSUME and Intel Hexadecimal Files</A>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This document briefly describes the Intel Hexadecimal Object File format
+and its HXA implementation.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA
+<UL>
+<LI>
+<A HREF="hxa.htm">Main Documentation</A>
+</UL>
+<P>
+Intel
+<UL>
+<LI>
+Intel Hexadecimal Object File Format Specification, Revision A, 01/06/88
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Intel Hexadecimal Object File Format</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The Intel Hexadecimal Object file format is an
+ASCII text representation of an absolute memory image.
+The Intel specification is based on the 8080 and 80x86 processors with
+accumulator widths of 8-, 16- and 32-bits.
+<P>
+Each line of the file represents a single record consisting of
+up to six fields:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Intel Hexadecimal Record</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Record Mark
+<TD>
+Record Length
+<TD>
+Load Offset
+<TD>
+Record Type
+<TD>
+Data
+<TD>
+Checksum
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Record Fields</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Chars</STRONG>
+<TD>
+<STRONG>Description</STRONG>
+<TD>
+<STRONG>Additional Notes</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+Record Mark
+<TD>
+1
+<TD>
+always ':'
+<TD>
+ASCII 03AH
+<TR ALIGN=CENTER>
+<TD>
+Record Length
+<TD>
+2
+<TD>
+length of Data field in bytes
+<TD>
+max 255, ASCII 'FF' (046046H)
+<TR ALIGN=CENTER>
+<TD>
+Load Offset
+<TD>
+4
+<TD>
+offset of Data bytes from base address
+<TD>
+ASCII '0000' (030303030H) if not Data record
+<TR ALIGN=CENTER>
+<TD>
+Record Type
+<TD>
+2
+<TD>
+one of six record types
+<TD>
+ASCII 030H to 035H
+<TR ALIGN=CENTER>
+<TD>
+Data
+<TD>
+2*#bytes
+<TD>
+data bytes of all record types except EOF
+<TD>
+EOF has no data
+<TR ALIGN=CENTER>
+<TD>
+Checksum
+<TD>
+2
+<TD>
+Two's complement of ((byte sum of length+offset+type+data) & 0FFH)
+<TD>
+sum + checksum = 0
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Record Types</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Type</STRONG>
+<TD>
+<STRONG>ASCII</STRONG>
+<TD>
+<STRONG>Meaning</STRONG>
+<TD>
+<STRONG>Applies To</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+0
+<TD>
+030H
+<TD>
+Data
+<TD>
+8-, 16- and 32-bit
+<TR ALIGN=CENTER>
+<TD>
+1
+<TD>
+031H
+<TD>
+End of File
+<TD>
+8-, 16- and 32-bit
+<TR ALIGN=CENTER>
+<TD>
+2
+<TD>
+032H
+<TD>
+Extended Segment Address
+<TD>
+16- and 32-bit
+<TR ALIGN=CENTER>
+<TD>
+3
+<TD>
+033H
+<TD>
+Start Segment Address
+<TD>
+16- and 32-bit
+<TR ALIGN=CENTER>
+<TD>
+4
+<TD>
+034H
+<TD>
+Extended Linear Address
+<TD>
+32-bit
+<TR ALIGN=CENTER>
+<TD>
+5
+<TD>
+035H
+<TD>
+Start Linear Address
+<TD>
+32-bit
+</TABLE>
+<P>
+For further details see the Intel documentation.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Non-Standard Byte Sizes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The Intel Hexadecimal Object Format is modified in a non-standard
+way if the size of a "byte" is 16- or 32-bits.
+<P>
+16-Bit Bytes
+<UL>
+<LI>
+the 'Record Mark' is always ';' (ASCII 03BH)
+<LI>
+the 'Record Length' is always octet-correct
+<LI>
+the 'Extended Address'(if any) + 'Load Offset' is always byte-correct
+<LI>
+the number of data characters is 4*#bytes (up to 128 characters)
+</UL>
+<P>
+32-Bit Bytes
+<UL>
+<LI>
+the 'Record Mark' is always '&lt;' (ASCII 03CH)
+<LI>
+the 'Record Length' is always octet-correct
+<LI>
+the 'Extended Address'(if any) + 'Load Offset' is always byte-correct
+<LI>
+the number of data characters is 8*#bytes (up to 256 characters)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">HXA Implementation Notes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+By default HXA outputs record types based not on accumulator widths
+but on program counter widths.
+Note that correct records for the Intel 8080 and 80x86 processors
+are a subset of HXA's default mode.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Default Record Types in Output File</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Program Counter Width</STRONG>
+<TD>
+<STRONG>Data</STRONG>
+<TD>
+<STRONG>EOF</STRONG>
+<TD>
+<STRONG>Extended Segment</STRONG>
+<TD>
+<STRONG>Start Segment</STRONG>
+<TD>
+<STRONG>Extended Linear</STRONG>
+<TD>
+<STRONG>Start Linear</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+08 - 16
+<TD>
+Y
+<TD>
+Y
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+17 - 20
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+21 - 32
+<TD>
+Y
+<TD>
+Y
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TD>
+-
+</TABLE>
+<P>
+Start address records are optional when using segmented
+or linear addresses.
+To create a start record, place an expression representing the start
+address following the 
+<A HREF="hxa.htm#l5a">"END"</A>
+ pseudo op.
+Note that any such expression is always evaluated (and range checked),
+even if segmented or linear addresses are not being used (and therefore no
+start record will actually be created).
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">ASSUME and Intel Hexadecimal Files</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The Intel specification requires that records for the 80836 and
+above processors can be either segmented (real mode) or linear
+(protected mode).
+Other processors may support only linear addresses.
+<P>
+HXA therefore allows the default address record types in an
+Intel Hexadecimal Object file to be overridden by using the
+<A HREF="hxa.htm#l53">"ASSUME"</A>
+ pseudo opcode.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Intel Hexadecimal Object File Overrides</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ASSUME</STRONG>
+<TD>
+<STRONG>Forces</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+hexfile:segmented
+<TD>
+Segmented Extended and Start Addresses
+<TR ALIGN=CENTER>
+<TD>
+hexfile:linear
+<TD>
+Linear Extended and Start Addresses
+<TR ALIGN=CENTER>
+<TD>
+hexdatasize:[8-32]
+<TD>
+Number of data bytes per record
+</TABLE>
+<P>
+These may be used at any point in the source file(s).
+<EM>HEXFILE</EM>
+ may be used as often as desired,
+but if any use after the first differs from it a warning
+will be generated and the request ignored.
+<P>
+Changing the size of output records can be done only once.
+The same size request can be repeated, but any attempt to change
+it again to a different size generates a warning and the request is ignored.
+<P>
+When 
+<EM>HEXFILE</EM>
+ is used to force a particular output format,
+HXA limits the maximum program counter value to the output format maximum
+or the actual program counter width maximum, whichever is less.
+<P>
+When the output format maximum is set to less than the actual
+program counter width maximum, HXA verifies than any data already generated
+fits under the new maximum.
+If an out-of-range value is discovered, the error is reported as belonging
+to the 
+<EM>HEXFILE</EM>
+ line which lowered the limit.
+It is therefore best to make this forcing as soon as possible in the
+source code, 
+so that any range errors reported accurately reflect the source lines they
+actually occurred on.
+<P>
+<EM>HEXDATASIZE</EM>
+ is different from 
+<EM>HEXFILE</EM>
+ in that its argument is
+an expression, not a literal.
+The default value is 16, so each data-containing record has at most
+16 data bytes (partial records are possible).
+<P>
+The number of data bytes per output record can be set anywhere from
+eight to 32 inclusive.
+Once set the value cannot be re-set to another value, although the
+same value can be repeated as often as desired.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:46 2013</EM>
+</BODY>
+</HTML>

@@ -1,0 +1,4212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Hobby Cross Assembler v0.201 Source Code Overview</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Hobby Cross Assembler v0.201 Source Code Overview</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l35">Scope of This Document</A>
+<LI><A HREF="#l34">Related Resources</A>
+<LI><A HREF="#l02">Acknowledgements</A>
+<LI><A HREF="#l01">A Note on Documentation</A>
+<LI><A HREF="#l1f">HXA History</A>
+<UL>
+<LI><A HREF="#l20">v0.10</A>
+<LI><A HREF="#l21">v0.11</A>
+<LI><A HREF="#l22">v0.12</A>
+<LI><A HREF="#l23">v0.121</A>
+<LI><A HREF="#l24">v0.122</A>
+<LI><A HREF="#l25">v0.130</A>
+<LI><A HREF="#l26">v0.140</A>
+<LI><A HREF="#l27">v0.150</A>
+<LI><A HREF="#l28">v0.160</A>
+<LI><A HREF="#l29">v0.161</A>
+<LI><A HREF="#l2a">v0.162</A>
+<LI><A HREF="#l2b">v0.163</A>
+<LI><A HREF="#l2c">v0.170</A>
+<LI><A HREF="#l2d">v0.180</A>
+<LI><A HREF="#l2e">v.181</A>
+<LI><A HREF="#l2f">v0.182</A>
+<LI><A HREF="#l30">v0.190</A>
+<LI><A HREF="#l31">v0.191</A>
+<LI><A HREF="#l32">v0.200</A>
+<LI><A HREF="#l33">v0.201</A>
+</UL>
+<LI><A HREF="#l36">TAWK Programming Language</A>
+<UL>
+<LI><A HREF="#l39">Loose Typing</A>
+<LI><A HREF="#l3a">Regular Expressions</A>
+<LI><A HREF="#l37">Associative Arrays</A>
+<LI><A HREF="#l38">Automatic Memory Management</A>
+<LI><A HREF="#l3b">TAWK extensions to AWK</A>
+</UL>
+<LI><A HREF="#l10">HXA Design and Modularization</A>
+<UL>
+<LI><A HREF="#l1d">Design Goals</A>
+<LI><A HREF="#l1e">Naming Conventions</A>
+<LI><A HREF="#l11">Current Modules</A>
+</UL>
+<LI><A HREF="#l03">Creating an HXA Variant</A>
+<UL>
+<LI><A HREF="#l04">By Replacing A_INS---.AWK</A>
+<LI><A HREF="#l0e">By Using Macros</A>
+</UL>
+<LI><A HREF="#l0f">Future Development</A>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l35">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This document briefly describes
+<P>
+<UL>
+<LI>
+HXA release history
+<LI>
+the TAWK programming language used to create HXA
+<LI>
+the design and modularization of HXA
+<LI>
+how to modify HXA to accept a new assembly language
+<LI>
+possible future changes to HXA
+</UL>
+<P>
+It attempts to highlight what someone who wishes to understand
+(or modify) HXA's source code might fruitfully pay attention to.
+It does not attempt to teach anyone how to program.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l34">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA
+<UL>
+<LI>
+<A HREF="hxa.htm">Main Documentation</A>
+<LI>
+<A HREF="hxa_test.htm">General Tests</A>
+<LI>
+<A HREF="hxa_demo.htm">General Demos</A>
+</UL>
+<P>
+<STRONG>Programming and Design Influences</STRONG>
+<P>
+<STRONG>Merlin Assemblers</STRONG>
+<UL>
+<LI>
+Bredon, Glen
+<LI>
+<EM>Roger Wagner Publishing</EM>
+<LI>
+this series of assemblers for the 6502-family processors used in
+Commodore and Apple home computers remains popular with many programmers
+</UL>
+<P>
+<STRONG>Advanced C Programming for Displays</STRONG>
+<UL>
+<LI>
+Rochkind, Marc J.
+<LI>
+<EM>Prentice Hall, 1988</EM>
+<LI>
+the ideas on program design and portability found in
+this book are so completely general that although it deals only with
+character-oriented displays, updating it to deal with bit-mapped ones
+(GUIs) would be almost trivial.
+HXA's variable and function naming conventions originated here
+</UL>
+<P>
+<STRONG>The AWK Programming Language</STRONG>
+<UL>
+<LI>
+Aho, Alfred V., Kernighan, Brian W., and Weinberger, Peter J.
+<LI>
+<EM>Addison-Wesley Publishing Company, 1988</EM>
+<LI>
+still the best introduction to AWK.
+Many fascinating examples, including a simple assembler
+</UL>
+<P>
+<STRONG>Software Tools</STRONG>
+<UL>
+<LI>
+Kernighan, Brian W., and Plauger, P. J.
+<LI>
+<EM>Addison-Wesley Publishing Company, 1976</EM>
+<LI>
+although some of the programs presented are no
+longer of much relevance, every programmer should read this book for the
+never-outdated discussions of program design and programming style.
+Most of HXA's macro processing ideas originated here
+</UL>
+<P>
+<STRONG>Writing Interactive Compilers and Interpreters</STRONG>
+<UL>
+<LI>
+Brown, P. J.
+<LI>
+<EM>John Wiley & Sons, 1979 (reprinted with corrections, 1980)</EM>
+<LI>
+a witty, utterly delightful book full of practical advice.
+HXA's expression evaluation ideas originated here, as well as
+whatever ability it has to detect and recover from errors
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Acknowledgements</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+I'd like to extend an appreciation to the many people who have written
+assemblers before me and posted their work on the Internet.
+Although I often could not follow the source code (it's hard to do
+without printing it all out!), I learned much simply by reading their
+documentation.
+Their feature lists broadened my ideas of what is possible, and
+their history summaries often pointed out areas that especially benefitted
+from extensive testing.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">A Note on Documentation</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA's documentation exists in several parts:
+<UL>
+<LI>
+the non-processer specific main user manual
+<LI>
+the processor-specific user manuals
+<LI>
+the implementation manual (ie., this document)
+<LI>
+the source code itself (ie., what this document describes in overview)
+<LI>
+the test and demo program suites
+</UL>
+<P>
+To use HXA requires only the first, plus perhaps one or more of the second.
+To fully understand how HXA works requires the last three.
+<P>
+It must be said that writing documentation is fairly tedious.
+However simply creating it helps to make HXA better, and often enough
+that the process might be worthwhile even if not meant for reference.
+<P>
+Sometimes when writing a description of what a pseudo op is supposed to do
+the question comes to mind "Does it really?", which leads to a new or revised
+test to determine if it was so (and if not, to find out why).
+Sometimes describing a limitation leads to the question "Does it really have
+to be that way?", which in turn leads to finding a way of eliminating the
+limitation in question.
+<P>
+The test suite contains many more tests to determine how HXA reacts to an
+error than how it reacts to legal input.
+Part of this is simply that there are more ways to err compared to the
+number of ways to do things right.
+Part of this is because illegal input more often causes HXA
+to do something unexpected.
+Figuring out why often turns up an overlooked possibility.
+HXA may then be modified and the test suite expanded to account for that
+possibility.
+<P>
+Buried in some of the tests are comments on why things do or do not
+happen.
+There are also occasional tricks used that HXA is capable of, or a
+useful macro definition here and there.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1f">HXA History</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l20">v0.10</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+October 2004
+<P>
+<EM>All Versions</EM>
+<P>
+<UL>
+<LI>
+initial release
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Processors Supported
+<UL>
+<LI>
+6502, 65C02, R65C02 and W65C02S
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l21">v0.11</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+March 2005
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+WHILE..ENDWHILE conditional pseudo ops
+<LI>
+RBIT--, SBIT-- and UBIT-- ranged data storage pseudo ops
+<LI>
+built-in __VER__ symbol
+</UL>
+<P>
+Deprecated
+<UL>
+<LI>
+built-in VER() function
+</UL>
+<P>
+Bug Fix - Modulus Operator
+<UL>
+<LI>
+then: "%0" and "%1" always interpreted as binary numbers
+<LI>
+now: always correctly interpreted in context as either binary numbers
+or modulus operators
+</UL>
+<P>
+Bug Fix - Erroneous Nested IF Evaluation
+<UL>
+<LI>
+then: a nested IF condition in a false ELSE branch could be evaluated
+(and if true its branch processed) when the nesting depth became greater
+than in the companion true IF branch of the ELSE
+<LI>
+now: IF conditions nested in false ELSE branches are always ignored
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Added
+<UL>
+<LI>
+W65C816S processor support
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l22">v0.12</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+August 2005
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+SEGMENT and ENDSEGMENT pseudo ops to create segmented source code
+<LI>
+PADTO pseudo op to insert $00 bytes until reaching a modular byte boundary
+<LI>
+HEXFILE pseudo op to create Intel format hexadecimal output files
+<LI>
+MAXDEPTH pseudo op to limit local scope nesting depth
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+ASSUME pseudo op support for modifying the default behavior of HEXFILE
+<LI>
+END pseudo op now accepts an expression which is interpreted as a start
+address to be written to an Intel hexadecimal output file
+<LI>
+the same global label can be assigned the same value any number of times
+<LI>
+the same local label in the same local scope can be assigned
+the same value any number of times
+</UL>
+<P>
+Bug Fix - Byte at Highest Processor Address
+<UL>
+<LI>
+then: placing a byte at the highest processor address advanced the
+internal program counter past that address, which triggered a fatal error
+<LI>
+now: the program counter is allowed to have a value one past the highest
+legal processor address, as long as no attempt is made to store anything
+at that address
+</UL>
+<P>
+Bug Fix - Unrecognized LIST-- Option
+<UL>
+<LI>
+then: unrecognized LIST-- options triggered warnings both when first
+encountered while reading the source code and later during actual listing
+<LI>
+now: unrecognized LIST-- options trigger warnings only when first
+encountered while reading the source code
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l23">v0.121</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+May 2006
+<P>
+<EM>All Versions</EM>
+<P>
+Extended
+<UL>
+<LI>
+label, macro and pseudo-op alias names can now contain period characters,
+as long as each one is surrounded by alphanumeric characters
+<LI>
+string arguments of the CPU, ECHO, MESGTEXT, PSALIAS and XLATE psops now
+work like arguments of the ASSUME psop, in that delimiting double quote marks are
+are optional, but if present the string must be non-null and any escape
+sequences are processed
+<LI>
+the ECHO pseudo op now outputs a blank line if no argument is supplied
+<LI>
+the STATS list option produces more detail
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+attempting to define a macro with an illegal name in the label field no
+longer causes a second (cascade) error when "ENDMACRO" is encountered
+<LI>
+some internal routines now attempt to examine every sub-field of the
+expression field rather than giving up after the first error is detected
+</UL>
+<P>
+Bug Fix - Escaped Backslash
+<UL>
+<LI>
+then: a "created" escape sequence consisting of a replaced escaped
+backslash and the immediately following character was itself replaced if
+the same sequence also occurred later in the string
+<LI>
+now: "created" escape sequences formed during escape code replacement are
+never themselves replaced
+</UL>
+<P>
+Bug Fix - Escaped Double Quote Mark
+<UL>
+<LI>
+then: any double quote mark immediately preceeded by one or more escape
+characters was considered escaped, which is not correct if the number
+of escape characters is even
+<LI>
+now: a double quote mark is escaped only when immediately preceeded by
+an odd number of escape characters
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l24">v0.122</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+May 2006
+<P>
+<EM>All Versions</EM>
+<P>
+Bug Fix - Leftover Debug Code
+<UL>
+<LI>
+then: v0.121 expression parsing copied each token found to a check file
+<LI>
+now: debug code removed
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l25">v0.130</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+October 2006
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+string labels (global, local and variable)
+<LI>
+string concatenation (implied operator)
+<LI>
+logical function: 
+<A HREF="hxa.htm#l11">FORWARD()</A>
+<LI>
+numeric functions: 
+<A HREF="hxa.htm#l12">INDEX()</A>
+, 
+<A HREF="hxa.htm#l13">INDEXR()</A>
+, 
+<A HREF="hxa.htm#l15">LEN()</A>
+,
+<A HREF="hxa.htm#l19">ORD()</A>
+, 
+<A HREF="hxa.htm#l20">VAL()</A>
+<LI>
+string functions: 
+<A HREF="hxa.htm#l0c">CHR$()</A>
+,
+<A HREF="hxa.htm#l1f">LOWER$()</A>
+,
+<A HREF="hxa.htm#l16">MATCH$()</A>
+, 
+<A HREF="hxa.htm#l18">MID$()</A>
+, 
+<A HREF="hxa.htm#l1d">STR$()</A>
+,
+<A HREF="hxa.htm#l1f">UPPER$()</A>
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+the ASSUME, CPU, ECHO, MESGTEXT, PSALIAS and XLATE pseudo ops
+now accept string expressions in place of string literals.
+If an argument starts with a string literal, label or function then it is
+assumed to be a string expression and escapes are processed; otherwise it is
+accepted as-is
+<LI>
+the ERROR, FATAL and WARN pseudo ops also now optionally accept the same
+string/not string expression argument as above.
+If an argument is supplied it is displayed as part of the last line of
+the error message
+<LI>
+in the expression field a comma character does not divide arguments if
+it appears between balanced parentheses, in addition to the previous cases
+of being escaped or within a string literal
+<LI>
+block nesting enforcement is now applied to segment fragments, include
+files and macro, repeat and while block expansions (instead of just their
+definitions).
+When a block closes any blocks opened after it which are still open are
+flagged as errors
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+the --FILE and INCLUDE pseudo ops now accept string expressions to specify
+filenames, which subjects them to escape processing (filenames delimited
+by angle-brackets remain unaffected by escape processing)
+<LI>
+use of the INCLUDE pseudo op within a macro, repeat or while block
+expansion is now treated as an error instead of merely issuing a warning
+(this assists block nesting enforcement)
+<LI>
+characters in ECHO arguments and all other assembler messages which are
+not printable ASCII are replaced by a "[xx]" sequence, where 'xx' is a
+two-character ASCII representation of the hexadecimal value of the
+replaced character
+<LI>
+the logical-AND ('&&') and logical-OR ('||') operators now
+<EM>short-circuit</EM>
+, skipping over their right-hand side arguments without
+evaluating them if the final result can be determined solely from the
+left-hand side result
+</UL>
+<P>
+Bug Fix - Source Line Count
+<UL>
+<LI>
+then: the source line count reported in the statistics portion of a listing
+did not count lines from any included files
+<LI>
+now: all lines from all user source files are counted
+</UL>
+<P>
+Partial Bug Fix - Unbalanced IF Blocks Within Block Expansions
+<UL>
+<LI>
+then: in order to allow the EXIT pseudo op to be used inside an IF block,
+at the end of every block expansion the IF nesting level was set back
+to whatever it was at the start of the expansion, which could cause
+"IF without ENDIF" errors in a block definition to be ignored
+even if EXIT was not used
+<LI>
+now: unbalanced IF blocks in block expansions might be ignored only if
+EXIT is actually executed in that block
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l26">v0.140</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+April 2007
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+<A HREF="hxa.htm#l61">HEX</A>
+ data storage pseudo op
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+the upper limit of the numeric argument supplied to PADTO has been raised
+from 512 to the maximum value of the program counter plus one, which makes
+padding to specific address values possible (thanks to Dave Plummer for
+provoking a re-thinking of this pseudo op)
+<LI>
+hexadecimal numeric literals and escape sequences may now be expressed
+C-style (ie., with an '0x' prefix) in addition to Motorola and Intel styles
+<LI>
+in segmented source the ORG that makes the first segment absolute can now
+occur in any fragment of it before the end of the source, rather than being
+required before data is stored in any other segment (it still must occur
+before any data is stored in the first segment)
+</UL>
+<P>
+Bug Fix - PADTO Pseudo Op
+<UL>
+<LI>
+then: PADTO could be used even if the program counter had an indeterminate
+value, leading to unpredicatable behavior since it depends on the program
+counter to decide how much to padding to add
+<LI>
+now: PADTO triggers a fatal error if the program counter is invalid when
+its use is attempted (the same as all other pseudo ops that depend on
+the program counter)
+</UL>
+<P>
+Bug Fix - Listing Long Source Lines
+<UL>
+<LI>
+then: single source lines with a sufficiently long run of non-space
+characters caused the listing routine to go into an infinite loop as it
+tried to chop them down for listing on multiple consecutive lines
+<LI>
+now: long runs of non-space characters are properly listed on consecutive
+lines (thanks to Dave Plummer for finding this bug)
+</UL>
+<P>
+Bug Fix - Labels In Nested Repeat Control Expressions
+<UL>
+<LI>
+then: control expressions of nested repeat loops were evaluated
+prematurely, leading to incorrect error reports if a label in the expression
+received a value only after that point
+<LI>
+now: evaluation of control expressions of repeat loops occurs only
+when they are actually needed
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l27">v0.150</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+October 2007
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+ternary conditional operator ("?:") in numeric expressions
+<LI>
+<A HREF="hxa.htm#l64">INCBIN</A>
+ pseudo op to include binary file data
+<LI>
+<A HREF="hxa.htm#l75">READONCE</A>
+ pseudo op to prevent multiple inclusions of a source file
+<LI>
+<A HREF="hxa.htm#l5e">EXITIF</A>
+ pseudo op to permit simple conditional exit
+from block expansions
+<LI>
+<A HREF="hxa.htm#l56">COMMON</A>
+ pseudo op to help manage "scratch" memory in
+segmented programs
+<LI>
+non-zero error codes returned at progam exit if error(s) detected
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+macro formal arguments may now also be variable and local labels, which
+at expansion time are treated as the left-hand side of an implied "EQU"
+pseudo op, with the actual argument treated as the right-hand side
+<LI>
+the OBJECT list flag can now be used to turn on and off listing of whole
+sections of source code regardless of whether any data was generated by
+lines within 'off' sections
+<LI>
+the PADTO pseudo op now accepts an optional argument which specifies
+the value it should pad the object code with
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+all status and error messages are now sent to 
+<EM>stdout</EM>
+, which can
+be redirected to avoid or capture all screen (console) output
+</UL>
+<P>
+Bug Fix - Object Filename Extension
+<UL>
+<LI>
+then: v0.140 code changes resulted in the default filename
+created by the OBJFILE pseudo op not having any extension
+<LI>
+now: the default filename created by the OBJFILE pseudo op has
+an 'OBJ' extension (again)
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Extended
+<UL>
+<LI>
+the ASSUME pseudo op now accepts "zeropage:", "directpage:" and
+"databank:" options to inform HXA65 that the default location of these
+has been changed (for processors or systems that allow this)
+<LI>
+the string following "accum:" or "index:" in an ASSUME pseudo op is now
+treated as a numeric expression
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+a single legal address mode for an instruction is now determined before any
+address mode forcing is applied rather than after, which disallows a few
+previously allowed forcings from a mode that would normally be illegal to
+a legal one (all to or from a W65C816S long indirect mode)
+</UL>
+<P>
+Bug Fix - DEA and INA Instruction Aliases (65C02 and Above)
+<UL>
+<LI>
+then: treated as "accumulator" mode instructions, which allows the
+expression field to be blank (which is correct) or to contain the
+literal character 'A' (which is not)
+<LI>
+now: treated as "implied" mode instructions, which allows only a blank
+expression field and matches all the other register increment/decrement
+instructions
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l28">v0.160</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+February 2008
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+<A HREF="hxa.htm#l71">PSNULL</A>
+ customization pseudo op to aid porting source code when
+HXA has no equivalent pseudo op suitable for aliasing
+<LI>
+<A HREF="hxa.htm#l1c">SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()</A>
+ functions to
+allow source code access to segment absolute addresses, sizes and
+byte offsets within the raw binary object file
+<LI>
+<A HREF="hxa.htm#l4f">ABSEND and RELEND</A>
+ pseudo ops to allow
+aligning segments by their end addresses rather than starting
+<LI>
+<A HREF="hxa.htm#l76">RELORG</A>
+ pseudo op to explicitly declare a relative origin segment
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+the 
+<A HREF="hxa.htm#l12">INDEX()</A>
+, 
+<A HREF="hxa.htm#l13">INDEXR()</A>
+, 
+<A HREF="hxa.htm#l16">MATCH$()</A>
+ and 
+<A HREF="hxa.htm#l18">MID$()</A>
+functions now accept a negative value for the start position, which is
+interpreted as an offset from the right end of the affected string argument
+rather than the left
+<LI>
+comma characters (",") no longer need to be escaped to be recognized in
+character literals (though they still can be, if desired)
+<LI>
+"ABSORG", "$=" and "*=" (if it does not start in the first column
+of a line) are now all accepted as aliases for 
+<A HREF="hxa.htm#l6c">"ORG"</A>
+.
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+a leading "*" character now indicates a comment line only if it occupies
+the first column of a line (instead of simply being the first non-whitespace
+character on the line)
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+macro definition and expansion routines now attempt to examine every
+argument in the expression field rather than giving up after the
+first error is detected
+<LI>
+expression parsing now displays expressions which end unexpectedly in
+their entirety, which helps identify them if there are several expressions
+on one source line
+<LI>
+nested block structures which are opened but not closed before the
+nesting block is closed now cause a fatal error (instead of simply an error)
+<LI>
+the STR$() function now causes an error if its argument is outside the
+range of a 32-bit signed integer and returns the null string
+</UL>
+<P>
+Bug Fix - ONEXPAND Error Message Text
+<UL>
+<LI>
+then: the error message displayed if the ONEXPAND pseudo op was used
+outside of a macro expansion was incorrect
+<LI>
+now: a correct error message is displayed
+</UL>
+<P>
+Bug Fix - STR$() Function
+<UL>
+<LI>
+then: STR$() failed with a misleading error message if its numeric
+argument was a label which had been assigned the minimum integer value
+specified in decimal (but not binary or hexadecimal)
+<LI>
+now: STR$() properly converts the minimum integer value no matter how
+it is specified
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l29">v0.161</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+July 2008
+<P>
+<EM>All Versions</EM>
+<P>
+Extended
+<UL>
+<LI>
+<A HREF="hxa.htm#l79">segment nesting</A>
+ is now allowed
+<LI>
+the list file segment map now reports the type of each segment
+<LI>
+the 
+<A HREF="hxa.htm#l5a">END</A>
+ pseudo op now always warns if used within any open block
+structure (which makes clearer why some unclosed block errors occur)
+</UL>
+<P>
+Bug Fix - Source Line in Error Messages
+<UL>
+<LI>
+then: v0.160 changes sometimes resulted in error messages showing the
+wrong source line as the cause if the error was not detected immediately
+but only after additional source lines had been read
+<LI>
+now: the source line actually responsible is always displayed (again)
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2a">v0.162</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+February 2009
+<P>
+<EM>All Versions</EM>
+<P>
+Extended
+<UL>
+<LI>
+the 
+<A HREF="hxa.htm#l68">MACRO</A>
+ (in the preferred form),
+<A HREF="hxa.htm#l79">--SEGMENT</A>
+, 
+<A HREF="hxa.htm#l51">--TIMER</A>
+ and 
+<A HREF="hxa.htm#l7e">UNDEF</A>
+pseudo ops now optionally accept string expressions which evaluate to
+global-style names as well as literal global-style names
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+errors detected during definition of macro, repeat and while blocks
+now cause a "definition ignored" warning (the blocks cannot be expanded)
+<LI>
+errors reported during expansion of macro, repeat or while blocks
+now show the source lines which activated every currently open block,
+rather than just the one which activated the outermost open block
+</UL>
+<P>
+Bug Fix - Source Line in Error Messages
+<UL>
+<LI>
+then: the v0.161 fix to this problem still did not always report
+the proper source line if delayed error detection occurred in a nested block
+<LI>
+now: the source line actually responsible is always displayed (again)
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2b">v0.163</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+July 2009
+<P>
+<EM>All Versions</EM>
+<P>
+Extended
+<UL>
+<LI>
+the 
+<A HREF="hxa.htm#l19">ORD()</A>
+ function now accepts an optional second argument,
+a numeric value which is the index of the character in the string argument
+to apply the function to
+<LI>
+in expressions, global name arguments may now be specified by
+string expressions whereever a name is required
+<LI>
+the 
+<A HREF="hxa.htm#l63">IF and ELSEIF</A>
+,
+<A HREF="hxa.htm#l82">WHILE</A>
+ and 
+<A HREF="hxa.htm#l5e">EXITIF</A>
+conditional pseudo ops now accept string expressions
+<LI>
+the conditional branch of the ternary conditional
+now accepts string expressions
+<LI>
+the true and false branchs of the ternary conditional now accept string,
+global name and regular expressions when these are correct in context
+<LI>
+the 
+<A HREF="hxa.htm#l7a">STRING and STRINGR</A>
+ pseudo ops now accept any number of
+mixed string and numeric expressions as arguments
+<LI>
+the 
+<A HREF="hxa.htm#l67">LIST--</A>
+ pseudo ops now accept a "LINENUMS" flag to
+consecutively number each line of a listing
+<LI>
+the 
+<A HREF="hxa.htm#l5a">END</A>
+ pseudo op can now be used within an "INCLUDE" file
+(with a warning)
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+v0.162 moved segment fix-up to the second pass but did not stop
+processing if errors were discovered, which meant additional error
+reports might be correct or might just be cascade errors
+<LI>
+if segment fix-up errors are discovered further code resolution is skipped
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2c">v0.170</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+April 2010
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+<A HREF="hxa.htm#l73">PUTBACKS</A>
+ pseudo op to push a string expression evaluated
+at assembly time back onto the input (so it becomes the next input line)
+<LI>
+<A HREF="hxa.htm#l6a">MAXPUTBACK</A>
+ pseudo op to limit the number of consecutive lines
+that may be pushed back (to avoid infinite looping)
+<LI>
+<A HREF="hxa.htm#l7f">UNINITIALIZED</A>
+ pseudo op to explicitly declare that a segment
+does not hold data and prevent any data storage to it
+<LI>
+<A HREF="hxa.htm#l60">FILL</A>
+ pseudo op to insert an arbitrary number of constant bytes
+into the object code
+<LI>
+<A HREF="hxa.htm#l50">SRECFILE</A>
+ pseudo op to create Motorola format hexadecimal
+output files
+<LI>
+<A HREF="hxa.htm#l4e">--BYSEG</A>
+ pseudo ops to allow segmented programs to output each
+data-containing segment as a separate file
+<LI>
+<A HREF="hxa.htm#l4d">--BYBLOCK</A>
+ pseudo ops to allow segmented programs to output
+each contiguous group of data-containing segments as a separate file
+<LI>
+<A HREF="hxa.htm#l6f">PAGESIZE</A>
+, 
+<A HREF="hxa.htm#l69">MARGINS</A>
+ and 
+<A HREF="hxa.htm#l66">LINESPACE</A>
+ pseudo ops to
+allow greater control over listing format
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+the 
+<A HREF="hxa.htm#l7e">UNDEF</A>
+ pseudo op now accepts multiple macro names for deletion
+<LI>
+the 
+<A HREF="hxa.htm#l58">DS</A>
+ and 
+<A HREF="hxa.htm#l56">COMMON</A>
+ pseudo ops now implicitly declare a
+segment 
+<A HREF="hxa.htm#l7f">UNINITIALIZED</A>
+ as well
+<LI>
+hexadecimal opt-strings of the type used in arguments to the 
+<A HREF="hxa.htm#l61">HEX</A>
+,
+<A HREF="hxa.htm#l60">FILL</A>
+ and 
+<A HREF="hxa.htm#l6d">PADTO</A>
+ pseudo ops now optionally accept
+a radix indicator
+<LI>
+<A HREF="hxa.htm#l53">ASSUME</A>
+ pseudo op support for modifying the default formats
+of Motorola hexadecimal output files
+<LI>
+the general upper limit of numeric calculations has been extended from
+2^31-1 to 2^32-1 (the allowed range now covers all signed and unsigned 32-bit
+integers)
+<LI>
+the general upper limit of the program counter has been extended from
+2^31 to 2^32 (full 32-bit program counters are now allowed)
+<LI>
+the RBIT--, SBIT-- and UBIT-- ranged data storage pseudo ops now have
+32-bit types to go along with the previous 8-, 16- and 24-bit variants
+<LI>
+the logical short circuit operators '&&' and '||' now accept string
+expressions as operands
+<LI>
+the unary arithmetic, bitwise and logical operators can now be applied
+to string operands (which are first implicitly compared to the null string)
+<LI>
+the 
+<A HREF="hxa.htm#l67">LIST--</A>
+ pseudo ops now accept a "LINEWRAP" flag to control
+whether text too long to list on one line is wrapped or truncated
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+the ONEXPAND pseudo op is now an alias of 
+<A HREF="hxa.htm#l73">PUTBACK</A>
+<LI>
+the optional second argument of the 
+<A HREF="hxa.htm#l6d">PADTO</A>
+ pseudo op, which
+specifies the value to pad with, is now a hexidecimal opt-string
+<LI>
+binary and hexadecimal numeric literals are now interpreted as unsigned
+rather than signed values, which matches what decimal numeric literals
+have always been (and like them can be negated with the unary '-' operator)
+<LI>
+decimal literals which are out of 32-bit unsigned range can no longer be
+used (intermediate values during expression evaluation still can be, however)
+<LI>
+the precedence of the unary extract operators has been raised to that of
+the other unary operators, and like them now affect only the operand to their
+immediate right (use parentheses to create a larger "operand")
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+global labels in macro definitions no longer cause a warning during
+macro expansion if they appear on a line by themselves (this facilitates
+one-time-use label creation by 
+<A HREF="hxa.htm#l73">PUTBACKS</A>
+; an error will
+still occur if more than one value is ever assigned to such a label)
+</UL>
+<P>
+Removed
+<UL>
+<LI>
+built-in '__VER__' symbol (use VER() function instead)
+</UL>
+<P>
+Bug Fix - DS Pseudo Op in Segmented Programs
+<UL>
+<LI>
+then: the DS pseudo op could be used in initialized segments, which caused
+incorrect segment size and offset information to be reported for them
+<LI>
+now: the DS pseudo op can be used only in uninitialized segments
+</UL>
+<P>
+Bug Fix - SEGOFF() Function and Uninitialized Segments
+<UL>
+<LI>
+then: the SEGOFF() function reported an offset value in the object file
+for every non-common segment, which could cause incorrect results for
+all segments following an uninitialized non-common segment
+<LI>
+now: uninitialized segments whether explicitly or implicitly declared
+have no offset value in the object file
+</UL>
+<P>
+Bug Fix - More than 64K Object Code in Intel Hexadecimal Output Files
+<UL>
+<LI>
+then: in 20- and 32-bit Intel hexadecimal output files, the offset value
+field of a data record could exceed its 16-bit limit
+<LI>
+now: a new extended address record is written to the output file whenever
+the offset value plus the data size of the next record exceeds 64K
+</UL>
+<P>
+Bug Fix - First Character of Records in Intel Hexadecimal Output Files
+<UL>
+<LI>
+then: an Ascii semi-colon (';')
+<LI>
+now: an Ascii colon (':')
+</UL>
+<P>
+Bug Fix - Numeric Values of Zero and One in STRING- Pseudo Ops
+<UL>
+<LI>
+then: when used as numeric operands of these pseudo ops, mis-interpreted
+during type fixup as operators
+<LI>
+now: always correctly intepreted as operands
+</UL>
+<P>
+Bug Fix - Logical '&&' and '||' Short Circuiting
+<UL>
+<LI>
+then: if during the first pass the left hand side expression could not be
+evaluated, an attempt to evaluate the right hand side would be made, which
+is incorrect until it is known that short-circuiting does not apply
+<LI>
+now: no attempt is made to evaluate the right hand side until the left
+hand side is completely evaluated and short-circuiting does not apply
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2d">v0.180</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+July 2011
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+<A HREF="hxa.htm#l0d">CPU$()</A>
+, 
+<A HREF="hxa.htm#l10">FILE$()</A>
+, 
+<A HREF="hxa.htm#l17">MESG$()</A>
+, 
+<A HREF="hxa.htm#l1e">TIME$()</A>
+and 
+<A HREF="hxa.htm#l21">VER$()</A>
+ functions
+<LI>
+<A HREF="hxa.htm#l7c">TITLE</A>
+ pseudo op to replace the default listing title
+<LI>
+<A HREF="hxa.htm#l6e">PAGE</A>
+ pseudo op to force a formfeed in a listing
+<LI>
+<A HREF="hxa.htm#l80">USESEGMENTS</A>
+ pseudo op to explicitly declare a segmented source
+<LI>
+global labels and macro names can now be cross-referenced as part of a
+listing, with appearances keyed to both source and listing file lines
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+if a symbol table is included in a listing, numeric global labels are
+shown twice, first alphabetically (along with any variable labels) and then
+by value (along with any internal forms of local labels, if enabled)
+<LI>
+if a symbol table is included in a listing, defined macro names are now
+also shown
+<LI>
+if an object section is included in a listing, source lines are flagged to
+indicate if they are from include files or macro expansions or both
+<LI>
+hexadecimal escape sequences in char and string literals can now use any
+number of digits, per the C standard (though at most only two count)
+<LI>
+'\0' is now a recognized mnemonic escape sequence that converts to ASCII
+nul ($00) (no other octal or decimal numeric sequence is yet recognized)
+<LI>
+the ENDMACRO pseudo op now accepts an optional name argument, which if
+present must match the name of the macro being defined
+<LI>
+the 
+<A HREF="hxa.htm#l53">ASSUME</A>
+ pseudo op now supports custom byte extraction orders
+(ie., other than the default LSB and MSB orders)
+<LI>
+a 
+<A HREF="hxa.htm#l40">"byte"</A>
+ can now be 8-, 16- or 32-bits
+ie., the smallest size that will increase the program counter by one unit
+<LI>
+the 
+<A HREF="hxa.htm#l7a">STRING--</A>
+ pseudo ops now null-pad if needed to fit
+8-bit character values into 16- or 32-bit "byte" values
+<LI>
+the 
+<A HREF="hxa.htm#l61">HEX</A>
+ and 
+<A HREF="hxa.htm#l64">INCBIN</A>
+ pseudo ops now zero-pad if needed to
+fill the last 16- or 32-bit "byte" value occupied
+<LI>
+the 
+<A HREF="hxa.htm#l60">FILL</A>
+ and 
+<A HREF="hxa.htm#l6d">PADTO</A>
+ pseudo ops now interpret their
+arguments in terms of 8-, 16- or 32-bit "bytes" as needed
+<LI>
+the "bit extraction" operators "&lt;", "&gt;" and "^" are now "byte-size" aware
+<LI>
+Intel and Motorola hexadecimal files now have non-standard extensions to
+support address-correct 16- and 32-bit "byte" output files
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+unprintable characters in output strings are now converted to C-style
+'\x--' sequences instead of '[--]' sequences
+<LI>
+the minimum listing page width is now zero, which acts as a flag to always
+print each output string on one line without wrapping or truncation
+<LI>
+the minimum listing page width for non-zero values is no longer fixed
+but is only required to be large enough to print at least one character of
+any output string plus any added indentation or line number
+<LI>
+the single quote character must now always be escaped to be recognized
+in a character literal
+<LI>
+for all pseudo ops which accept or require a filename argument, that
+argument is now an opt-string, except that any enclosing angle-brackets
+are always removed from both "as-is" and evaluated strings
+<LI>
+"implicit" segments in monolithic programs are now created whenever
+consecutive data storage occurs at non-consecutive addresses instead of
+whenever the program counter value decreases
+<LI>
+attempting to use the "SEGMENT" or "USESEGMENTS" pseudo ops after using
+"ORG" (ie., making the program monolithic) is now a fatal error rather than
+just an error
+<LI>
+the 
+<A HREF="hxa.htm#l55">BYTE-, WORD- and LONG-family</A>
+ pseudo op aliases
+are now "byte size" aware
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+global labels in macro definitions no longer cause warnings at all during
+macro expansion as long as every assignment to one has the same value
+(but a different value will cause both a warning and an error to occur)
+<LI>
+regular expression literals are now checked to verify the presence of both
+characters of the metachar pairs '[]', '()' and '{}' if an un-escaped opening
+char is detected (note this check does not guarantee the overall correctness
+of the expression and is meant only to avoid simple errors)
+</UL>
+<P>
+Bug Fix - FILL and PADTO Pseudo Ops with No Value Argument
+<UL>
+<LI>
+then: defaulted to numeric zero, which the run-time package both
+complained about and converted to character $30 (ASCII zero)
+<LI>
+now: defaults to string null, which is correctly converted to
+character $00 (ASCII nul)
+</UL>
+<P>
+Bug Fix - C-style Escape Codes in Char and String Literals
+<UL>
+<LI>
+then: only the form '\0x--' accepted, which is both incorrect form and
+limited in the number of digits accepted
+<LI>
+now: both '\0x--' (legacy support) and '\x--' (correct) forms accepted,
+with no limit on the number of digits accepted
+</UL>
+<P>
+Bug Fix - ECHO Pseudo Op with No Argument
+<UL>
+<LI>
+then: the default null string argument rendered as a pair of double quotes
+due to a later change introduced to guarantee all ECHO arguments "printable"
+<LI>
+now: the default null string causes only a carriage return (again)
+</UL>
+<P>
+Bug Fix - Commas in Regular Expression Literals
+<UL>
+<LI>
+then: argument field splitting divided regular expression literals which
+contained one or more commas into two or more arguments
+<LI>
+now: argument field splitting does not divide regular expression literals
+which contain comma characters
+</UL>
+<P>
+Bug Fix - Record Counts in No-Header Motorola Hexadecimal Output Files
+<UL>
+<LI>
+then: if multiple output files were requested via "SRECBYSEG" or
+"SRECBYBLOCK" and the header record (only) suppressed, the record count in
+each successive output file was cumulative over all previous output files
+<LI>
+now: the record count in each output file is for that file only
+</UL>
+<P>
+Bug Fix - Output Files Created Despite No Data Generated
+<UL>
+<LI>
+then: a source file which specified output file(s) but did not actually
+generate any data nonetheless created output file(s) which contained no
+data (but were not necessarily zero length)
+<LI>
+now: source files which generate no data do not create output files
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2e">v.181</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+January 2012
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Bug Fix - Relative Branch Offset Values
+<UL>
+<LI>
+then: off-by-one error resulted from v0.180 changes to storage of data
+addresses that did not account for how HXA65 stores generated data
+<LI>
+now: relative branch calculations correct (again) (thanks to 'dclxvi'
+for finding this bug)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l2f">v0.182</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+June 2012
+<P>
+<EM>All Versions</EM>
+<P>
+Extended
+<UL>
+<LI>
+<A HREF="hxa.htm#l39">label names</A>
+ may now contain multiple consecutive
+underscore characters wherever only one was previously permitted
+<LI>
+program listing files now also show the absolute address associated
+with data stored using any of the 'RBIT--' (pc-relative) pseudo ops
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+all unrecoverable evaluation-time expression errors are now treated
+uniformly, reporting the error as soon as it occurs and preventing
+the assembly of just the source line they are found in
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Bug Fix - W65C816S Incorrect Op Codes
+<UL>
+<LI>
+then: opcodes for 'load long absolute x-indexed' and
+'load long indirect y-indexed' were incorrect ($8-x instead of $B-x)
+<LI>
+now: opcodes are correct (thanks to 'dclxvi' for finding this bug)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l30">v0.190</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+October 2012
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+<A HREF="hxa.htm#l62">IFDEF and IFNDEF</A>
+ pseudo ops and 
+<A HREF="hxa.htm#l14">LABEL()</A>
+function to determine the presence or absence of a global numeric label
+in the symbol table
+<LI>
+<A HREF="hxa.htm#l3a">__HXA__</A>
+ built-in global numeric label
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+all user-named labels are now defined as a single type indicator character
+followed by zero or more alphanumeric, underscore and period characters
+<LI>
+a single colon character can now be used as a branch target label,
+marking a location as both a forward and a backward target
+</UL>
+<P>
+Error Detection
+<UL>
+<LI>
+all fatal errors triggered by exceeding a maximum limit are now treated
+uniformly, reporting the error and displaying the value exceeded
+<LI>
+an attempt to evaluate a null expression now reports the expression
+type expected rather than that a null expression was found
+</UL>
+<P>
+Bug Fix - Local String Labels More Than 10 Characters Long
+<UL>
+<LI>
+then: prior code changes led to them being treated in program listings
+as numeric labels of indeterminate value
+<LI>
+now: treated as string values (again)
+</UL>
+<P>
+<EM>HXA_T Version</EM>
+<P>
+Added
+<UL>
+<LI>
+"__HXA_T__" built-in global numeric label
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+Added
+<UL>
+<LI>
+"__HXA65__" built-in global numeric label
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+the register names "A", "S", "X" and "Y" are now reserved label names
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l31">v0.191</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+December 2012
+<P>
+<EM>All Versions</EM>
+<P>
+Changed
+<UL>
+<LI>
+macro names are now recognized only after a complete definition has
+been processed without error, instead of conditionally being recognized
+after a correct first line and later deleted if further processing
+detected other definition errors
+</UL>
+<P>
+Bug Fix - Defining Macro Names Ending in Colons
+<UL>
+<LI>
+then: defining a macro with a name ending in a colon worked properly
+only if the name was declared in the expression field
+<LI>
+now: defining a macro with a name ending in a colon works properly
+using either the label or expression fields to declare the name
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l32">v0.200</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+August 2013
+<P>
+<EM>All Versions</EM>
+<P>
+Added
+<UL>
+<LI>
+PUSHS, MAXSTACK and ASSERT pseudo ops
+<LI>
+EMPTY(), PEEK$() and POP$() functions
+</UL>
+<P>
+Extended
+<UL>
+<LI>
+binary numeric literals may now be specified using an "0b" prefix
+as well as the existing "%" prefix or "B" suffix variants
+<LI>
+the "READONCE" pseudo op now warns if the base filename of the current
+file matches a base filename previously included
+<LI>
+non-object-generating pseudo ops such as "ASSERT", "ABSEND", "DS",
+"END", "EQU", and "ORG" now show any values they create at the point
+they occur in the "OBJECT" section of a listing
+<LI>
+an "ALLEQU" flag has been added to the "LIST--" options to control the
+display of values assigned by equates to non-global labels in the
+"OBJECT" section
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+the "PUTBACKS" pseudo op now requires at least one argument, instead
+of reporting a warning when none are present
+<LI>
+the built-in functions "LOWER$()" and "UPPER$()" have been re-named
+"TOLOWER$()" and "TOUPPER$()"
+</UL>
+<P>
+Bug Fix - Extended Address Records in Intel Hexadecimal Output Files
+<UL>
+<LI>
+then: new extended address records were written based only on whether
+more than 32K of data was written since the last one
+<LI>
+now: new extended address records are written if the difference between
+the current data record address and the current extended address is greater
+than 64K or less than zero, if the current data will cross a 64K offset,
+and if more than 32K of data has been written since the last one
+</UL>
+<P>
+<EM>HXA65 Version</EM>
+<P>
+<EM>no changes</EM>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l33">v0.201</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Unreleased
+<P>
+&lt;All Versions&gt;
+<P>
+Extended
+<UL>
+<LI>
+all error messages now indicate how HXA treated the source line, eg.,
+as a mnemonic, pseudo opcode, macro invocation, etc.
+<LI>
+in cases of duplicate name errors HXA now differentiates between
+conflicts with built-in names and those with user-defined names
+</UL>
+<P>
+Changed
+<UL>
+<LI>
+it is now only a warning and not an error to use READONCE after the
+file it appears in has already included one or more others
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l36">TAWK Programming Language</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Thompson AWK (TAWK) is a compiled variant of the normally interpreted
+AWK programming language.
+<P>
+HXA is written in version 4 of TAWK.
+This was available for MS-DOS, OS/2 and Unix.
+The MS-DOS version of HXA is compiled with this version.
+<P>
+The last version of TAWK was version 5.
+This was available for MS-DOS, Win32 and Unix.
+The Windows version of HXA is compiled with this version.
+However the source is exactly the same as the MS-DOS version.
+No version 5-specific features are used (and some "features" are
+explicitly avoided!).
+<P>
+Unfortunately TAWK is currently withdrawn from commercial distribution
+by Thompson Automation.
+<P>
+The main performance difference between the two versions is that the
+Windows version can handle much larger volumes of source code.
+The MS-DOS version is limited to around forty thousand code generating
+expressions.
+The limits of the Windows version have not been fully established,
+but are at least four hundred thousand (and likely to be limited only
+by the total amount of memory available).
+<P>
+The source code of an AWK program resembles a program in the
+C programming language.
+Indeed, many of AWK's operators and their associated precedences
+and behaviors are identical.
+<P>
+However there are important built-in features AWK provides to make
+text manipulation easy that are not found in C:
+<P>
+<UL>
+<LI><A HREF="#l39">Loose Typing</A>
+<LI><A HREF="#l3a">Regular Expressions</A>
+<LI><A HREF="#l37">Associative Arrays</A>
+<LI><A HREF="#l38">Automatic Memory Management</A>
+<LI><A HREF="#l3b">TAWK extensions to AWK</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l39">Loose Typing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+There is no type declaration in AWK.
+<P>
+There isn't even any need to declare a variable, although it's
+usually safer (and better style) to do so.
+Merely using a variable name in an expression causes it to be created
+with an appropriate type.
+<P>
+If a variable value does not have the appropriate type for the expression
+it appears in, it is automatically converted (if possible).
+Variables which have never had a value assigned to them have a default
+value (and type) of "unknown".
+The "unkown" value converts to zero or the null string depending on context.
+<P>
+The same variable can hold different types at different times.
+<P>
+Functions do need to be declared and defined,
+but they do not have to return the same type from every possible
+exit point.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3a">Regular Expressions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+A 
+<EM>regular expression pattern</EM>
+ is a concise notation used to specify
+text matches.
+Regular expressions are widespread and are used in compilers,
+text editors and programming languages.
+<P>
+HXA makes extensive use of regular expressions to parse input lines.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l37">Associative Arrays</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Associative arrays are indexed by arbitrary strings,
+which may be but are not required to be consecutive integers.
+Many tasks which are difficult in conventional programming languages
+are thus trivial in AWK.
+<P>
+For example, entering a label into a symbol table
+can be as simple as direct assignment:
+<P>
+<CODE>
+    symbolTable[ label ] = value
+</CODE>
+<P>
+To check whether there is a conflict with an existing name in the table,
+the keyword 
+<STRONG>in</STRONG>
+ can be used:
+<P>
+<CODE>
+    if ( label in symbolTable )
+        error( "Duplicate Name" )
+    else
+        symbolTable[ label ] = value
+</CODE>
+<P>
+The 
+<STRONG>in</STRONG>
+ keyword can also be used to walk through all elements of
+an associative array:
+<P>
+<CODE>
+    for ( ndx in symbolTable )
+        print "Value of " ndx " = " symbolTable[ ndx ]
+</CODE>
+<P>
+For arrays whose indices are consecutive integers, however, it is much
+faster to use a C-style FOR loop:
+<P>
+<CODE>
+    for ( i = firstndx; i &lt;= lastndx; i++ )
+</CODE>
+<P>
+This is because by default the "in" keyword causes TAWK to sort array
+indices into increasing order (AWK makes no order guarantee at all).
+Not using "in" skips the sort, which makes the loop faster.
+<P>
+A subtle point is that the elements of an associative array do not all have
+to have the same type.
+Elements of one and the same array can be any type supported by TAWK,
+including other arrays (standard AWK does not support multi-dimensional
+arrays).
+Beyond this, not every dimension in a multi-dimensional array has to
+have the same number of elements.
+<P>
+A TAWK array can be passed to functions and results returned in that array.
+A subtle point here is that this is apparently (ie., it is not documented)
+allowed only one level deep.
+That is, a function which receives an array as an argument cannot
+successfully pass that array along to another function.
+In a few places this is inconvenient and leads to a slight awkwardness
+in HXA's source code.
+<P>
+Possibly what is happening is that what is passed is a pointer.
+Thus the first-level function receives a pointer to an array,
+but the second-level function receives a pointer to a pointer to an array.
+TAWK does not have an explicit pointer de-referencing operator which
+would clarify this, um, point.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l38">Automatic Memory Management</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+In AWK and its variants variables of any required type are
+automatically created when necessary and deleted when no longer in scope.
+The 
+<STRONG>delete</STRONG>
+ keyword can be also used to erase variables under program
+control.
+<P>
+The MS-DOS version of TAWK 4 is built with a 16-bit DOS extender that
+allows direct access to up to 16 megabytes of memory.
+The extender also implements a virtual memory system by paging to disk
+if more is needed.
+<P>
+Although the total amount of available memory has never been a concern
+to HXA, it appears that the MS-DOS version of TAWK 4 has a global upper
+limit of about 150-250K elements total for all arrays used.
+Multi-dimensional arrays also appear to require "extra" elements,
+presumably used for internal housekeeping, that count against the limit.
+<P>
+Successive versions of HXA have internal changes designed to maximize
+the size of user programs that can be assembled successfully.
+The pace of these changes may slow as it appears HXA can be compiled
+with the Win32x version of TAWK 5, which does not have the memory limits
+of MS-DOS TAWK 4.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l3b">TAWK extensions to AWK</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The TAWK variant of AWK offers some features not found in most (if not all)
+other AWK variants.
+Two in particular may cause difficulty in porting HXA to one of them.
+<P>
+First, TAWK provides true multi-dimensional arrays.
+Second, TAWK allows assignment of any legal type to any variable at any time.
+<P>
+HXA uses both these features.
+Its code includes two-dimensional arrays and assignment
+of regular expressions to variables.
+Work arounds may have to be found for them in porting to another AWK variant.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l10">HXA Design and Modularization</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1d">Design Goals</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+There are many desirable traits any computer program should have,
+some of which compete with each other.
+Of the ones which the design of HXA consciously considers,
+they generally rank in the following descending order:
+<P>
+<UL>
+<LI>
+<STRONG>Reliability</STRONG>
+ : "The error case is the normal case." - PJ Brown
+<LI>
+<STRONG>Simplicity</STRONG>
+ : both of use and implementation
+<LI>
+<STRONG>Power</STRONG>
+ : it should not be necessary to 'trick' HXA to accomplish
+reasonable programming goals
+<LI>
+<STRONG>Flexibility</STRONG>
+ : ease of adaptation to different processors
+and environments
+<LI>
+<STRONG>Speed</STRONG>
+ : first make it work, then make it faster
+<LI>
+<STRONG>Size</STRONG>
+ : as small as possible, but no smaller
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1e">Naming Conventions</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA groups its source into several files, each more-or-less dedicated
+to a providing a single kind of functionality.
+Inter-module communication is strictly limited to function calls and
+reading variable values.
+Writing directly to another module's variables is not allowed.
+<P>
+The naming of HXA's functions and variables is designed to provide
+<EM>manifest scope</EM>
+.
+That is, it should be possible to tell by looking at a name what source file
+it is defined in and who is allowed to access it.
+<P>
+Function Name Scope
+<UL>
+<LI>
+<STRONG>all lowercase</STRONG>
+: 
+<EM>modulefunc()</EM>
+<LI>
+file scope, available only within the source file it appears in
+<LI>
+<STRONG>capitalized prefix</STRONG>
+: 
+<EM>PUBLICfunc()</EM>
+<LI>
+global scope, available from any module
+</UL>
+<P>
+Variable Name Scope
+<UL>
+<LI>
+<STRONG>all lowercase</STRONG>
+: 
+<EM>localvar</EM>
+<LI>
+function scope, available only within the function it appears in
+<LI>
+<STRONG>initial lowercase with embedded capital</STRONG>
+: 
+<EM>moduleVar</EM>
+<LI>
+file scope, available only within the source file it appears in
+<LI>
+<STRONG>capitalized prefix</STRONG>
+: 
+<EM>PUBLICvar</EM>
+<LI>
+global scope, available from any module
+</UL>
+<P>
+Note that all global functions and variables declared within a single module
+share the same capitalized prefix.
+Thus whatever file a global name is found in, it should be possible to
+immediately tell which file it is declared in.
+<P>
+TAWK itself provides only 
+<STRONG>local</STRONG>
+ and 
+<STRONG>global</STRONG>
+ qualifiers that
+may be (and are) applied to the declaration of any name.
+The conventions described above are not enforced by TAWK,
+but are imposed as a programming style.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l11">Current Modules</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<UL>
+<LI><A HREF="#l12">a_codgen.awk</A>
+<LI><A HREF="#l13">a_common.awk</A>
+<LI><A HREF="#l14">a_eval.awk</A>
+<LI><A HREF="#l15">a_ins---.awk</A>
+<LI><A HREF="#l16">a_macro.awk</A>
+<LI><A HREF="#l17">a_main.awk</A>
+<LI><A HREF="#l18">a_mesg.awk</A>
+<LI><A HREF="#l19">a_prgctr.awk</A>
+<LI><A HREF="#l1a">a_pseudo.awk</A>
+<LI><A HREF="#l1b">a_source.awk</A>
+<LI><A HREF="#l1c">a_symbol.awk</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l12">a_codgen.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_codgen.awk">Source File</A>
+<P>
+Initializes the CPU and supervises translating source code and data
+into object code.
+<P>
+This is the only "generic" (ie., non-processor specific) module that
+deals with native byte size and orientation.
+Only this and the "native" (ie., processor-specific) 
+<A HREF="#l15">a_ins---.awk</A>
+ module
+need to know this information.
+<P>
+As part of CPU initialization a 
+<A HREF="hxa_t.htm#l0a">cpu descriptor</A>
+ is retrieved from the
+"a_ins--.awk" module.
+This describes the program counter width and native byte size and the
+orientation of multi-byte values.
+From this "a_codgen.awk" handles initializing the program counter width
+and which "-BIT--" pseudo ops will be available and what their aliases are.
+<P>
+The fundamental data structure HXA currently uses for code generation
+consists of three elements:
+<P>
+<UL>
+<LI>
+a data type: one of the -BIT-- pseudo ops or a string flag
+<LI>
+a data value: a signed 32-bit integer, float double or string
+<LI>
+a data address: a coded segment/offset value
+</UL>
+<P>
+The first pass of HXA creates an array of these structures
+called the 
+<EM>code storage</EM>
+ array (although it could be more accurately
+called the 
+<EM>data storage</EM>
+ array).
+<P>
+Note that some numeric data values may not be fully resolved during
+the first pass.
+<P>
+Also note that only [type, value] pairs are explicitly stored.
+The address element is handled transparently by HXA, and
+may not actually be present in every element.
+However if needed the actual address of an element without an explicit
+address can always be calculated from elements with them.
+<P>
+The second pass scans through the code storage array to fully resolve
+all data values and verify that any ranged values
+(as specified by the data type members) are correct.
+Note that this is all the second pass does; there is no actual code
+generation at this point.
+<P>
+Only if output files are specified does HXA do any further manipulation.
+The data address of each element is used to determine
+where in the output sequence it will appear.
+The data type of each element is used to determine which bytes of each
+data value to extract and in what order.
+Numeric values outside the range of a signed 32-bit integer are reduced to
+one in such a way that the relevant bit patterns are unchanged.
+<P>
+v0.180 comments:
+<P>
+The change to store only some address values rather than all of them was
+designed to allow the MS-DOS version of HXA to assemble larger programs.
+There was actually no noticeable change, though.
+<P>
+Primary Responsibilities
+<UL>
+<LI>
+pass one: supervise identification of CPU mnemonics, evaluate data
+expressions, save code and data in intermediate form
+<LI>
+pass two: resolve forward references, range check expression values
+<LI>
+file output: sequence and extract data bytes, write object code
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l13">a_common.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_common.awk">Source File</A>
+<P>
+Miscelleaneous functions and variables used
+by more than one module or too small to yet warrant their own module.
+<P>
+Primary Responsibilities
+<UL>
+<LI>
+pass one: field splitting, escape code handling, character translation,
+handling and enforcement of block nesting
+<LI>
+pass two: pass timing
+<LI>
+file output: file naming and opening, report pass timing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l14">a_eval.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_eval.awk">Source File</A>
+<P>
+Handles expression conversion and evaluation.
+<P>
+Expression conversion to Reverse Polish Notation (RPN) form is done
+in two major parts.
+<P>
+First, every expression (and sub-expression) is converted to RPN by
+a generalized operator precedence parser.
+This type of parser is 
+<EM>bottom-up</EM>
+ rather than 
+<EM>top-down</EM>
+.
+The parser accepts expressions of any legal type, using a state table
+to guarantee that they are syntactically correct.
+<P>
+Second, at the end of each expression (and sub-expression) a check is
+made to ensure that its type is correct in context.
+At this point some expressions may be "coerced" to the proper type.
+For example, string expressions may be converted to numeric by adding an
+operator to compare them to the null string.
+<P>
+The expression evaluator is capable of partial evaluation, resolving
+whatever sub-expressions it can and saving the rest for later.
+<P>
+v0.130 Comments:
+<P>
+Caching of converted expressions has been part of HXA for some time.
+In this version caching is somewhat less ambitious than in previous
+versions, in that it does not try to cache every expression nor
+does it try to update any cache entries after successful evaluation.
+On the other hand this simpler version seems to retain about 98% of
+the effectiveness of the previous versions at speeding up repeated
+evaluations of the same expression.
+<P>
+v0.150 Comments:
+<P>
+This version eliminates the string cache with the unexpected result
+that a test program with a very high hit rate on that cache ("DEMO032.A")
+became slightly faster.
+<P>
+v0.163 Comments:
+<P>
+The key to making the expression parser capable of handling any legal
+type in the various branches of the ternary conditional is the ability
+to perform type-checking at the end of every sub-expression.
+Once this was implemented it was immediately apparent that the idea could
+be easily extended in many ways.
+Allowing global names to be specified by string expressions in any
+expression context is one.
+Permitting multiple mixed string and numeric expressions as arguments
+to the STRING-- pseudo ops without ugly code hacks is another.
+<P>
+v0.170 Comments:
+<P>
+The main difficulty in getting the logical short circuit operators to
+accept string operands was figuring out how to "know" that the right hand
+side still needs to be compared against the null string when the end
+of expression is reached.
+The solution turned out to be an accurate state transition table, which
+suggested where "hints" might be usefully included.
+<P>
+Another concern was how to get rid of the "looking back" into and adjusting
+the RPN expression occasionally used by v0.163.
+Again the proper state table enabled this, and v0.170 never looks back.
+<P>
+The handling of type checking parenthesized sub-expressions, although
+completely correct, is not yet completely satisfactory.
+The problem is that any of several operand types may be acceptable at the
+time an opening parenthesis is found, but it will not be until the
+closing parenthesis is encountered that the type of the "operand" they
+enclose will be known.
+The solution used at present is to save all legal types at the opening
+and check at the close to see if one was found.
+Another method might be to expand the state table to account for all
+possiblities, although desultory attempts at this didn't seem to
+coalesce very quickly to a "reasonable" table.
+<P>
+The addition of a second "clear stack" "operator" that takes off everything
+but the ternary conditional seemed an elegant solution to a nasty problem
+arising from the high precedence of the "compare to null string" operator
+not clearing off the stack itself.
+<P>
+The low precedence of the unary extract operators in previous versions
+originally arose from a desire to maintain compatibility with assemblers
+which had no notion of precedence.
+This version finally abandons that idea in favor of having all the
+unary operators behave similarly.
+<P>
+It is interesting to note that the main apparent purpose of a
+high precedence for unary operators is to limit their "sphere of influence"
+to immediately adjacent operands.
+There seems to be no inherent reason unary operands cannot have a
+low precedence if expanding their effect to a larger portion of an
+expression is permissible.
+<P>
+The extension of the unary operators to apply directly to string operands
+came from the notion that applying the logical negate operator to a string
+ought to work, and ought to result in the value one for a null string and
+the value zero for any other string.
+The ability was gained by making a single change in the state transition
+table in the "u"-nary row - no code change was necessary at all.
+That all the other unary operators can be also used with string operands
+is basically a side effect.
+<P>
+v0.180 Comments:
+<P>
+The expression cache now purges itself after every certain number of entries.
+Experience (in other contexts) has shown that it can exceed available
+memory.
+The regular expression cache also purges itself, though this is less
+likely to fill anyway.
+<P>
+The "extraction" operators "&lt;", "&gt;" and "^" are now "byte-size aware".
+They are implemented as calls to functions in 
+<A HREF="#l12">a_codgen.awk</A>
+, which is
+actually the only "generic" module that is truly "byte-size aware".
+<P>
+v0.182 Comments:
+<P>
+A much-belated (years!) recognition that expression evaluation failures due
+to bad arguments are really a class by themselves, just as failures due to
+unresolved forward references are.
+Divide by zero, out-of-range "STR$()" arguments, strings that should but
+do not match global names, and un-parseable "FWD()" and "VAL()" arguments
+are all evaluation-time failures that should be detected, reported and cause
+the offending expression to be considered "un-resolveable".
+<P>
+These errors actually were always eventually detected and reported, but in
+an inconsistent and sometimes confusing (eg., irrelevant cascading) manner.
+<P>
+The regular expression cache has been eliminated, as it could not be
+guaranteed to be in sync with the parsed expression cache unless it was
+either never purged or always purged at the same time.
+Regular expression literals are now converted to internal form at parse time.
+This loses the ability to display a regular expression literal in a parsed
+expression (usually for internal debug purposes) but does save some code.
+In demos where regular expressions appear in macros and are thus placed
+in the parsed expression cache there appears to be a slight gain in
+overall assembly speed (as with eliminating the string cache).
+<P>
+Primary Responsibilities
+<UL>
+<LI>
+pass one: convert expressions to RPN form and attempt to evaluate them
+<LI>
+pass two: complete evaluation of expressions which contained legal forward
+references
+<LI>
+file output: 
+<EM>not used</EM>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l15">a_ins---.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Currently Supported Variants Source Files
+<UL>
+<LI>
+<A HREF="../source/a_instst.awk">Descriptor-only processors</A>
+<LI>
+<A HREF="../source/a_ins65x.awk">6502-family processors</A>
+</UL>
+<P>
+This module (where "---" is replaced by a specific CPU identifier)
+is called during the first pass to
+recognize CPU mnemonics and begin evaluation of any associated expressions.
+The results are stored as data by
+<A HREF="#l12">a_codgen.awk</A>
+.
+<P>
+<A HREF="#l03">Creating an HXA variant</A>
+ which assembles a different language can be
+accomplished by replacing this single module.
+<P>
+Primary Responsibilities:
+<UL>
+<LI>
+pass one: report CPU descriptor; identify CPU mnemonics;
+evaluate associated expressions; handle CPU-specific "ASSUME" options
+<LI>
+pass two: 
+<EM>not used</EM>
+<LI>
+file output: 
+<EM>not used</EM>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l16">a_macro.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_macro.awk">Source File</A>
+<P>
+Handles macro definition and expansion.
+"Macro" is here taken in a broad sense to include repeat and while blocks
+as well.
+<P>
+Macro expansion is performed by re-reading saved source lines originally
+read from files.
+HXA nests expansion blocks by stacking indices into the saved line store.
+The top index on the stack indicates which line to read next.
+<P>
+Whenever the index stack is non-empty HXA reads the next line from saved
+store (which is why a file cannot be included from inside an expansion, as
+the next line read would come from saved store and not the newly included
+file).
+<P>
+Primary Responsibilities:
+<UL>
+<LI>
+pass one: define and expand macros, repeats and whiles
+<LI>
+pass two: 
+<EM>not used</EM>
+<LI>
+file output: 
+<EM>not used</EM>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l17">a_main.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_main.awk">Source File</A>
+<P>
+The top-level supervisor.
+<P>
+Unlike all other modules, this one has no globally available
+functions or variables.
+<P>
+Primary Responsibilities:
+<UL>
+<LI>
+control both assembler passes
+<LI>
+pass one: dispatch each source line
+<LI>
+pass two: call the code generator
+<LI>
+file output: call all file outputs
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l18">a_mesg.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_mesg.awk">Source File</A>
+<P>
+During all phases, reports all HXA status and error messages to the user.
+<P>
+This is the only module that contains the actual text of any message
+HXA can display.
+Other modules specify only an index into a
+<A HREF="hxa_mesg.htm">table of messages</A>
+ when
+calling this module.
+This allows replacing message texts without altering any other module.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l19">a_prgctr.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_prgctr.awk">Source File</A>
+<P>
+Tracks HXA's internal program counters and segment numbers.
+Internal to this file they are tracked independently.
+Externally they are often combined to form coded values.
+<P>
+<A HREF="#l12">A_codgen.awk</A>
+ uses its coded values to maintain the proper
+order for object code generation.
+Coded values are used to distinguish between absolute and relative
+items by 
+<A HREF="#l14">a_eval.awk</A>
+ and 
+<A HREF="#l1c">a_symbol.awk</A>
+.
+<P>
+Note that no other module ever directly examines or manipulates a
+value they get from this module.
+If they need to know something about it or have something done
+to it, they ask this module.
+<P>
+Primary Responsibilities:
+<UL>
+<LI>
+pass one: read and write the program counter; handle implicit and
+explicit segments
+<LI>
+pass two: convert relative values and segments to absolute;
+report maximum program counter size
+<LI>
+file output: format program counter values and prepare segment
+map for assembly listing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1a">a_pseudo.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_pseudo.awk">Source File</A>
+<P>
+Process HXA's pseudo opcodes.
+<P>
+Once this module identifies a pseudo opcode, it collects and verifies
+any arguments and passes them to a handler.
+A handler can be located in any module except the top-level supervisor.
+<P>
+v0.190 comments:
+<P>
+The addition of IFDEF and IFNDEF in some ways spoils the ideal of *all*
+conditions being determined by a powerful expression evaluator.
+But it increases the compatibility of HXA with other assemblers that prefer
+a proliferation of --IF-- variants.
+<P>
+The superfluous addition of a LABEL() function that has the same capability
+as IFDEF gives the same power to the expression evaluator directly, in a
+small way restoring the original ideal.
+<P>
+These versions of IFDEF and IFNDEF recognize only global numeric labels,
+largely because it's easiest to leverage just existing evaluation functions.
+It is possible to increase the types of labels recognized by using other
+functions to guarantee a legal label name before trying to evaluate it
+(failure to evaluate then becomes the flag that signals the name does not
+exist).
+<P>
+The greatest problem is branch target labels, or more specifically the
+newly introduced ":" (colon) label.
+Although a legal label, it doesn't have a recognized meaning in the
+expression field the way a single "+" or "-" does.
+Some way of handling that has to be added.
+Not necessarily difficult, but there is something of an "ad hoc" feel to it.
+<P>
+Primary Responsibilities:
+<UL>
+<LI>
+pass one: identification, preliminary handling and dispatch of all
+pseudo opcodes; complete handling of some pseudo opcodes
+<LI>
+pass two: 
+<EM>not used</EM>
+<LI>
+file output: 
+<EM>not used</EM>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1b">a_source.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_source.awk">Source File</A>
+<P>
+Read and manage user source code.
+<P>
+HXA saves every source code line it encounters.
+This store is used for macro expansion, error-reporting and assembly listing.
+<P>
+HXA generally saves only those expansion lines which generate data, which
+are the only ones necessary to create the default listing file.
+<P>
+Primary Responsibilities
+<UL>
+<LI>
+pass one: read and save source code lines and return them as requested;
+handle file inclusion
+<LI>
+pass two: return source code lines as requested
+<LI>
+file output: write assembly listing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1c">a_symbol.awk</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<A HREF="../source/a_symbol.awk">Source File</A>
+<P>
+Manages the symbol table.
+<P>
+Primary Responsibilities
+<UL>
+<LI>
+pass one: enter labels and their values into symbol table; return their
+values as requested; convert auto labels to internal form
+<LI>
+pass two: return label values as requested
+<LI>
+file output: write symbol table for assembly listing
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Creating an HXA Variant</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">By Replacing A_INS---.AWK</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+An HXA variant can created by replacing the 
+<A HREF="#l15">a_ins---.awk</A>
+ source file, where "---"
+is replaced by a specific CPU identifier.
+No other module need be changed in any way.
+<P>
+The primary job of an 
+<STRONG>a_ins---.awk</STRONG>
+ module is to add
+data 
+<EM>[type, value]</EM>
+ pairs to the
+<A HREF="#l12">code storage array</A>
+during the first pass.
+It is not involved in the second pass nor in any file output.
+<P>
+The specification of 
+<EM>a_ins---.awk</EM>
+ files details only the public functions
+that must be provided.
+How they work is up to the implementer.
+All that is required is that the inputs and any outputs be correct.
+<P>
+Required Public Functions:
+<P>
+<UL>
+<LI><A HREF="#l0b">INSname()</A>
+<LI><A HREF="#l0c">INSreserve()</A>
+<LI><A HREF="#l09">INSiscpu()</A>
+<LI><A HREF="#l08">INSgetdescrip()</A>
+<LI><A HREF="#l0d">INSsetcpu()</A>
+<LI><A HREF="#l0a">INSisop()</A>
+<LI><A HREF="#l07">INSdoop()</A>
+<LI><A HREF="#l06">INSassume()</A>
+<LI><A HREF="#l05">Available Functions in Other Modules</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0b">INSname()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+provides the name of the HXA variant (for display to user)
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSname()</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+none
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+a string consisting of the letters "HXA" plus any variant identifier,
+eg., "HXA_T" or "HXA65"
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0c">INSreserve()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+provides a variant identifier symbol plus any symbols that are
+not available for program use
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSreserve()</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+none
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+a string containing a required variant identifier (eg., "__HXA_T__" or
+"__HXA65__", for use by LABEL())
+<LI>
+the identifier may optionally be followed by a space-separated list
+of any other reserved symbols (eg., register names)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">INSiscpu()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+check for the name of known CPU
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSiscpu(</STRONG>
+<EM>token</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+<EM>token</EM>
+ is the string argument following a "CPU" pseudo opcode
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+non-zero (TRUE) if 
+<EM>token</EM>
+ is the name of a CPU whose instruction
+set this module can assemble, zero (FALSE) otherwise
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">INSgetdescrip()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Useage
+<CODE>
+<STRONG>INSgetdescrip(</STRONG>
+<EM>name</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+<EM>name</EM>
+ is the name of a CPU identified by 
+<A HREF="#l09">INSiscpu()</A>
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+a 
+<A HREF="hxa_t.htm#l0a">CPU descriptor</A>
+ string specifying the program counter width,
+native multi-octet orientation and native "byte" size
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0d">INSsetcpu()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+perform any setup needed for a particular CPU
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSsetcpu(</STRONG>
+<EM>name</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+<EM>name</EM>
+ is the name of a CPU identified by 
+<A HREF="#l09">INSiscpu()</A>
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+<EM>none</EM>
+</UL>
+<P>
+The following public function may be called by this function:
+<P>
+<UL>
+<LI>
+<STRONG>CGbyteseq(</STRONG>
+<EM>name, order</EM>
+<STRONG>)</STRONG>
+<LI>
+sets a custom 
+<A HREF="hxa.htm#l08">octet extraction order</A>
+ for numeric values
+<LI>
+<EM>name</EM>
+ is a -BIT-- pseudo op base family name, either "BIT--" or "BIT--R",
+where "--" is replaced by one of "08", "16", "24" or "32"
+<LI>
+<EM>order</EM>
+ is a string specifing the desired extraction order
+<LI>
+note that the arguments are checked for validity. It is not possible to
+change the order of a non-available -BIT-- family, for example
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">INSisop()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+check for a known instruction mnemonic
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSisop(</STRONG>
+<EM>token</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+Argument
+<UL>
+<LI>
+<EM>token</EM>
+ is the opcode field of a source code line
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+non-zero (TRUE) if 
+<EM>token</EM>
+ is a legal instruction mnemonic
+for the particular CPU in use, zero (FALSE) otherwise
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">INSdoop()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+add one or more entries to the code storage array maintained by
+<A HREF="#l12">a_codgen.awk</A>
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSdoop(</STRONG>
+<EM>mnemonic, cnt, expr</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+Arguments
+<UL>
+<LI>
+<EM>mnemonic</EM>
+ is an instruction mnemonic identified by 
+<A HREF="#l0a">INSisop()</A>
+<LI>
+<EM>cnt</EM>
+ is the number of non-blank sub-fields of the expression field
+<LI>
+<EM>expr</EM>
+ is an integer-indexed array of the comma-separated
+sub-fields in the expression field of the source code line
+</UL>
+<P>
+Argument Notes
+<UL>
+<LI>
+<EM>cnt</EM>
+ is zero if the expression field was blank
+<LI>
+<EM>expr[1]</EM>
+ is the only element in the array if there were no commas
+separating sub-fields, and equals the null string if the expression field
+was blank
+<LI>
+no element of 
+<EM>expr</EM>
+ has been evaluated
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+null string ("") if no error (or errors are ignored)
+<LI>
+an index into the 
+<A HREF="hxa_mesg.htm">error message table</A>
+if an error should be reported
+</UL>
+<P>
+<EM>INSdoop()</EM>
+ is allowed to do whatever it wants in order to convert
+an instruction mnemonic and any associated expression(s) into entries
+in the code storage array.
+<P>
+The following public functions may be called by this function:
+<P>
+<UL>
+<LI>
+<STRONG>EXPgetnum( expr )</STRONG>
+<LI>
+attempts to evaluate an expression
+<LI>
+<EM>expr</EM>
+ is a string representing an expression in algebraic form.
+Usually these are based on strings passed to 
+<EM>INSdoop()</EM>
+ in its 
+<EM>expr</EM>
+argument (which may be modified in any way necessary to ensure
+correct evalution)
+Note that 
+<EM>EXPgetnum()</EM>
+ can evaluate only one expression at a time.
+If more than one of the sub-fields passed to 
+<EM>INSdoop()</EM>
+ needs to be
+evaluated, a separate call to 
+<EM>EXPgetnum()</EM>
+ is required for each
+<LI>
+the return value of 
+<EM>EXPgetnum()</EM>
+ can be assigned to any
+variable, but 
+<EM>no assumptions whatsoever</EM>
+ can be made about the 
+<EM>type</EM>
+that variable assumes.
+<EM>EXPgetnum()</EM>
+ is allowed to return different types
+based on whether or not 
+<EM>expr</EM>
+ could be fully resolved
+<LI>
+incompletely evaluated expressions are resolved during the second pass
+by the a_codgen.awk module
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>EXPgotnum( val )</STRONG>
+<LI>
+reports whether or not 
+<EM>val</EM>
+ is fully resolved
+<LI>
+<EM>val</EM>
+ is the return value of a previous call to 
+<EM>EXPgetnum()</EM>
+ or other
+numeric evaluation function
+<LI>
+returns non-zero (TRUE) if 
+<EM>val</EM>
+ is an integer-valued constant,
+zero (FALSE) otherwise
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>EXPgetint( expr )</STRONG>
+<LI>
+like EXPgetnum() except forward reference is not allowed
+<LI>
+EXPgotnum() distinguishes between a fully-resolved integer-valued constant
+and an error return
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>EXPgetinrange( expr, lowlimit, highlimit )</STRONG>
+<LI>
+like EXPgetint() except the result is range-checked
+<LI>
+EXPgotnum() distinguishes between a fully-resolved integer-valued constant
+and an error return
+<LI>
+essentially a convenience function combining EXPgetint() and CKinrange()
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>CGsavedata( type, val )</STRONG>
+<LI>
+adds an element to the code storage array.
+There is no return value
+<LI>
+<EM>type</EM>
+ is one of the BIT--, RBIT--, SBIT-- or UBIT-- pseudo ops.
+The string must be fully capitalized and aliases are not permitted
+<LI>
+<EM>val</EM>
+ is the return value of a previous call to 
+<EM>EXPgetnum()</EM>
+(which can be any type)
+<LI>
+a single call to 
+<EM>INSdoop()</EM>
+ can result in as many calls to
+<EM>CGsavedata()</EM>
+ as needed
+Each call adds one element to the code storage array
+<LI>
+RBIT--, SBIT-- and UBIT-- range checking occurs during the
+second pass, when all values are resolved
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>CGsavestr( str )</STRONG>
+<LI>
+adds a string value to the code storage array.
+There is no return value
+<LI>
+<EM>str</EM>
+ is a string of any legal length
+<LI>
+each character becomes one octet in the output in the same order it
+appears in 
+<EM>str</EM>
+<LI>
+no further processing or range checking is performed before file output
+<LI>
+if 
+<EM>str</EM>
+ is null nothing is added and there is no effect
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>UMerror( ndx [, cause] )</STRONG>
+; also 
+<STRONG>UMfatal()</STRONG>
+ and 
+<STRONG>UMwarn()</STRONG>
+<LI>
+these three functions (which have identical argument signatures) may
+be used to report any errors or warnings.
+There is no return value
+<LI>
+<EM>ndx</EM>
+ is an index into the 
+<A HREF="hxa_mesg.htm">error message table</A>
+<LI>
+<EM>cause</EM>
+ is an optional argument providing more information about what
+triggered the message (most often an unexpected token)
+<LI>
+calling any of these functions adds to the count necessary to trigger
+a halt to assembly
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>UMecho( str )</STRONG>
+<LI>
+displays a message on the console and writes it to the error file (if any).
+There is no return value
+<LI>
+<EM>str</EM>
+ is a string
+<LI>
+any unprintable characters in 
+<EM>str</EM>
+ are replaced by an ASCII
+representation before display
+</UL>
+<P>
+<UL>
+<LI>
+<STRONG>CKinrange( val, low, high )</STRONG>
+<LI>
+returns TRUE if low &lt;= val &lt;= high, otherwise displays an error message
+and returns FALSE
+<LI>
+<EM>val</EM>
+, 
+<EM>low</EM>
+ and 
+<EM>high</EM>
+ are all integers
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">INSassume()</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Purpose
+<UL>
+<LI>
+allow the programmer to communicate in source code information that
+could not otherwise be easily known to the assembler
+(such as the state of processor flags or registers or address mode overrides)
+</UL>
+<P>
+Useage
+<CODE>
+<STRONG>INSassume(</STRONG>
+<EM>lft</EM>
+, 
+<EM>rgt</EM>
+<STRONG>)</STRONG>
+</CODE>
+<P>
+ASSUME Handling
+<UL>
+<LI>
+before this function is called HXA evaluates the ASSUME string argument
+and attempts to split it into two fields at the first colon (':') or
+equals sign ('=') (checked in that order)
+<LI>
+this function is called once in sequence for every argument supplied
+to ASSUME (which allows multiple arguments)
+</UL>
+<P>
+Arguments
+<UL>
+<LI>
+<EM>lft</EM>
+ is the part of an ASSUME string argument which preceeds the
+split character, or the whole string if it does not contain one
+<LI>
+<EM>rgt</EM>
+ is the part of an ASSUME string argument which follows the
+split character, or the null string if it does not contain one
+</UL>
+<P>
+Return Value
+<UL>
+<LI>
+non-zero (TRUE) if the string was handled or should be ignored,
+zero (FALSE) if an error was detected
+</UL>
+<P>
+Notes
+<UL>
+<LI>
+what strings (if any) are recognized and what they mean is
+up to the implementor
+<LI>
+any of the internal HXA functions already listed may be called from here
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Available Functions in Other Modules</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The following functions in other modules of HXA are guaranteed to be
+available in any future version:
+<P>
+<UL>
+<LI>
+<STRONG>CGsavedata( type, val )</STRONG>
+<LI>
+adds a numeric element to the code storage array
+<LI>
+<STRONG>CGsavestr( str )</STRONG>
+<LI>
+adds a string value to the code storage array
+<LI>
+<STRONG>CKfmtval( val )</STRONG>
+<LI>
+prepares a value (of any type) for display by the UM--() functions
+<LI>
+<STRONG>CKinrange( val, low, high )</STRONG>
+<LI>
+checks that low &lt;= val &lt;= high
+<LI>
+b&lt;EXPgetinrange( expr, low, high )
+<LI>
+evaluates a numeric expr and checks that low &lt;= expr &lt;= high
+<LI>
+<STRONG>EXPgetnum( exp )</STRONG>
+<LI>
+attempts to evaluate an expression
+<LI>
+<STRONG>EXPgotnum( val )</STRONG>
+<LI>
+reports whether or not 
+<EM>val</EM>
+ is fully resolved
+<LI>
+<STRONG>UMecho( str )</STRONG>
+<LI>
+displays a message on the console and writes it to the error file (if any)
+<LI>
+<STRONG>UMerror( ndx [, cause] )</STRONG>
+; also 
+<STRONG>UMfatal()</STRONG>
+ and 
+<STRONG>UMwarn()</STRONG>
+<LI>
+report non-fatal errors; also fatal ones and warnings
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0e">By Using Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Another possibility for creating an HXA variant is to note that what
+the assembler deals with after
+the first pass is essentially an array of 
+<EM>[type, value]</EM>
+ pairs.
+This implies that some CPU instruction sets might be
+implemented entirely as macros which expand to one or more
+"-BIT--" pseudo ops.
+<P>
+The HXA_T variant of HXA can be used to assemble such macros with
+the correct program counter size, byte size and orientation.
+<P>
+For some processors the officially recommended mnenomics could be used.
+HXA expression evaluation is currently powerful enough to alter most
+expressions following such mnemonics if they cannot be directly
+evaluated in their original form.
+<P>
+For other processors a variant set might be possible or even desirable.
+A common reason would be to reduce the effort needed to identify the
+address mode of a mnemonic and evaluate any accompanying expression by
+indicating the mode via the mnemonic rather than the expression.
+Such a variant set might entail a loss of portability,
+but this might be acceptable in some cases.
+<P>
+As a proof-of-concept, macro include files implementing the
+official mnemonics of the 8080/85, Z80, 6502, 65C02 and R65C02
+microprocessor instruction sets are provided in the 
+<A HREF="hxa_demo.htm#l01">general demos</A>
+.
+<P>
+The 8080/85 mnemonics are the simplest to implement, as the instruction
+set is fairly small and the address modes are generally indicated by
+the mnemonics themselves.
+<P>
+The 6502 and 65C02 also have fairly small instruction sets.
+The main difficulty is that the address modes are often indicated by
+decorating the expression, so some examination and manipulation are required.
+The macros have been defined to be compatible with the same instruction
+set extensions recognized by 
+<A HREF="hxa65.htm">HXA65</A>
+They do not recognize any kind of "address mode forcing", however,
+which might better be implemented as additional macros anyway
+(eg., "LDAA" might be defined to always "LoaD Accumulator Absolute").
+<P>
+The R65C02 instruction set is a superset of the 65C02 instruction set
+and its macro implementation is simplified by "including" the 65C02
+macro implementation and defining only the 32 new instructions it adds.
+<P>
+The 65C02 macro implementation does not use this approach even though its
+instruction set is a superset of the 6502 instruction set because it
+introduces new address modes for old instructions.
+This makes it more reasonable to re-define the macros implementing those
+instructions.
+<P>
+The Z80 instruction set is fairly large and there are a large number of
+address modes.
+The macro file provided makes extensive use of nested macros to determine
+the proper data to emit.
+<P>
+The general result to be noted is that implementing an instruction set via
+macros has the advantages of being completely portable and not requiring
+any changes to the HXA_T variant of HXA, and the disadvantages of being
+slower and requiring a (sometimes much) larger number of source lines than
+a native HXA variant.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0f">Future Development</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+An informal list of enhancements or changes being considered
+(there is no guarantee any of these will actually happen):
+<P>
+<STRONG>"Case|Switch" pseudo op</STRONG>
+<P>
+Something along the lines of one of these:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TD>
+-SWITCH (num_expr)
+<TD>
+CASE (num_expr)
+<TR ALIGN=CENTER>
+<TD>
+VALUE (num_expr)
+<TD>
+WHEN (num_expr)
+<TR ALIGN=CENTER>
+<TD>
+...
+<TD>
+...
+<TR ALIGN=CENTER>
+<TD>
+VALUE (num_expr)
+<TD>
+WHEN (num_expr)
+<TR ALIGN=CENTER>
+<TD>
+...
+<TD>
+...
+<TR ALIGN=CENTER>
+<TD>
+DEFAULT
+<TD>
+OTHERWISE
+<TR ALIGN=CENTER>
+<TD>
+...
+<TD>
+...
+<TR ALIGN=CENTER>
+<TD>
+ENDSWITCH
+<TD>
+ENDCASE (alias ENDC)
+</TABLE>
+<P>
+Mainly this offers a slightly cleaner-looking alternative to a series of
+"if..elseif..else..endif" statements.
+A possible differentiator would be to make "fall-through" from one branch
+to the next the default behavior (avoid this with "EXIT").
+Some critics say this kind of behavior is a problem for beginners, though.
+<P>
+<STRONG>"Loop..Until" pseudo op</STRONG>
+<P>
+A conditional like "while..endwhile", except that it tests at the bottom
+of the loop.
+Not difficult to implement, but it's hard to come up with a name pair
+that keeps the "name..endname" symmetry of all the others
+<P>
+<STRONG>Fix known weak points (aka "bugs")</STRONG>
+<P>
+a) operator tokens
+<P>
+- these are currently strings, and expression evaluation fails if a user
+string happens to match one.
+They could be made more difficult to accidentally match (by including
+unprintable characters, say) or their type could be changed (to small
+floating point numbers, perhaps).
+<P>
+b) string lengths
+<P>
+- the MS-DOS version of TAWK 4 limits dynamic strings to 8000 characters.
+This is not checked by HXA during concatenation
+A simple fix is to check the length of the string operands before
+concatenation, but this adds overhead to every concatenation to catch
+a very rare failure (additional overhead actually, since the TAWK
+run-time package makes the same check)
+<P>
+c) regular expressions
+<P>
+- HXA performs only simple pattern matching to detect regular expressions,
+and relies on the TAWK run-time package to perform the actual parsing.
+However if TAWK decides the offering is not a legal regular expression
+it complains directly to the console (rather than, say,
+returning a null pattern).
+Which is not as neat as we might like, but it may not be possible
+to determine regular expression pattern legality simply by matching against
+another regular expression
+<P>
+d) numeric function arguments
+<P>
+- the sub-expressions which comprise function arguments in the RPN
+form are not range-checked.
+This is so that the VAL() function can return an out-of-range result
+which can come back in-range as part of a larger expression (and which
+will trigger an error if it doesn't).
+However since range checking only occurs once for every complete
+expression (at the end), an out-of-range intermediate result can be created
+and used for any numeric function argument.
+For some functions this won't matter as they will not be used if they
+are out of range (eg., MID$()).
+But any which do not range check might produce questionable results
+<P>
+e) EXIT block nesting clearing
+<P>
+- EXIT skips to the end of a macro, repeat or while block
+and silently closes any still-open IF blocks within the block.
+This behavior is necessary to allow
+the unconditional EXIT to be used within an IF block.
+However this unconditional nature means that it will also "cover up"
+an "IF without ENDIF" problem in the block body.
+<P>
+On the one hand that's somewhat helpful, as the error then can't hurt
+anything outside the block (such as unexpectedly cutting off assembly for
+hundreds of lines).
+<P>
+On the other hand, it's an undetected error.
+Moreover, unlike any other source code error in the skipped over portion,
+it's one that is actively covered up by HXA.
+<P>
+On the other other hand, it's an error that has no practical effect.
+If EXIT is executed HXA reacts the same way whether or not there is
+an unbalanced IF block.
+If EXIT is not executed HXA will detect an unbalanced block.
+<P>
+<STRONG>Revised source control</STRONG>
+<P>
+The difficulty is not so much user source code but macro expansions.
+If these are saved, and if used prolifigately, they can reach the array
+element limit (at least in the MS-DOS version).
+But the whole point of macros is to make life easier, so it won't do
+to eliminate them.
+<P>
+The 0.16x and higher versions of HXA by default save only lines read
+from source files and expansion lines that actually generate code.
+Macros may have quite complex logic covering many lines and still cause
+only one or two of those lines to be saved.
+<P>
+The 0.161 version reduced the count of saved line numbers (which are only
+applicable to lines read from files) by observing that these are used
+only for error reporting, hence only need to be saved for lines where
+an error has either already occurred or might be discovered later.
+<P>
+This also speeds the first assembly pass somewhat, and because all the
+lines necessary for the default list file are saved there is no slowdown
+when listing.
+If macro expansion listing is turned on, the situation simply reverts
+to what it has always been in the pre-v0.16x versions.
+<P>
+The 0.163 version saves the current line number of a source file only
+when it is interrupted by an include file.
+In all cases the line number of a source line can be re-calculated using
+the saved source text (although this can be slower than looking it up).
+During the first pass this is often not even necessary, as the value needed
+can be deduced to be the current line number (which is quite fast).
+<P>
+However these versions more-or-less just pick the "low-hanging fruit".
+If all listing is turned off, the only lines that need to be saved
+are macro, repeat and while definitions and those lines that generate
+code (in case of forward reference or range errors in them).
+<P>
+Regarding expansion definitions, HXA knows when they start and when
+they end, so it could be a fairly simple matter to temporarily "override"
+the user's specification and make sure those lines are saved.
+Moreover, if the index into the saved line buffer is noted at the start
+of non-nested repeat and while definitions, once they are complete
+the index can be re-set to that point, effectively erasing them from
+storage.
+<P>
+In the end this may all be moot, as Win32x TAWK 5 does not have the
+same memory limitations as MS-DOS TAWK 4.
+<P>
+<STRONG>Link files</STRONG>
+<P>
+Not likely to be compatible with any existing format, if only
+because they tend to be tied to specfic processors (although what if
+a "such-and-such file" was recognized as a "processor mnemonic" and
+that HXA variant included an ability to output that format?)
+<P>
+It should be fairly easy to dump the state of HXA after the first pass
+to a text file that could also be read back as an include file.
+Use of a "linkfile" pseudo op would trigger this, and also suppress
+errors if the first segment of a source file was relative rather than
+absolute (unless the user also specified a binary or hex output file).
+<P>
+The main problem forseen is turning the internal RPN expression form
+back to text, specifically partially resolved expressions.
+Labels, numeric integers and all operators are not a problem.
+<P>
+Strings would have to have unprintable characters turned into escape codes.
+Literal strings would not have this problem, but partial resolution
+might have created dynamic strings with unprintable characters.
+<P>
+Regular expressions do not exist in their literal form in partially
+resolved expressions.
+This would have to be changed or their existence in link files made illegal.
+<P>
+It would probably be a good idea to require all external labels to be
+declared via "public" or "global" or somesuch pseudo op.
+<P>
+<STRONG>Additional functions</STRONG>
+<P>
+New functions are easily added if a common use can be discerned.
+It is now more likely that user access to certain values will be provided by
+new functions rather than new internal variables, as it's easy to write
+functions that take no arguments, the style is not objectionable, and
+it simplifies the symbol-handling code.
+<P>
+a) FIRST$(str [,len])
+<P>
+- returns first &lt;len&gt; characters of string (&lt;len&gt; defaults to one if not
+supplied)
+- similar to BASIC LEFT$(), except length parameter is optional
+- however not much different from MID$(str, 1 [,len]) or MATCH$(str, /^./),
+except more compact if only the first character is wanted
+- in that case, though, is 'FIRST$(str) == "char"' more useful than
+'"str" ~ /^(char)/', which is already available ?
+<P>
+b) LAST$(str [,len])
+<P>
+- similar operation, comments, and objections as FIRST$(), except it operates
+on end of string rather than beginning
+- also the extension MID$()'s length argument to negative values
+allows MID$(str, -1) to achieve the same thing
+<P>
+c) MIN(numexp1, numexp2)
+<P>
+- returns minimum value of two expressions
+- easy to implement, but is it useful ?
+<P>
+d) MAX(numexpr1, numexpr2)
+<P>
+- ditto
+<P>
+e) TIME$() - implemented v0.180
+<P>
+- essentially a wrapper for ctime(), re-named to match HXA conventions
+<P>
+f) ISLABEL(name) - implemented v0.190 as LABEL()
+<P>
+- boolean: is name a defined label?
+- already available as FORWARD("name") is itself a complete expression,
+although the sense is opposite (TRUE if "name" is 
+<EM>not</EM>
+ defined)
+<P>
+g) SEGABS(name) or SEGLDA(name) or SEGADR(name)
+<P>
+- the absolute load address of a segment ( SEGBEG(firstseg) + SEGOFF(name) )
+- may make it easier to move to execution address (if different)
+- but this can already be calculated using existing functions
+- could also define this as a macro for ease of use, although it might have
+to be re-defined for every program using a different name for 'firstseg'
+<P>
+h) LABEL(strexpr) or GLOBAL(strexpr)
+<P>
+- makes a label out of strexpr and makes sure it is a global
+- but how would a value be assigned to it ?
+- might also consider as a pseudo-op: .LABEL strexp
+- presumably it would receive the value of the program counter at that point
+- or, allow global string expressions in the label field (what are the
+implications of this? - one is that skipping during block definitions
+has to somehow account for this, but when used in this context they
+probably would not be constants. Perhaps a ".LABEL" psop is better suited,
+as skipping would be satisfied by the psop and the expression itself
+left for later resolution)
+- might also provide something like this so macros named by string
+expressions during definition (which is allowed) could be expanded by
+string expressions which evaluated to their names (which isn't)
+<P>
+However PUTBACKS essentially provides all this functionality, including
+naming macros to expand by string expressions.
+Still, global labels in macro definitions are somewhat of a special case
+as things now stand, and a ".LABEL" psop would remove that condition in
+a consistent manner.
+<P>
+i) REGEX(strexpr)
+<P>
+- makes a regular expression out of strexpr
+<P>
+j) CPU$() - implemented v0.180
+<P>
+- returns name of current CPU being used
+<P>
+k) User Functions
+<P>
+- easiest might be one-line functions:
+<P>
+function   myfunc(]mynum,]mystr$)=expr
+<P>
+- formal arguments must be variable or local labels
+- definition would place the argument names and expression in a table
+and verify the expression can be parsed without error
+- types would be deduced from the argument names so parsing could handle
+- evaluation might be a two-argument injected operator: the name of the
+function and the number of arguments
+- execution would pull the arguments off the evaluation stack and assign
+them to the formal arguments, with the provisio that pulling an operator
+means an actual argument could not be resolved (which might be okay)
+- then recursive calls to parse (always succeeds) and evaluate the
+function definition (might fail if there is a forward reference in the
+expression, and might be okay)
+- might even be possible to handle optional arguments with defaults:
+<P>
+function   myfunc(]mynum1,]mynum2=1)=expr
+<P>
+- how would recursive calls to user-defined functions work?
+<P>
+k) PUSH$(strexpr[, name]), POP$([name]), TOP$([name]), EMPTY([name])
+<P>
+- user stack functions, default and named stacks
+- PUSH$() returns argument and pushes it on stack
+- POP$() returns top stack item and pops it off stack
+- TOP$() returns top stack item but does not pop it
+- EMPTY() returns TRUE if the stack is empty
+<P>
+alternatively:
+- .PUSH arg pushes item on stack
+- .POP assigns top item to a label and removes it from stack
+- .TOP assigns top item to a label
+- EMPTY() returns TRUE if the stack is empty
+<P>
+- if only one stack, how are types verified?
+- should pushing or popping evaluate the argument? If not, how would we
+know type is correct for label being assigned to?
+- maybe two stacks: a numeric stack and a string stack
+- if stacks are themselves named, then the name indicates type
+<P>
+- implemented v0.200
+- one string stack - multiple named stacks turn out to be a pain to manage
+- a mix of pseudo ops and functions: PUSHS, POP$(), PEEK$(), EMPTY()
+<P>
+l) RELOFF(name, [name]) or OFFSET(name)
+<P>
+- returns the relative offset of "name" in its segment, ie., its offset
+value less any segment value (what should absolute origin segments return?)
+- enables some expressions to be evaluated during the first pass that
+otherwise could not be
+- a second argument would imply getting the difference between them.
+This could help verify that they both belong to the same segment
+- should the program counter be allowed?
+How would it be specified?
+A seperate function is one way - simpler for implementation, but
+for the user?
+<P>
+m) LOOP0() and LOOP1()
+<P>
+- return the zero- and one-based iteration counts of REPEAT and WHILE blocks,
+defaulting to zero (one) if no block active
+- the idea is that there would be no need to manually implement loop counters
+in source code
+- "loop1()" can be thought of as "number of loops started" and "loop0()" as
+"number of loops completed"
+- these have been implemented experimentally (quite easily done), but...
+- no noticeable speed improvement observed in limited testing (a bit of a
+surprise since repeated calculations were now avoided)
+- somewhat non-intuitive behavior at WHILE block starts (the functions can
+be used in control expressions in tricky ways to "jump start" the loop)
+- when used in multiple blocks of two or more nested blocks it can be
+difficult to apprehend what the result of any particular call might be
+<P>
+<STRONG>Explicit Expression Caching</STRONG>
+<P>
+Easy to implement, this would take the form of a "cache" pseudo op followed
+by an expression (maybe even a 
+<EM>named</EM>
+ expression, so the name could be
+used in place of the expression).
+The expression would be converted and cached but not evaluated.
+The advantage is any expression the user thought or knew to be heavily
+used could be cached.
+The disadvantage, if automatic caching was simultaneously dropped, would
+be that every expression desireable to cache would have to be specified.
+<P>
+<STRONG>Partial File Output</STRONG>
+<P>
+In addition to what we have now, another idea would be to have matched
+"FILEGROUP..ENDGROUP" psops where all segments named between the two
+would be output to the same file (named as an argument to FILEGROUP)
+in the order they appear.
+Any segment could belong to multiple output files.
+If lots of segments it could be a pain to name them all, though.
+Perhaps a regular expression could be of assistance?
+<P>
+Would this be of any use anyway?
+<P>
+<STRONG>More list file options</STRONG>
+<P>
+Perhaps an indication of which are source and which are expansion lines.
+- implemented v0.180
+<P>
+A source file indication might also be useful for included files.
+- implemented v0.180
+<P>
+User-defined page headers.
+These would probably require new functions to obtain file names,
+page number, time, etc.
+The main difficulty seems to be what to do with headers that require
+more than one line to display.
+If they are not part of the main text body either they are truncated
+or they mess up the top margin.
+If they are part of the main text body they could conceivably "squeeze out"
+the real text.
+Should any title be automatically truncated to fit on one line?
+- implemented v0.180, but only appear on first page due to above problems
+<P>
+Optionally sort the symbol listing based on value as well as alphabetically.
+Or make both sorts optional, with alphabetically default ON and value OFF.
+- implemented v0.180 as both methods always used
+<P>
+A PAGE pseudo op to force the next listed line to be at the top of the
+next page.
+Because this would actually be printed itself, a PAGE at the first line of
+a new page would cause the rest of the page to be blank.
+Should this be suppressed?
+Should PAGE have any effect in an unlisted section?
+If blank lines follow PAGE in the source, should they be listed at the top
+of that next page?
+- implemented v0.180 (no page top suppression, no effect in unlisted section)
+<P>
+<STRONG>Allow regular expressions to be specified by string expressions</STRONG>
+<P>
+Perhaps by a "S2R" type-check at parse time and a "verify and convert regex"
+at evaluation time would be sufficient
+<P>
+<STRONG>ENDMACRO [name] psop</STRONG>
+<P>
+Extend ENDMACRO to match an optional name to the current MACRO name, much
+like ENDSEGMENT can optionally match the current SEGMENT name
+- implemented v0.180
+<P>
+<STRONG>ASSERT expr psop</STRONG>
+<P>
+Issue an error message if "expr" is false.
+A macro based around an IF psop could easily do the same thing during
+the first pass.
+ASSERT's difference would be that it could save any partially resolved
+expression during the first pass and then complete evaluation during
+the second.
+Perhaps ASSERT1 and ASSERT2 could force evaluation during a particular pass.
+<P>
+Could this be incorporated into the code storage array as an "ASSRT" type?
+Brief inspection indicates that a fair number of places would have to
+be taught the difference.
+The biggest problem appears to be that unlike the other element types,
+"ASSRT" would not generate code or data.
+Rather than teach every other part to ignore "ASSRT", it might be simpler
+to give it its own, basically parallel, structure.
+- implemented v0.200 (piggy-backing on code used for display of EQU, DS, etc)
+<P>
+<STRONG>CPU Switching Support</STRONG>
+<P>
+Allow variants which support multiple CPUs to switch between them at
+assembly time.
+The basic desire is to disallow certain CPU/instruction combinations from
+happening, eg., some portion of a program must run using only the lowest
+common instruction set.
+Instructions not supported in that section must cause an error, but can
+be allowed in other sections.
+<P>
+One idea might be a ".CPUSET" psop which lists all CPUs to be used.
+If no ".CPUSET" psop appears before ".CPU" then the only allowed CPU
+is the one named by ".CPU".
+Otherwise any CPU listed by ".CPUSET" is allowed.
+<P>
+<STRONG>Arrays</STRONG>
+<P>
+Singly-dimensioned arrays of numbers or strings
+- it seems fairly straightforward to store them in the symbol table (one idea
+is that their indices can be thought of as part of their name, thus allowing
+them to be stored as scalars - this might also make it possible to "skip"
+elements or more generally to treat them as associative arrays)
+- it also seems relatively easy to extend expression evaluation to handle
+them
+- the main difficulty appears to be how to assign values to elements. The
+standard method of using the label field would have to be extended to
+recognize array notation with a potentially complex index expression. An
+alternative syntax - eg., ARRAY name, index, value - is easy to implement
+but not at all what programmers are used to, plus would not look at all
+like how they are later used
+<P>
+<STRONG>Implied Formal Macro Arguments</STRONG>
+<P>
+This would allow a macro to accept a variable number of actual arguments
+without having to declare default values for any unspecified ones
+- the definition might use "..." as the last formal argument to signal
+that any number (including zero) more arguments can follow
+- the expansion would assign any arguments found past the last named formal
+argument to pre-defined labels, possibly '?1', '?2', etc
+- '?0' could be a count of how many are actually present at expansion time
+- references to pre-defined labels with no assigned values should default
+to null strings?
+- OR might ALWAYS define these at expansion time, and let user choose
+whether or not to use formal argument names as well (which would still
+be required in order to use default arguments with them)
+- though the "..." notation is designed to flag that "extra" arguments
+are acceptable (do not throw them away as is currently done)
+- another way might be to create another "ASSUME" convention that also
+flags extra arguments are just accepted as implied actual arguments,
+which has the advantage of only needing to be done once, and the disadvantage
+of applying globally with no visibility beyond where it's done
+- of course considering default arguments there is in effect a way to
+'count' arguments already - does this add more complication than it's worth?
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:46 2013</EM>
+</BODY>
+</HTML>

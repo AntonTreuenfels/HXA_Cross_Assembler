@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Hobby Cross Assembler v0.201 General Demos</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Hobby Cross Assembler v0.201 General Demos</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">General Demos</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<UL>
+<LI><A HREF="#l09">Code Movement</A>
+<UL>
+<LI><A HREF="#l0a">Code Movement</A>
+</UL>
+<LI><A HREF="#l06">Code Alignment</A>
+<UL>
+<LI><A HREF="#l08">EVEN, ODD and ALIGN Macros</A>
+<LI><A HREF="#l07">ALIGN Macro</A>
+</UL>
+<LI><A HREF="#l1a">Uninitialized Storage</A>
+<UL>
+<LI><A HREF="#l1b">Using DS</A>
+</UL>
+<LI><A HREF="#l14">String Macros</A>
+<UL>
+<LI><A HREF="#l15">String Macros</A>
+</UL>
+<LI><A HREF="#l0b">Lookup Table</A>
+<UL>
+<LI><A HREF="#l0c">ASCII-to-7E_Parity</A>
+</UL>
+<LI><A HREF="#l02">Bit Position</A>
+<UL>
+<LI><A HREF="#l03">Most Significant Bit</A>
+</UL>
+<LI><A HREF="#l16">Type Conversion</A>
+<UL>
+<LI><A HREF="#l19">FLOAT Macros</A>
+<LI><A HREF="#l17">BCD Macros</A>
+<LI><A HREF="#l18">DEC Macros</A>
+</UL>
+<LI><A HREF="#l04">Character Packing</A>
+<UL>
+<LI><A HREF="#l05">Forty Char Alphabet</A>
+</UL>
+<LI><A HREF="#l0d">Macro Instruction Set</A>
+<UL>
+<LI><A HREF="#l11">8080</A>
+<LI><A HREF="#l13">Z80</A>
+<LI><A HREF="#l10">6502</A>
+<LI><A HREF="#l0e">65C02</A>
+<LI><A HREF="#l12">R65C02</A>
+<LI><A HREF="#l0f">65Org16</A>
+</UL>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">Code Movement</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">Code Movement</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo001.a">../demo0/demo001.a</A>
+<LI>
+ok: assembly/load address doesn't match execution address
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Code Alignment</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">EVEN, ODD and ALIGN Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo002.a">../demo0/demo002.a</A>
+<LI>
+ok: pad output to specific byte boundaries
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">ALIGN Macro</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo002e.a">../demo0/demo002e.a</A>
+<LI>
+error: alignments on boundaries outside (arbitrary) range
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1a">Uninitialized Storage</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l1b">Using DS</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo003.a">../demo0/demo003.a</A>
+<LI>
+ok: allocate uninitialized storage
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l14">String Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l15">String Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo005.a">../demo0/demo005.a</A>
+<LI>
+ok: building on the STRING pseudo op
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0b">Lookup Table</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0c">ASCII-to-7E_Parity</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo010.a">../demo0/demo010.a</A>
+<LI>
+eight methods of building an ASCII to seven-bit even-parity lookup table
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Bit Position</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Most Significant Bit</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo018.a">../demo0/demo018.a</A>
+<LI>
+ok: find position of most significant magnitude bit of signed integer
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l16">Type Conversion</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l19">FLOAT Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo020.a">../demo0/demo020.a</A>
+<LI>
+ok: convert an integer to floating point form
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l17">BCD Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo021.a">../demo0/demo021.a</A>
+<LI>
+ok: convert an integer to Binary Coded Decimal form
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l18">DEC Macros</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo022.a">../demo0/demo022.a</A>
+<LI>
+ok: convert an integer to a fixed length ASCII decimal
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Character Packing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Forty Char Alphabet</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo024.a">../demo0/demo024.a</A>
+<LI>
+ok: code three characters into two bytes
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0d">Macro Instruction Set</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l11">8080</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo030.a">../demo0/demo030.a</A>
+<LI>
+ok: 8080\8085 instruction set
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l13">Z80</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: Any
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo032.a">../demo0/demo032.a</A>
+<LI>
+ok: Z80 instruction set
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l10">6502</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA65
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo034.a">../demo0/demo034.a</A>
+<LI>
+ok: 6502 instruction set
+<LI>
+<A HREF="../demo0/demo034e.a">../demo0/demo034e.a</A>
+<LI>
+error: illegal address mode, detected first pass
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0e">65C02</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA65
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo036.a">../demo0/demo036.a</A>
+<LI>
+ok: 65C02 instruction set
+<LI>
+<A HREF="../demo0/demo036e.a">../demo0/demo036e.a</A>
+<LI>
+error: illegal address mode, detected first pass
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l12">R65C02</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA65
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo038.a">../demo0/demo038.a</A>
+<LI>
+ok: R65C02 instruction set
+<LI>
+<A HREF="../demo0/demo038e.a">../demo0/demo038e.a</A>
+<LI>
+error: illegal address mode, detected first pass
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=16%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0f">65Org16</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler: HXA_T
+<P>
+<UL>
+<LI>
+<A HREF="../demo0/demo040.a">../demo0/demo040.a</A>
+<LI>
+ok: 65Org16 instruction set
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:43 2013</EM>
+</BODY>
+</HTML>

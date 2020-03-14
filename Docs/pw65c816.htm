@@ -1,0 +1,5531 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>W65C816S CPU</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>W65C816S CPU</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l02">Scope of This Document</A>
+<LI><A HREF="#l01">Related Resources</A>
+<LI><A HREF="#l04">W65C816S CPU</A>
+<UL>
+<LI><A HREF="#l03">Registers</A>
+<LI><A HREF="#l0a">Status Flags</A>
+<LI><A HREF="#l09">Special Memory Locations</A>
+<LI><A HREF="#l06">Instruction Set Mnemonics</A>
+<LI><A HREF="#l05">Address Modes and Object Code Sizes</A>
+<LI><A HREF="#l07">Instruction Set Opcodes</A>
+<LI><A HREF="#l08">Instruction Set Timings</A>
+</UL>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This document briefly describes the W65C816S microprocessor.
+It does not attempt to discuss how to program the W65C816S.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Assembler Documentation
+<UL>
+<LI>
+<A HREF="hxa.htm">HXA</A>
+ : main documentation
+<LI>
+<A HREF="hxa65.htm">HXA65</A>
+ : 6502-family variant of HXA
+</UL>
+<P>
+Processor Documentation
+<UL>
+<LI>
+<A HREF="p6502.htm">6502</A>
+<LI>
+<A HREF="p65c02.htm">65C02</A>
+<LI>
+<A HREF="pr65c02.htm">R65C02</A>
+<LI>
+<A HREF="pw65c02s.htm">W65C02S</A>
+<LI>
+W65C816S
+</UL>
+<P>
+Additional W65C816S References
+<P>
+<A HREF="http://www.westerndesigncenter.com">Western Design Center</A>
+ maintains
+complete data sheets for the W65C816S as well as a complete programming
+manual, all in Portable Document Format (PDF).
+<P>
+The programming manual in particular is an excellent guide to the
+W65C816S, resolving many ambiguities found in the data sheets.
+It was used as the primary reference in adding support
+for this microprocessor to HXA65.
+Any differences between the data sheets and the programming manual
+were resolved in favor of the latter.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">W65C816S CPU</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The W65C816S is a Least-Significant-Byte-First microprocessor with both
+8- and 16-bit operation modes.
+<P>
+The 8-bit 
+<EM>emulation</EM>
+ mode is completely instruction-compatible with
+the 
+<A HREF="p6502.htm">6502</A>
+ and 
+<A HREF="p65c02.htm">65C02</A>
+ microprocessors
+(but not the 
+<A HREF="pr65c02.htm">R65C02</A>
+ or 
+<A HREF="pw65c02s.htm">W65C02S</A>
+ microprocessors).
+<P>
+The 16-bit 
+<EM>native</EM>
+ mode features new instructions, new address modes,
+and a 24-bit (16 megabyte) address space.
+<P>
+The W65C816S processor was used in the Apple ][gs.
+A processor core with the same instruction set was used in the Commodore One.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Registers</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Programming Model (Native Mode)</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Bank (Bits 23-16)
+<TD>
+High (Bits 15-8)
+<TD>
+Low (Bits 7-0)
+<TR ALIGN=CENTER>
+<TD>
+Data Bank Register (DBR)
+<TD>
+X-Register (XH)
+<TD>
+X-Register (XL)
+<TR ALIGN=CENTER>
+<TD>
+Data Bank Register (DBR)
+<TD>
+Y-Register (YH)
+<TD>
+Y-Register (YL)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+Stack Pointer (SH)
+<TD>
+Stack Pointer (SL)
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Accumulator (B)
+<TD>
+Accumulator (A)
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+-
+<TD>
+Status Flags (P)
+<TR ALIGN=CENTER>
+<TD>
+Program Bank Register (PBR)
+<TD>
+Program Counter (PCH)
+<TD>
+Program Counter (PCL)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+Direct Register (DH)
+<TD>
+Direct Register (DL)
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Programming Model (Emulation Mode)</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Bank (Bits 23-16)
+<TD>
+High (Bits 15-8)
+<TD>
+Low (Bits 7-0)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+$00
+<TD>
+X-Register (X)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+$00
+<TD>
+Y-Register (Y)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+$01
+<TD>
+Stack Pointer (S)
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Accumulator (B)
+<TD>
+Accumulator (A)
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+-
+<TD>
+Status Flags (P)
+<TR ALIGN=CENTER>
+<TD>
+Program Bank Register (PBR)
+<TD>
+Program Counter (PCH)
+<TD>
+Program Counter (PCL)
+<TR ALIGN=CENTER>
+<TD>
+$00
+<TD>
+Direct Register (DH)
+<TD>
+Direct Register (DL)
+</TABLE>
+<P>
+Emulation Mode Notes
+<UL>
+<LI>
+the Direct registers are each initialized to $00, but can be changed
+<LI>
+the Accumulator High (B) register can be exchanged with the Accumulator
+Low (A) register
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">Status Flags</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Status Flags Register</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Bit</STRONG>
+<TD>
+<STRONG>7</STRONG>
+<TD>
+<STRONG>6</STRONG>
+<TD>
+<STRONG>5</STRONG>
+<TD>
+<STRONG>4</STRONG>
+<TD>
+<STRONG>3</STRONG>
+<TD>
+<STRONG>2</STRONG>
+<TD>
+<STRONG>1</STRONG>
+<TD>
+<STRONG>0</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Native Mode</STRONG>
+<TD>
+N
+<TD>
+V
+<TD>
+M
+<TD>
+X
+<TD>
+D
+<TD>
+I
+<TD>
+Z
+<TD>
+C
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Emulation Mode</STRONG>
+<TD>
+N
+<TD>
+V
+<TD>
+1
+<TD>
+B
+<TD>
+D
+<TD>
+I
+<TD>
+Z
+<TD>
+C
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Both</STRONG>
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+E
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Status Flags</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Symbol</STRONG>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Clear (=0)</STRONG>
+<TD>
+<STRONG>Set (=1)</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+B
+<TD>
+Break
+<TD>
+No Software Break Occurred
+<TD>
+Software Break Occurred
+<TR ALIGN=CENTER>
+<TD>
+C
+<TD>
+Carry
+<TD>
+No Carryout/Borrow Required
+<TD>
+Carryout/No Borrow Required
+<TR ALIGN=CENTER>
+<TD>
+D
+<TD>
+Decimal Mode
+<TD>
+Binary Arithmetic Enabled
+<TD>
+BCD Arithmetic Enabled
+<TR ALIGN=CENTER>
+<TD>
+E
+<TD>
+Emulation Mode
+<TD>
+Native
+<TD>
+6502
+<TR ALIGN=CENTER>
+<TD>
+I
+<TD>
+Interrupt Disable
+<TD>
+Maskable IRQs Enabled
+<TD>
+Maskable IRQs Disabled
+<TR ALIGN=CENTER>
+<TD>
+M
+<TD>
+Accumulator/Memory Select
+<TD>
+16 Bit
+<TD>
+8 Bit
+<TR ALIGN=CENTER>
+<TD>
+N
+<TD>
+Sign
+<TD>
+Result is Positive
+<TD>
+Result is Negative
+<TR ALIGN=CENTER>
+<TD>
+V
+<TD>
+Overflow
+<TD>
+No Signed Arithmetic Overflow
+<TD>
+Signed Arithmetic Overflow
+<TR ALIGN=CENTER>
+<TD>
+X
+<TD>
+Index Register Select
+<TD>
+16 Bit
+<TD>
+8 Bit
+<TR ALIGN=CENTER>
+<TD>
+Z
+<TD>
+Zero
+<TD>
+Result is Not Zero
+<TD>
+Result is Zero
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+after subtraction the C-flag is clear if a borrow was required,
+set otherwise
+<LI>
+in emulation mode after an IRQ or NMI the saved B-flag on the stack
+is clear; after a BRK instruction it is set
+<LI>
+the N-, V- and Z-flags are valid in decimal mode
+<LI>
+the D-flag is clear after processor reset
+<LI>
+the D-flag is cleared by interrupts
+<LI>
+the "phantom" E-flag "hides behind" the C-flag; the XCE instruction
+swaps the E- and C-flags
+<LI>
+at power-up the processor is in emulation mode (E=1)
+<LI>
+in native mode the M- and X-flags replace the permanently set bit 5 and
+the B-flag of emulation mode, respectively
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">Special Memory Locations</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<UL>
+<LI>
+<STRONG>Direct Page</STRONG>
+<LI>
+instructions addressing the direct page of memory require only one-byte
+addresses.
+Many W65C816S instructions are thus shorter and faster if addressed here
+rather than elsewhere, and others can only be addressed here.
+The starting location of the direct page can be specified by the Direct
+registers anywhere within the first bank of memory.
+In emulation mode the Direct registers are initialized to $0000,
+which makes the direct page equivalent to the zero page of the 
+<A HREF="p6502.htm">6502</A>
+<LI>
+<STRONG>Stack Memory</STRONG>
+<LI>
+the W65C816S has a 16-bit stack pointer which can be set to any location
+within the first bank of memory.
+In emulation mode the Stack Pointer High (SH) register is initialized to
+$01, which sets the stack location to page $01, the same as the stack
+location of the 6502
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Vector Locations</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Emulation Mode</STRONG>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Type</STRONG>
+<TD>
+<STRONG>Native Mode</STRONG>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Type</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+$00FFFE/F
+<TD>
+IRQ/BRK
+<TD>
+hardware/software
+<TD>
+$00FFEE/F
+<TD>
+IRQ
+<TD>
+hardware
+<TR ALIGN=CENTER>
+<TD>
+$00FFFC/D
+<TD>
+RESET
+<TD>
+hardware
+<TD>
+$00FFEC/D
+<TD>
+(reserved)
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+$00FFFA/B
+<TD>
+NMI
+<TD>
+hardware
+<TD>
+$00FFEA/B
+<TD>
+NMI
+<TD>
+hardware
+<TR ALIGN=CENTER>
+<TD>
+$00FFF8/9
+<TD>
+ABORT
+<TD>
+hardware
+<TD>
+$00FFE8/9
+<TD>
+ABORT
+<TD>
+hardware
+<TR ALIGN=CENTER>
+<TD>
+$00FFF6/7
+<TD>
+(reserved)
+<TD>
+-
+<TD>
+$00FFE6/7
+<TD>
+BRK
+<TD>
+software
+<TR ALIGN=CENTER>
+<TD>
+$00FFF4/5
+<TD>
+COP
+<TD>
+software
+<TD>
+$00FFE4/5
+<TD>
+COP
+<TD>
+software
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Instruction Set Mnemonics</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The W65C816S instruction set mnemonics include all of the
+<A HREF="p65c02.htm">65C02</A>
+instruction set mnemonics.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Mnemonic</STRONG>
+<TD>
+<STRONG>Status Flags Affected</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Description</STRONG>
+<TD>
+<STRONG>Operation</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ADC</STRONG>
+<TD>
+P[C+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Add memory to accumulator and carry flag
+<TD>
+A + M + P[C] -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>AND</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Bitwise AND memory with accumulator
+<TD>
+A AND M -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ASL</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Arithmetic shift memory or accumulator one bit left to carry
+<TD>
+P[C] &lt;- M[7|15 &lt;- ... &lt;- 0] &lt;- 0
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BCC</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if carry clear
+<TD>
+PC + disp8 -&gt; PC if P[C]=0
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BCS</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if carry set
+<TD>
+PC + disp8 -&gt; PC if P[C]=1
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BEQ</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if equal to zero
+<TD>
+PC + disp8 -&gt; PC if P[Z]=1
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BIT</STRONG>
+<TD>
+P[N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Bitwise AND memory with accumulator (but only set flags)
+<TD>
+M[7|15] -&gt; P[N]; M[6|14] -&gt; P[V]; A AND M -&gt; P[Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BMI</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if minus
+<TD>
+PC + disp8 -&gt; PC if P[N]=1
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BNE</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if not equal to zero
+<TD>
+PC + disp8 -&gt; PC if P[Z]=0
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BPL</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if plus
+<TD>
+PC + disp8 -&gt; PC if P[N]=0
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BRA</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch always
+<TD>
+PC + disp8 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BRK</STRONG>
+<TD>
+P[B+I]
+<TR ALIGN=CENTER>
+<TD>
+Software break (emulation mode)
+<TD>
+PC+2-&gt;(S); 1-&gt;P[B]; P-&gt;(S); 1-&gt;P[I]; (00FFFE)-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BRK</STRONG>
+<TD>
+P[D+I]
+<TR ALIGN=CENTER>
+<TD>
+Software break (native mode)
+<TD>
+PBR-&gt;(S); PC+2-&gt;(S); P-&gt;(S); 1-&gt;P[I]; 0-&gt;P[D]; $00-&gt;PBR; (00FFE6)-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BRL</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch always long
+<TD>
+PC + disp16 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BVC</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if overflow flag clear
+<TD>
+PC + disp8 -&gt; PC if P[V]=0
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>BVS</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Branch if overflow flag set
+<TD>
+PC + disp8 -&gt; PC if P[V]=1
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CLC</STRONG>
+<TD>
+P[C]
+<TR ALIGN=CENTER>
+<TD>
+Clear carry flag
+<TD>
+0 -&gt; P[C]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CLD</STRONG>
+<TD>
+P[D]
+<TR ALIGN=CENTER>
+<TD>
+Clear decimal flag
+<TD>
+0 -&gt; P[D]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CLI</STRONG>
+<TD>
+P[I]
+<TR ALIGN=CENTER>
+<TD>
+Clear interrupt disable flag
+<TD>
+0 -&gt; P[I]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CLV</STRONG>
+<TD>
+P[V]
+<TR ALIGN=CENTER>
+<TD>
+Clear overflow flag
+<TD>
+0 -&gt; P[V]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CMP</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Subtract memory from accumulator (but only set flags)
+<TD>
+A - M -&gt; P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>COP</STRONG>
+<TD>
+P[D+I]
+<TR ALIGN=CENTER>
+<TD>
+Coprocessor enable (emulation mode)
+<TD>
+PC+2-&gt;(S); P-&gt;(S); 1-&gt;P[I]; 0-&gt;P[D]; (00FFF4)-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>COP</STRONG>
+<TD>
+P[D+I]
+<TR ALIGN=CENTER>
+<TD>
+Coprocessor enable (native mode)
+<TD>
+PBR-&gt;(S); PC+2-&gt;(S); P-&gt;(S); 1-&gt;P[I]; 0-&gt;P[D]; $00-&gt;PBR; (00FFE4)-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CPX</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Subtract memory from X-register (but only set flags)
+<TD>
+X - M -&gt; P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>CPY</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Subtract memory from Y-register (but only set flags)
+<TD>
+Y - M -&gt; P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>DEC</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Decrement memory by one
+<TD>
+M - 1 -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>DEX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Decrement X-register by one
+<TD>
+X - 1 -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>DEY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Decrement Y-register by one
+<TD>
+Y - 1 -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>EOR</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Bitwise Exclusive-OR memory with accumulator
+<TD>
+A EOR M -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>INC</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Increment memory by one
+<TD>
+M + 1 -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>INX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Increment X-register by one
+<TD>
+X + 1 -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>INY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Increment Y-register by one
+<TD>
+Y + 1 -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>JML</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Jump to new address long
+<TD>
+addr24 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>JMP</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Jump to new address
+<TD>
+addr16 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>JSL</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Jump to subroutine long
+<TD>
+PBR-&gt;(S); PC+3-&gt;(S); addr24-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>JSR</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Jump to subroutine
+<TD>
+PC+2-&gt;(S); addr16-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>LDA</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Load accumulator from memory
+<TD>
+M -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>LDX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Load X-register from memory
+<TD>
+M -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>LDY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Load Y-register from memory
+<TD>
+M -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>LSR</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Logical shift memory or accumulator one bit right to carry
+<TD>
+0 -&gt; M[7|15 -&gt; ... -&gt; 0] -&gt; P[C]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>MVN</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Block move next
+<TD>
+^src24|X-&gt;^dst24|Y; X+1-&gt;X; Y+1-&gt;Y; C-1-&gt;C; repeat until C=$FFFF
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>MVP</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Block move previous
+<TD>
+^src24|X-&gt;^dst24|Y; X-1-&gt;X; Y-1-&gt;Y; C-1-&gt;C; repeat until C=$FFFF
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>NOP</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+No operation
+<TD>
+PC + 1 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ORA</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Bitwise Inclusive-OR memory with accumulator
+<TD>
+A OR M -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PEA</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push effective absolute address
+<TD>
+data16 -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PEI</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push effective indirect address
+<TD>
+(DR+offset8) -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PER</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push effective PC relative indirect address
+<TD>
+PC + disp16 -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHA</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push accumulator on stack
+<TD>
+A -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHB</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push data bank register on stack
+<TD>
+DBR -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHD</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push direct page register on stack
+<TD>
+DR -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHK</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push program bank register on stack
+<TD>
+PBR -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHP</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push status flags on stack
+<TD>
+P -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHX</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push X-register on stack
+<TD>
+X -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PHY</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Push Y-register flag on stack
+<TD>
+Y -&gt; (S)
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLA</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull accumulator from stack
+<TD>
+(S) -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLB</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull data bank register from stack
+<TD>
+(S) -&gt; DBR
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLD</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull direct page register from stack
+<TD>
+(S) -&gt; DR
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLP</STRONG>
+<TD>
+P[B+C+D+I+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull status flags from stack (emulation mode)
+<TD>
+(S) -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLP</STRONG>
+<TD>
+P[C+D+I+M+N+V+X+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull status flags from stack (native mode)
+<TD>
+(S) -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull X-register from stack
+<TD>
+(S) -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>PLY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Pull Y-register from stack
+<TD>
+(S) -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>REP</STRONG>
+<TD>
+P[B+C+D+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Reset status flags (emulation mode)
+<TD>
+~data8 AND P -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>REP</STRONG>
+<TD>
+P[C+D+I+M+N+V+X+Z]
+<TR ALIGN=CENTER>
+<TD>
+Reset status flags (native mode)
+<TD>
+~data8 AND P -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ROL</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Rotate memory or accumulator one bit left through carry
+<TD>
+P[C] &lt;- M[7|15 &lt;- ... &lt;- 0] &lt;- P[C]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ROR</STRONG>
+<TD>
+P[C+N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Rotate memory or accumulator one bit right through carry
+<TD>
+P[C] -&gt; M[7|15 -&gt; ... -&gt; 0] -&gt; P[C]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>RTI</STRONG>
+<TD>
+P[B+C+D+I+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Return from interrupt (emulation mode)
+<TD>
+(S)-&gt;P; (S)-&gt;PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>RTI</STRONG>
+<TD>
+P[C+D+I+M+N+V+X+Z]
+<TR ALIGN=CENTER>
+<TD>
+Return from interrupt (native mode)
+<TD>
+(S)-&gt;P; (S)-&gt;PC; (S)-&gt;PBR
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>RTI</STRONG>
+<TD>
+P[B+C+D+I+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>RTL</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Return from subroutine long
+<TD>
+(S)+1-&gt;PC; (S)-&gt;PBR
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>RTS</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Return from subroutine
+<TD>
+(S) + 1 -&gt; PC
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SBC</STRONG>
+<TD>
+P[C+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Subtract memory from accumulator and complement of carry flag
+<TD>
+A - M - ~P[C] -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SEC</STRONG>
+<TD>
+P[C]
+<TR ALIGN=CENTER>
+<TD>
+Set carry flag
+<TD>
+1 -&gt; P[C]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SED</STRONG>
+<TD>
+P[D]
+<TR ALIGN=CENTER>
+<TD>
+Set decimal flag
+<TD>
+1 -&gt; P[D]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SEI</STRONG>
+<TD>
+P[I]
+<TR ALIGN=CENTER>
+<TD>
+Set interrupt disable flag
+<TD>
+1 -&gt; P[I]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SEP</STRONG>
+<TD>
+P[B+C+D+N+V+Z]
+<TR ALIGN=CENTER>
+<TD>
+Set status flags (emulation mode)
+<TD>
+data8 OR P -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>SEP</STRONG>
+<TD>
+P[C+D+I+M+N+V+X+Z]
+<TR ALIGN=CENTER>
+<TD>
+Set status flags (native mode)
+<TD>
+data8 OR P -&gt; P
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>STA</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Store accumulator to memory
+<TD>
+A -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>STP</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Stop the processor
+<TD>
+1 -&gt; Phi_2
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>STX</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Store X-register to memory
+<TD>
+X -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>STY</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Store Y-register to memory
+<TD>
+Y -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>STZ</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Store zero to memory
+<TD>
+0 -&gt; M
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TAX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer accumulator to X-register
+<TD>
+A -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TAY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer accumulator to Y-register
+<TD>
+A -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TCD</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer 16-bit accumulator to Direct Page Register
+<TD>
+C -&gt; DR
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TCS</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Transfer accumulator to stack pointer
+<TD>
+C -&gt; S
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TDC</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer Direct Page Register to 16-bit accumulator
+<TD>
+DR -&gt; C
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TRB</STRONG>
+<TD>
+P[Z]
+<TR ALIGN=CENTER>
+<TD>
+Test and reset bits
+<TD>
+~A AND M-&gt;M; A AND M-&gt;P[Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TSB</STRONG>
+<TD>
+P[Z]
+<TR ALIGN=CENTER>
+<TD>
+Test and set bits
+<TD>
+A OR M-&gt;M; A AND M-&gt;P[Z]
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TSC</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer stack pointer to 16-bit accumulator
+<TD>
+S -&gt; C
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TSX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer stack pointer to X-register
+<TD>
+S -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TXA</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer X-register to accumulator
+<TD>
+X -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TXS</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer X-register to stack pointer
+<TD>
+X -&gt; S
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TXY</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer X-register to Y-register
+<TD>
+X -&gt; Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TYA</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer Y-register to accumulator
+<TD>
+Y -&gt; A
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>TYX</STRONG>
+<TD>
+P[N+Z]
+<TR ALIGN=CENTER>
+<TD>
+Transfer Y-register to X-register
+<TD>
+Y -&gt; X
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>WAI</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Wait for interrupt
+<TD>
+0 -&gt; RDY
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>WDM</STRONG>
+<TD>
+<EM>none</EM>
+<TR ALIGN=CENTER>
+<TD>
+Reserved for future expansion
+<TD>
+PC + 2 -&gt; PC
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+the BIT immediate instruction does not change P[N] or P[V]
+<LI>
+the BRK and COP instructions cannot be masked by SEI
+<LI>
+register-to-register transfers are affected by the settings
+of the E, M and X status flags
+<LI>
+<EM>WDM</EM>
+ (for William D Mensch, Jr) is a temporary mnemonic for an
+"escape code" to introduce possible future 65-- family 16-bit opcodes
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Address Modes and Object Code Sizes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The W65C816S address modes are a superset of the 
+<A HREF="p65c02.htm">65C02</A>
+address modes.
+The zero page address modes of the 65C02 are replaced by direct modes,
+as the 256-byte "fast access" page can be located anywhere in the
+first 64 KB of memory.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Address Modes and Object Sizes</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Mode</STRONG>
+<TD>
+<STRONG>Source Form</STRONG>
+<TD>
+<STRONG>Object Form</STRONG>
+<TD>
+<STRONG>#Bytes</STRONG>
+<TD>
+<STRONG>24-Bit Effective Bank|Addr</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+Absolute
+<TD>
+mnemonic addr16
+<TD>
+opcode &lt;addr16 &gt;addr16
+<TD>
+3
+<TD>
+DBR|addr16 (data access); PBR|addr16 (control transfer)
+<TR ALIGN=CENTER>
+<TD>
+Absolute Indexed Indirect
+<TD>
+mnemonic (addr16i,X)
+<TD>
+opcode &lt;addr16i &gt;addr16i
+<TD>
+3
+<TD>
+PBR|addr16i+X -&gt; PBR|addr16
+<TR ALIGN=CENTER>
+<TD>
+Absolute Indirect
+<TD>
+mnemonic (addr16i)
+<TD>
+opcode &lt;addr16i &gt;addr16i
+<TD>
+3
+<TD>
+$00|addr16i -&gt; PBR|addr16
+<TR ALIGN=CENTER>
+<TD>
+Absolute Indirect Long
+<TD>
+mnemonic [addr16i]
+<TD>
+opcode &lt;addr16i &gt;addr16i
+<TD>
+3
+<TD>
+$00|addr16i -&gt; addr24
+<TR ALIGN=CENTER>
+<TD>
+Absolute Long
+<TD>
+mnemonic addr24
+<TD>
+opcode &lt;addr24 &gt;addr24 ^addr24
+<TD>
+4
+<TD>
+addr24
+<TR ALIGN=CENTER>
+<TD>
+Absolute Long X-Indexed
+<TD>
+mnemonic addr24,X
+<TD>
+opcode &lt;addr24 &gt;addr24 ^addr24
+<TD>
+4
+<TD>
+addr24+X
+<TR ALIGN=CENTER>
+<TD>
+Absolute X-Indexed
+<TD>
+mnemonic addr16,X
+<TD>
+opcode &lt;addr16 &gt;addr16
+<TD>
+3
+<TD>
+DBR|addr16+X
+<TR ALIGN=CENTER>
+<TD>
+Absolute Y-Indexed
+<TD>
+mnemonic addr16,Y
+<TD>
+opcode &lt;addr16 &gt;addr16
+<TD>
+3
+<TD>
+DBR|addr16+Y
+<TR ALIGN=CENTER>
+<TD>
+Accumulator
+<TD>
+mnemonic 'A'
+<TD>
+opcode
+<TD>
+1
+<TD>
+n/a
+<TR ALIGN=CENTER>
+<TD>
+Block Move
+<TD>
+mnemonic src24,dst24
+<TD>
+opcode ^dst24 ^src24
+<TD>
+3
+<TD>
+^src24|X =&gt; ^dst24|Y
+<TR ALIGN=CENTER>
+<TD>
+Direct
+<TD>
+mnemonic offset8
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8
+<TR ALIGN=CENTER>
+<TD>
+Direct Indexed Indirect
+<TD>
+mnemonic (offset8,X)
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8+X -&gt; DBR|addr16
+<TR ALIGN=CENTER>
+<TD>
+Direct Indirect
+<TD>
+mnemonic (offset8)
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8 -&gt; DBR|addr16
+<TR ALIGN=CENTER>
+<TD>
+Direct Indirect Indexed
+<TD>
+mnemonic (offset8),Y
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8 -&gt; DBR|addr16 + Y
+<TR ALIGN=CENTER>
+<TD>
+Direct Indirect Long
+<TD>
+mnemonic [offset8]
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8 -&gt; addr24
+<TR ALIGN=CENTER>
+<TD>
+Direct Indirect Long Indexed
+<TD>
+mnemonic [offset8],Y
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8 -&gt; addr24+Y
+<TR ALIGN=CENTER>
+<TD>
+Direct X-Indexed
+<TD>
+mnemonic offset8,X
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8+X
+<TR ALIGN=CENTER>
+<TD>
+Direct Y-Indexed
+<TD>
+mnemonic offset8,Y
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8+Y
+<TR ALIGN=CENTER>
+<TD>
+Immediate 8
+<TD>
+mnemonic #val8
+<TD>
+opcode val8
+<TD>
+2
+<TD>
+n/a
+<TR ALIGN=CENTER>
+<TD>
+Immediate 16
+<TD>
+mnemonic #val16
+<TD>
+opcode &lt;val16 &gt;val16
+<TD>
+3
+<TD>
+n/a
+<TR ALIGN=CENTER>
+<TD>
+Implied
+<TD>
+mnemonic
+<TD>
+opcode
+<TD>
+1
+<TD>
+n/a
+<TR ALIGN=CENTER>
+<TD>
+Program Counter Relative
+<TD>
+mnemonic offset8
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+PBR|PC+offset8 (sign extended)
+<TR ALIGN=CENTER>
+<TD>
+Program Counter Relative Long
+<TD>
+mnemonic offset16
+<TD>
+opcode &lt;offset16 &gt;offset16
+<TD>
+3
+<TD>
+PBR|PC+offset16 (signed)
+<TR ALIGN=CENTER>
+<TD>
+Stack Absolute
+<TD>
+mnemonic addr16
+<TD>
+opcode &lt;addr16 &gt;addr16
+<TD>
+3
+<TD>
+addr16 (immediate value) =&gt; stack
+<TR ALIGN=CENTER>
+<TD>
+Stack Direct Indirect
+<TD>
+mnemonic (offset8)
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|DR+offset8 =&gt; stack
+<TR ALIGN=CENTER>
+<TD>
+Stack Program Counter Relative
+<TD>
+mnemonic offset16
+<TD>
+opcode &lt;offset16 &gt;offset16
+<TD>
+3
+<TD>
+PC+offset16 (signed) =&gt; stack
+<TR ALIGN=CENTER>
+<TD>
+Stack Relative
+<TD>
+mnemonic offset8,S
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|S+offset8
+<TR ALIGN=CENTER>
+<TD>
+Stack Relative Indirect Indexed
+<TD>
+mnemonic (offset8,S),Y
+<TD>
+opcode offset8
+<TD>
+2
+<TD>
+$00|S+offset8 -&gt; DBR|addr16+Y
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">Instruction Set Opcodes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Primary Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imm
+<TD>
+Ab
+<TD>
+AbL
+<TD>
+Dir
+<TD>
+(Dir)
+<TD>
+[Dir]
+<TD>
+Ab,X
+<TD>
+AbL,X
+<TD>
+Ab,Y
+<TD>
+Dir,X
+<TD>
+(Dir,X)
+<TD>
+(Dir),Y
+<TD>
+[Dir],Y
+<TD>
+Sr,S
+<TD>
+(Sr,S),Y
+<TR ALIGN=CENTER>
+<TD>
+ADC
+<TD>
+69
+<TD>
+6D
+<TD>
+6F
+<TD>
+65
+<TD>
+72
+<TD>
+67
+<TD>
+7D
+<TD>
+7F
+<TD>
+79
+<TD>
+75
+<TD>
+61
+<TD>
+71
+<TD>
+77
+<TD>
+63
+<TD>
+73
+<TR ALIGN=CENTER>
+<TD>
+AND
+<TD>
+29
+<TD>
+2D
+<TD>
+2F
+<TD>
+25
+<TD>
+32
+<TD>
+27
+<TD>
+3D
+<TD>
+3F
+<TD>
+39
+<TD>
+35
+<TD>
+21
+<TD>
+31
+<TD>
+37
+<TD>
+23
+<TD>
+33
+<TR ALIGN=CENTER>
+<TD>
+CMP
+<TD>
+C9
+<TD>
+CD
+<TD>
+CF
+<TD>
+C5
+<TD>
+D2
+<TD>
+C7
+<TD>
+DD
+<TD>
+DF
+<TD>
+D9
+<TD>
+D5
+<TD>
+C1
+<TD>
+D1
+<TD>
+D7
+<TD>
+C3
+<TD>
+D3
+<TR ALIGN=CENTER>
+<TD>
+EOR
+<TD>
+49
+<TD>
+4D
+<TD>
+4F
+<TD>
+45
+<TD>
+52
+<TD>
+47
+<TD>
+5D
+<TD>
+5F
+<TD>
+59
+<TD>
+55
+<TD>
+41
+<TD>
+51
+<TD>
+57
+<TD>
+43
+<TD>
+53
+<TR ALIGN=CENTER>
+<TD>
+LDA
+<TD>
+A9
+<TD>
+AD
+<TD>
+AF
+<TD>
+A5
+<TD>
+B2
+<TD>
+A7
+<TD>
+BD
+<TD>
+BF
+<TD>
+B9
+<TD>
+B5
+<TD>
+A1
+<TD>
+B1
+<TD>
+B7
+<TD>
+A3
+<TD>
+B3
+<TR ALIGN=CENTER>
+<TD>
+ORA
+<TD>
+09
+<TD>
+0D
+<TD>
+0F
+<TD>
+05
+<TD>
+12
+<TD>
+07
+<TD>
+1D
+<TD>
+1F
+<TD>
+19
+<TD>
+15
+<TD>
+01
+<TD>
+11
+<TD>
+17
+<TD>
+03
+<TD>
+13
+<TR ALIGN=CENTER>
+<TD>
+SBC
+<TD>
+E9
+<TD>
+ED
+<TD>
+EF
+<TD>
+E5
+<TD>
+F2
+<TD>
+E7
+<TD>
+FD
+<TD>
+FF
+<TD>
+F9
+<TD>
+F5
+<TD>
+E1
+<TD>
+F1
+<TD>
+F7
+<TD>
+E3
+<TD>
+F3
+<TR ALIGN=CENTER>
+<TD>
+STA
+<TD>
+-
+<TD>
+8D
+<TD>
+8F
+<TD>
+85
+<TD>
+92
+<TD>
+87
+<TD>
+9D
+<TD>
+9F
+<TD>
+99
+<TD>
+95
+<TD>
+81
+<TD>
+91
+<TD>
+97
+<TD>
+83
+<TD>
+93
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Memory Read/Write Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imm
+<TD>
+Acc
+<TD>
+Ab
+<TD>
+Dir
+<TD>
+Ab,X
+<TD>
+Dir,X
+<TD>
+Ab,Y
+<TD>
+Dir,Y
+<TD>
+BMv
+<TR ALIGN=CENTER>
+<TD>
+ASL
+<TD>
+-
+<TD>
+0A
+<TD>
+0E
+<TD>
+06
+<TD>
+1E
+<TD>
+16
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BIT
+<TD>
+89
+<TD>
+-
+<TD>
+2C
+<TD>
+24
+<TD>
+3C
+<TD>
+34
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CPX
+<TD>
+E0
+<TD>
+-
+<TD>
+EC
+<TD>
+E4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CPY
+<TD>
+C0
+<TD>
+-
+<TD>
+CC
+<TD>
+C4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+DEC
+<TD>
+-
+<TD>
+3A
+<TD>
+CE
+<TD>
+C6
+<TD>
+DE
+<TD>
+D6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+INC
+<TD>
+-
+<TD>
+1A
+<TD>
+EE
+<TD>
+E6
+<TD>
+FE
+<TD>
+F6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+LDX
+<TD>
+A2
+<TD>
+-
+<TD>
+AE
+<TD>
+A6
+<TD>
+-
+<TD>
+-
+<TD>
+BE
+<TD>
+B6
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+LDY
+<TD>
+A0
+<TD>
+-
+<TD>
+AC
+<TD>
+A4
+<TD>
+BC
+<TD>
+B4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+LSR
+<TD>
+-
+<TD>
+4A
+<TD>
+4E
+<TD>
+46
+<TD>
+5E
+<TD>
+56
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+MVN
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+54
+<TR ALIGN=CENTER>
+<TD>
+MVP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+44
+<TR ALIGN=CENTER>
+<TD>
+ROL
+<TD>
+-
+<TD>
+2A
+<TD>
+2E
+<TD>
+26
+<TD>
+3E
+<TD>
+36
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+ROR
+<TD>
+-
+<TD>
+6A
+<TD>
+6E
+<TD>
+66
+<TD>
+7E
+<TD>
+76
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+STX
+<TD>
+-
+<TD>
+-
+<TD>
+8E
+<TD>
+86
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+96
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+STY
+<TD>
+-
+<TD>
+-
+<TD>
+8C
+<TD>
+84
+<TD>
+-
+<TD>
+94
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+STZ
+<TD>
+-
+<TD>
+-
+<TD>
+9C
+<TD>
+64
+<TD>
+9E
+<TD>
+74
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TRB
+<TD>
+-
+<TD>
+-
+<TD>
+1C
+<TD>
+14
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TSB
+<TD>
+-
+<TD>
+-
+<TD>
+0C
+<TD>
+04
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Control Transfer Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+PCRel
+<TD>
+PCRL
+<TD>
+Ab
+<TD>
+(Ab)
+<TD>
+(Ab,X)
+<TD>
+AbL
+<TD>
+[AbL]
+<TD>
+Imp
+<TD>
+IRQ
+<TR ALIGN=CENTER>
+<TD>
+BCC
+<TD>
+90
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BCS
+<TD>
+B0
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BEQ
+<TD>
+F0
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BMI
+<TD>
+30
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BNE
+<TD>
+D0
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BPL
+<TD>
+10
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BRA
+<TD>
+80
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BRK
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+00
+<TR ALIGN=CENTER>
+<TD>
+BRL
+<TD>
+-
+<TD>
+82
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BVC
+<TD>
+50
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BVS
+<TD>
+70
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+COP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+02
+<TR ALIGN=CENTER>
+<TD>
+JMP
+<TD>
+-
+<TD>
+-
+<TD>
+4C
+<TD>
+6C
+<TD>
+7C
+<TD>
+5C
+<TD>
+DC
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+JSL
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+22
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+JSR
+<TD>
+-
+<TD>
+-
+<TD>
+20
+<TD>
+-
+<TD>
+FC
+<TD>
+22
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+RTI
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+40
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+RTL
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+6B
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+RTS
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+60
+<TD>
+-
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Register, Stack and Flags Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imp
+<TD>
+Imm
+<TD>
+SAb
+<TD>
+(SDir)
+<TD>
+SPCRel
+<TR ALIGN=CENTER>
+<TD>
+CLC
+<TD>
+18
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLD
+<TD>
+D8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLI
+<TD>
+58
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLV
+<TD>
+B8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PEA
+<TD>
+-
+<TD>
+-
+<TD>
+F4
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PEI
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+D4
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PER
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+62
+<TR ALIGN=CENTER>
+<TD>
+PHA
+<TD>
+48
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHB
+<TD>
+8B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHD
+<TD>
+0B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHK
+<TD>
+4B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHP
+<TD>
+08
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHX
+<TD>
+DA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHY
+<TD>
+5A
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLA
+<TD>
+68
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLB
+<TD>
+AB
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLD
+<TD>
+2B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLP
+<TD>
+28
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLX
+<TD>
+FA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLY
+<TD>
+7A
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+REP
+<TD>
+-
+<TD>
+C2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEC
+<TD>
+38
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SED
+<TD>
+F8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEI
+<TD>
+78
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEP
+<TD>
+-
+<TD>
+E2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TAX
+<TD>
+AA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TAY
+<TD>
+A8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TCD
+<TD>
+5B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TCS
+<TD>
+1B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TDC
+<TD>
+7B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TSC
+<TD>
+3B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TSX
+<TD>
+BA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXA
+<TD>
+8A
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXA
+<TD>
+9A
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXY
+<TD>
+9B
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TYA
+<TD>
+98
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TYX
+<TD>
+BB
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Miscellaneous Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imp
+<TR ALIGN=CENTER>
+<TD>
+NOP
+<TD>
+EA
+<TR ALIGN=CENTER>
+<TD>
+STP
+<TD>
+DB
+<TR ALIGN=CENTER>
+<TD>
+WAI
+<TD>
+CB
+<TR ALIGN=CENTER>
+<TD>
+WDB
+<TD>
+42
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">Instruction Set Timings</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Primary Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imm
+<TD>
+Ab
+<TD>
+AbL
+<TD>
+Dir
+<TD>
+(Dir)
+<TD>
+[Dir]
+<TD>
+Ab,X
+<TD>
+AbL,X
+<TD>
+Ab,Y
+<TD>
+Dir,X
+<TD>
+(Dir,X)
+<TD>
+(Dir),Y
+<TD>
+[Dir],Y
+<TD>
+Sr,S
+<TD>
+(Sr,S),Y
+<TD>
+Notes
+<TR ALIGN=CENTER>
+<TD>
+ADC
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+AND
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+CMP
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+EOR
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+LDA
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+ORA
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+SBC
+<TD>
+2
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+5
+<TD>
+4
+<TD>
+4
+<TD>
+6
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+STA
+<TD>
+-
+<TD>
+4
+<TD>
+5
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+5
+<TD>
+5
+<TD>
+5
+<TD>
+4
+<TD>
+6
+<TD>
+6
+<TD>
+6
+<TD>
+4
+<TD>
+7
+<TD>
+-
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+for all modes, add one cycle if P[M]=0
+<LI>
+for all direct modes, add one cycle if DL != $00
+<LI>
+1) for Ab,X, Ab,Y and (Dir),Y modes, add one cycle if indexing across page
+boundary
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Memory Read/Write Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imm
+<TD>
+Acc
+<TD>
+Ab
+<TD>
+Dir
+<TD>
+Ab,X
+<TD>
+Dir,X
+<TD>
+Ab,Y
+<TD>
+Dir,Y
+<TD>
+BMv
+<TD>
+Notes
+<TR ALIGN=CENTER>
+<TD>
+ASL
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+BIT
+<TD>
+2
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+4
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+2,4
+<TR ALIGN=CENTER>
+<TD>
+CPX
+<TD>
+2
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+CPY
+<TD>
+2
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+DEC
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+INC
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+LDX
+<TD>
+2
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+4
+<TD>
+4
+<TD>
+-
+<TD>
+3,5
+<TR ALIGN=CENTER>
+<TD>
+LDY
+<TD>
+2
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+4
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3,4
+<TR ALIGN=CENTER>
+<TD>
+LSR
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+MVN
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+7
+<TD>
+6
+<TR ALIGN=CENTER>
+<TD>
+MVP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+7
+<TD>
+6
+<TR ALIGN=CENTER>
+<TD>
+ROL
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+ROR
+<TD>
+-
+<TD>
+2
+<TD>
+6
+<TD>
+5
+<TD>
+7
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+STX
+<TD>
+-
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+4
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+STY
+<TD>
+-
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+-
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+STZ
+<TD>
+-
+<TD>
+-
+<TD>
+4
+<TD>
+3
+<TD>
+5
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+2
+<TR ALIGN=CENTER>
+<TD>
+TRB
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+5
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+TSB
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+5
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+for all direct modes, add one cycle if DL != $00
+<LI>
+1) for all modes except Acc, add two cycles if P[M]=0
+<LI>
+2) add one cycle if P[M]=0
+<LI>
+3) add one cycle if P[X]=0
+<LI>
+4) for Ab,X mode, add one cycle if indexing across a page boundary
+<LI>
+5) for Ab,Y mode, add one cycle if indexing across a page boundary
+<LI>
+6) per byte moved
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Control Transfer Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+PCRel
+<TD>
+PCRL
+<TD>
+Ab
+<TD>
+(Ab)
+<TD>
+(Ab,X)
+<TD>
+AbL
+<TD>
+[AbL]
+<TD>
+Imp
+<TD>
+IRQ
+<TD>
+Notes
+<TR ALIGN=CENTER>
+<TD>
+BCC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BCS
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BEQ
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BMI
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BNE
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BPL
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BRA
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+2
+<TR ALIGN=CENTER>
+<TD>
+BRK
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+8
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+BRL
+<TD>
+-
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+BVC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+BVS
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+1,2
+<TR ALIGN=CENTER>
+<TD>
+COP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+8
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+JMP
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TD>
+5
+<TD>
+6
+<TD>
+4
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+JSL
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+JSR
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+-
+<TD>
+8
+<TD>
+8
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+RTI
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+7
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+RTL
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+RTS
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+-
+<TD>
+-
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+1) Add one cycle if branch is taken
+<LI>
+2) Add one cycle if P[E]=1 and branch crosses page boundary
+<LI>
+3) Subtract one cycle if P[E]=1
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Register, Stack and Flags Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imp
+<TD>
+Imm
+<TD>
+SAb
+<TD>
+(SDir)
+<TD>
+SPCRel
+<TD>
+Notes
+<TR ALIGN=CENTER>
+<TD>
+CLC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLD
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLI
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+CLV
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PEA
+<TD>
+-
+<TD>
+-
+<TD>
+5
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PEI
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+-
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+PER
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+6
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHA
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+2
+<TR ALIGN=CENTER>
+<TD>
+PHB
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHD
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHK
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHP
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PHX
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+PHY
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+PLA
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+2
+<TR ALIGN=CENTER>
+<TD>
+PLB
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLD
+<TD>
+5
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLP
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+PLX
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+PLY
+<TD>
+4
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+3
+<TR ALIGN=CENTER>
+<TD>
+REP
+<TD>
+-
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SED
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEI
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+SEP
+<TD>
+-
+<TD>
+3
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TAX
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TAY
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TCD
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TCS
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TDC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TSC
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TSX
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXA
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXA
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TXY
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TYA
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+TYX
+<TD>
+2
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+1) Add one cycle if DL != $00
+<LI>
+2) Add one cycle if P[M]=0
+<LI>
+3) Add one cycle if P[X]=0
+</UL>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Miscellaneous Group</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+-
+<TD>
+Imp
+<TD>
+Notes
+<TR ALIGN=CENTER>
+<TD>
+NOP
+<TD>
+2
+<TD>
+-
+<TR ALIGN=CENTER>
+<TD>
+STP
+<TD>
+3
+<TD>
+1
+<TR ALIGN=CENTER>
+<TD>
+WAI
+<TD>
+3
+<TD>
+2
+<TR ALIGN=CENTER>
+<TD>
+WDB
+<TD>
+*
+<TD>
+3
+</TABLE>
+<P>
+Notes:
+<UL>
+<LI>
+1) 3 cycles to shut down; additional cycles required by RESET to restart
+<LI>
+2) 3 cycles to shut down; additional cycles required by IRQ to restart
+<LI>
+3) cycle counts subject to change in future processors
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:59 2013</EM>
+</BODY>
+</HTML>

@@ -1,0 +1,462 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Motorola SRecord Output Files</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Motorola SRecord Output Files</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l06">Scope of This Document</A>
+<LI><A HREF="#l05">Related Resources</A>
+<LI><A HREF="#l03">Motorola Hexadecimal Object File Format</A>
+<UL>
+<LI><A HREF="#l04">Non-Standard Byte Sizes</A>
+</UL>
+<LI><A HREF="#l02">HXA Implementation Notes</A>
+<LI><A HREF="#l01">ASSUME and Motorola Hexadecimal Files</A>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This document briefly describes the Motorola Hexadecimal Object File format
+and its HXA implementation.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA
+<UL>
+<LI>
+<A HREF="hxa.htm">Main Documentation</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Motorola Hexadecimal Object File Format</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The Motorola Hexadecimal Object file format is an
+ASCII text representation of an absolute memory image.
+<P>
+Each line of the file represents a single record consisting of
+up to six fields:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Motorola Hexadecimal Record</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Record Mark
+<TD>
+Record Type
+<TD>
+Record Length
+<TD>
+Load Address
+<TD>
+Data
+<TD>
+Checksum
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Record Fields (in sequence)</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Chars</STRONG>
+<TD>
+<STRONG>Description</STRONG>
+<TD>
+<STRONG>Additional Notes</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+Record Mark
+<TD>
+1
+<TD>
+always 'S'
+<TD>
+ASCII $53
+<TR ALIGN=CENTER>
+<TD>
+Record Type
+<TD>
+1
+<TD>
+one of nine record types
+<TD>
+'0' to '9' (except '4')
+<TR ALIGN=CENTER>
+<TD>
+Record Length
+<TD>
+2
+<TD>
+byte length of all following fields
+<TR ALIGN=CENTER>
+<TD>
+Load Address
+<TD>
+4 to 8
+<TD>
+absolute load address of record
+<TD>
+zero if not used
+<TR ALIGN=CENTER>
+<TD>
+Data
+<TD>
+2*#bytes
+<TD>
+data bytes
+<TD>
+not used for types S5-S9
+<TR ALIGN=CENTER>
+<TD>
+Checksum
+<TD>
+2
+<TD>
+One's complement of ((byte sum of count+address+data) & $FF)
+</TABLE>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Record Types</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Type</STRONG>
+<TD>
+<STRONG>Meaning</STRONG>
+<TD>
+<STRONG>Load Address Field</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+0
+<TD>
+Header
+<TD>
+always '0000'
+<TR ALIGN=CENTER>
+<TD>
+1
+<TD>
+Data
+<TD>
+16 bits (2 chars)
+<TR ALIGN=CENTER>
+<TD>
+2
+<TD>
+Data
+<TD>
+24 bits (3 chars)
+<TR ALIGN=CENTER>
+<TD>
+3
+<TD>
+Data
+<TD>
+32 bits (4 chars)
+<TR ALIGN=CENTER>
+<TD>
+5
+<TD>
+Record Count
+<TD>
+16 bits (2 chars)
+<TR ALIGN=CENTER>
+<TD>
+6
+<TD>
+Record Count
+<TD>
+24 bits (3 chars)
+<TR ALIGN=CENTER>
+<TD>
+7
+<TD>
+Start Address
+<TD>
+32 bits (4 chars)
+<TR ALIGN=CENTER>
+<TD>
+8
+<TD>
+Start Address
+<TD>
+24 bits (3 chars)
+<TR ALIGN=CENTER>
+<TD>
+9
+<TD>
+Start Address
+<TD>
+16 bits (2 chars)
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Non-Standard Byte Sizes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The Motorola Hexadecimal Object Format is modified in a non-standard
+way if the size of a "byte" is 16- or 32-bits.
+<P>
+16-Bit Bytes
+<UL>
+<LI>
+the 'Record Mark' is always 'T' (ASCII $54)
+<LI>
+the 'Record Length' is always octet-correct
+<LI>
+the 'Load Address' is always byte-correct
+<LI>
+the number of data characters is 4*#bytes (up to 128 characters)
+</UL>
+<P>
+32-Bit Bytes
+<UL>
+<LI>
+the 'Record Mark' is always 'U' (ASCII $55)
+<LI>
+the 'Record Length' is always octet-correct
+<LI>
+the 'Load Address' is always byte-correct
+<LI>
+the number of data characters is 8*#bytes (up to 256 characters)
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">HXA Implementation Notes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Default Motorola Output Record Sequence</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Header</STRONG>
+<TD>
+<STRONG>Data</STRONG>
+<TD>
+<STRONG>Count</STRONG>
+<TD>
+<STRONG>Start Address</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+S0
+<TD>
+S[123]
+<TD>
+S[56]
+<TD>
+S[789]
+</TABLE>
+<P>
+Records appear in the order Header-&gt;Data-&gt;Count-&gt;Start Address.
+<P>
+Data records are the only type that can appear more than once
+in an output file.
+<P>
+Count records sum the number of Data records output.
+If less than 64K data records are output this will be an 'S5' record,
+otherwise it will be an 'S6' record.
+<P>
+Start Address records use a start address of zero if none has been supplied.
+To create a non-zero start address, place an expression representing
+it following the 
+<A HREF="hxa.htm#l5a">"END"</A>
+ pseudo op.
+Note that any such expression is always evaluated (and range checked),
+even if the output of start address records is suppressed.
+<P>
+HXA outputs record types based on program counter widths.
+Because the program counter width is fixed, certain Data and Start Address
+record types are always paired:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Paired Record Types in Output Files</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Program Counter Width</STRONG>
+<TD>
+<STRONG>Paired</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+08 - 16
+<TD>
+S1 and S9
+<TR ALIGN=CENTER>
+<TD>
+17 - 24
+<TD>
+S2 and S8
+<TR ALIGN=CENTER>
+<TD>
+25 - 32
+<TD>
+S3 and S7
+</TABLE>
+<P>
+HXA also uses the program counter width to choose an output filename.
+If no output filename has been specified, HXA replaces the filename
+extension of the first source file with one of 'S19', 'S28' or 'S37'.
+The filename extension of the output file matches the
+paired record types it contains.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">ASSUME and Motorola Hexadecimal Files</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The 
+<A HREF="hxa.htm#l53">"ASSUME"</A>
+ pseudo opcode can be used to override
+some default output choices.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Motorola Hexadecimal Object File Overrides</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>ASSUME</STRONG>
+<TD>
+<STRONG>Means</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+srecfile:s19
+<TD>
+16-bit address records
+<TR ALIGN=CENTER>
+<TD>
+srecfile:s28
+<TD>
+24-bit address records
+<TR ALIGN=CENTER>
+<TD>
+srecfile:s37
+<TD>
+32-bit address records
+<TR ALIGN=CENTER>
+<TD>
+srecfile:noheader
+<TD>
+supress 'S0' record
+<TR ALIGN=CENTER>
+<TD>
+srecfile:nocount
+<TD>
+supress 'S[56]' record
+<TR ALIGN=CENTER>
+<TD>
+hexdatasize:[8-32]
+<TD>
+data bytes per record
+</TABLE>
+<P>
+These may be used at any point in the source file(s).
+<P>
+Forcing a particular address size of output records can be done only once.
+The same size request can be repeated, but any attempt to change
+it again to a different size generates a warning and the request is ignored.
+<P>
+When 
+<EM>SRECFILE</EM>
+ is used to force a particular address size,
+HXA limits the maximum program counter value to the address size maximum
+or the original program counter maximum, whichever is less.
+<P>
+If the new maximum program counter value is less than the original
+program counter maximum, HXA verifies than any data already generated
+fits under the new maximum.
+If an out-of-range value is discovered, the error is reported as belonging
+to the 
+<EM>SRECFILE</EM>
+ line which lowered the limit.
+It is therefore best to make this forcing as soon as possible in the
+source code, 
+so that any range errors reported accurately reflect the source lines they
+actually occurred on.
+<P>
+<EM>HEXDATASIZE</EM>
+ is different from 
+<EM>SRECFILE</EM>
+ in that its argument is
+an expression, not a literal.
+The default value is 16, so each data-containing record has at most
+16 data bytes (partial records are possible).
+<P>
+The number of data bytes per output record can be set anywhere from
+eight to 32 inclusive.
+Once set the value cannot be re-set to another value, although the
+same value can be repeated as often as desired.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:46 2013</EM>
+</BODY>
+</HTML>

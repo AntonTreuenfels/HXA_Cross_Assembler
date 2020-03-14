@@ -1,0 +1,1646 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Hobby Cross Assembler 65</TITLE>
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+<CENTER>
+<H2>Hobby Cross Assembler 65</H2>
+</CENTER>
+<P><HR WIDTH=50%>
+<P>
+Copyright (C) 2004-2013 by Anton Treuenfels
+<P>
+<UL>
+<LI><A HREF="#l0f">License and Terms</A>
+<LI><A HREF="#l07">Contact Information</A>
+<LI><A HREF="#l14">Scope of This Document</A>
+<LI><A HREF="#l12">Related Resources</A>
+<LI><A HREF="#l09">Hardware and Software Requirements</A>
+<LI><A HREF="#l08">Executing HXA65</A>
+<LI><A HREF="#l11">Predefined Label</A>
+<LI><A HREF="#l13">Reserved Labels</A>
+<LI><A HREF="#l0a">HXA65 Notes</A>
+<UL>
+<LI><A HREF="#l0b">Accumulator Address Mode</A>
+<LI><A HREF="#l0e">Zero Page Addressing</A>
+<LI><A HREF="#l0d">Alternate Instruction Mnemonics</A>
+<LI><A HREF="#l0c">Alternate Address Modes</A>
+</UL>
+<LI><A HREF="#l01">ASSUME Pseudo Opcode</A>
+<UL>
+<LI><A HREF="#l04">Forced Address Mode</A>
+<LI><A HREF="#l05">Register Sizes (W65C816S Only)</A>
+<LI><A HREF="#l06">Zero Page Location</A>
+<LI><A HREF="#l03">Direct Page Location (W65C816S Only)</A>
+<LI><A HREF="#l02">Data Bank Location (W65C816S Only)</A>
+</UL>
+<LI><A HREF="#l10">Microprocessor Compatibility Issues</A>
+</UL>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0f">License and Terms</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+<P>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+<P>
+You should have received a copy of the
+<A HREF="license.gpl">GNU General Public License</A>
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l07">Contact Information</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Snail mail
+<UL>
+<LI>
+Anton Treuenfels
+<LI>
+5248 Horizon Dr
+<LI>
+Fridley MN 55421
+</UL>
+<P>
+E-mail
+<UL>
+<LI>
+<A HREF="mailto:hxa@earthlink.net">hxa@earthlink.net</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l14">Scope of This Document</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+This document briefly describes the portions of the
+HXA65 variant of HXA which are specific to the
+6502-family microprocessors it supports.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l12">Related Resources</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA
+<UL>
+<LI>
+<A HREF="hxa.htm">Main Documentation</A>
+</UL>
+<P>
+HXA65
+<UL>
+<LI>
+<A HREF="hxa_p65x.htm">6502 Family Processor Tests</A>
+<LI>
+<A HREF="hxa_d65x.htm">6502 Family Processor Demos</A>
+<LI>
+<A HREF="../source/a_ins65x.awk">Module Source</A>
+ : customization of HXA
+to create HXA65
+</UL>
+<P>
+Microprocessors Supported by HXA65
+<UL>
+<LI>
+<A HREF="p6502.htm">6502</A>
+ - also variants such as 6510 and 8502
+<LI>
+<A HREF="p65c02.htm">65C02</A>
+<LI>
+<A HREF="pr65c02.htm">R65C02</A>
+<LI>
+<A HREF="pw65c02s.htm">W65C02S</A>
+<LI>
+<A HREF="pw65c816.htm">W65C816S</A>
+</UL>
+<P>
+Additional Programming Information
+<UL>
+<LI>
+<A HREF="http://www.6502.org">//www.6502.org</A>
+</UL>
+<P>
+Additional Hardware Information
+<UL>
+<LI>
+<A HREF="http://www.westerndesigncenter.com">//www.westerndesigncenter.com</A>
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l09">Hardware and Software Requirements</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA for Windows
+<UL>
+<LI>
+Win 95 or higher (tested on Win98SE, WinME, WinVista 64-bit)
+<LI>
+execute at Command Line Interface (MS-DOS prompt)
+</UL>
+<P>
+HXA for MS-DOS
+<UL>
+<LI>
+PC compatible (floating point unit used if available)
+<LI>
+512 KB or more memory (extended or expanded memory used if available)
+<LI>
+MS-DOS 2.1 or higher
+</UL>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l08">Executing HXA65</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA65 accepts a single filename as a command-line argument:
+<P>
+<CODE>
+<STRONG>HXA65</STRONG>
+<EM>filename</EM>
+</CODE>
+<P>
+There are no other command-line arguments, options or switches.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l11">Predefined Label</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+In addition to the 
+<A HREF="hxa.htm#l3a">__HXA__</A>
+ built-in label defined
+by all HXA variants, HXA65 defines a variant identifier label:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Name</STRONG>
+<TD>
+<STRONG>Value</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+__HXA65__
+<TD>
+TRUE
+</TABLE>
+<P>
+This label may be used anywhere but is intended mainly
+for &lt;hxa:IF--DEF|"IFDEF"&gt; conditional blocks.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l13">Reserved Labels</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The register names 
+<STRONG>A\, S\, X and Y</STRONG>
+ are reserved and cannot be assigned
+values.
+<P>
+While determing instruction mnemonic address modes HXA65 notes their
+presence or absence in the expression field, but not their values.
+If they are referenced outside the context of an instruction mnemonic
+they have a value of TRUE.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0a">HXA65 Notes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0b">Accumulator Address Mode</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+In official useage this mode is indicated by a single
+literal character 'A' in the expression field.
+A blank expression field officially indicates 
+<EM>implied</EM>
+ address mode.
+<P>
+However no instruction which allows implied addressing also
+allows accumulator addressing, and vice-versa.
+Therefore use of the single character 'A' in the expression field is
+optional, and it may be left blank if desired.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0e">Zero Page Addressing</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Many 6502-family instructions have both absolute and zero page forms.
+In object code the zero page form is usually shorter and faster
+than the absolute form, but in source code both forms look alike.
+<P>
+HXA65 normally assembles the zero page form only if during pass one
+the operand address is calculated to be in the range $0000 to $00FF.
+If the expression that represents the operand address cannot be resolved
+during pass one or is greater than $00FF, HXA65 assembles the absolute form.
+<P>
+For timing or size purposes it can occasionally be desirable to override
+HXA65's automatic selection of zero page mode.
+<A HREF=".htm#l00">Forced address mode</A>
+ can be used to
+force absolute mode on an otherwise zero page address
+(and vice-versa, though this is rarer).
+<P>
+On some systems and some processors it is possible to change the default
+location of zero page (or "direct page").
+HXA65 can adapt to this using the ASSUME psuedo opcode (below).
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0d">Alternate Instruction Mnemonics</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA65 accepts several aliases recommended by Western Design Center
+for standard instruction mnemonics:
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TR ALIGN=CENTER>
+<TD>
+Standard
+<TD>
+Alias
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+BCC
+<TD>
+BLT
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+BCS
+<TD>
+BGE
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+DEC A
+<TD>
+DEA
+<TD>
+-
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+INC A
+<TD>
+INA
+<TD>
+-
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+JSL
+<TD>
+JSR
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+JML
+<TD>
+JMP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+TCD
+<TD>
+TAD
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+TCS
+<TD>
+TAS
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+TDC
+<TD>
+TDA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+TSC
+<TD>
+TSA
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+XBA
+<TD>
+SWP
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l0c">Alternate Address Modes</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+HXA65 accepts additional address modes for several standard instruction
+mnemonics.
+These generate exactly the same object code as the standard mnemonics.
+They are intended mainly to make some tasks easier or to make the
+sometimes-odd W65C816S standard syntax more closely resemble that of the
+other supported microprocessors.
+Note that these extensions are 
+<EM>not</EM>
+ portable.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>BRK Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+BRK #12
+<TD>
+immediate
+<TD>
+extended
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+BRK
+<TD>
+implied
+<TD>
+standard
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+BRK $12
+<TD>
+zero page
+<TD>
+extended
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+</TABLE>
+<P>
+The BRK instruction occupies one byte of object code and accepts no
+arguments, but executing it actually advances the program counter by
+two bytes before it is stored on the stack and control transferred to
+the software interrupt service (IRQ) routine.
+When the IRQ routine returns, execution resumes at the second byte
+past the BRK instruction.
+<P>
+It is possible for the IRQ routine to retrieve the stored program counter
+from the stack, use it to examine the skipped ("signature") byte, and make
+a control branch based on that examination.
+<P>
+The HXA65 extensions are designed to make it easier to specify the
+value of the signature byte.
+The zero page mode is designed to make the instruction resemble the
+standard W65C816S COP instruction syntax.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>COP Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+COP #12
+<TD>
+immediate
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+COP $12
+<TD>
+zero page
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+The Western Design Center standard requires the COP instruction to be
+followed by a zero page address operand (ie., a "signature" byte).
+<P>
+However whether a co-processor uses the value 
+<EM>at</EM>
+ the zero page address
+(as implied by the syntax) or the value 
+<EM>of</EM>
+ the zero page address
+(ie., as an immediate value) is ambiguous.
+<P>
+HXA65 allows both forms.
+<P>
+Also note COP signatures $80-$FF are reserved, while signatures $00-$7F
+are available for user definition.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>JML Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+JML ($1234)
+<TD>
+absolute indirect
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+JML $123456
+<TD>
+long absolute
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+The W65C816S JML "jump long" instruction officially has only
+one address mode, absolute indirect.
+<P>
+The JMP "jump" instruction officially is assigned the long absolute
+address mode.
+However this causes a problem for HXA65 when dealing with long forward
+jumps.
+Any forward reference means the destination address cannot be resolved
+during pass one.
+Therefore HXA65 will generate the official default address mode,
+which is absolute rather than long.
+<P>
+In fact it is officially impossible to use the JMP mnemonic to create
+a long forward jump without also either using 
+<A HREF="#l04">forced address mode</A>
+ or
+pre-defining the destination address via an 
+<A HREF="hxa.htm#l5b">equate</A>
+.
+<P>
+Alternatively HXA allows the JML instruction be used for the same purpose.
+If the operand of the JML instruction is not indirect (ie., surrounded
+by balanced parentheses), HXA65 will generate a "JMP long absolute" opcode.
+<P>
+This may be the safer option if there is any possibility at all of
+confusing a 
+<EM>program</EM>
+ bank address with a 
+<EM>data</EM>
+ bank address.
+HXA65 always generates a 16-bit address rather than a 24-bit address
+if it thinks the address is in the data bank, but a 16-bit JMP generates
+its 24-bit effective address using the program bank.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>JSR Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+JSR $1234
+<TD>
+absolute
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+JSR ($1234,X)
+<TD>
+absolute X-indexed indirect
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+JSR $123456
+<TD>
+long absolute
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+Officially only the JSL "jump to subroutine long" instruction permits
+(and requires) the "long absolute" address mode.
+HXA65 will automatically generate a "JSL long absolute" opcode if it
+recognizes during the first pass that the operand of a JSR instruction
+represents a long (greater than 16-bit) address.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>PEA Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+PEA #1234
+<TD>
+immediate
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+PEA $1234
+<TD>
+absolute
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+The Western Design Center standard requires the PEA instruction to be
+followed by an absolute address operand.
+<P>
+However the PEA instruction pushes the value 
+<EM>of</EM>
+ the address onto the
+stack, rather than the value 
+<EM>at</EM>
+ the address.
+That is, the operand value is actually used as an immediate value, rather
+than the address value implied by the standard syntax.
+<P>
+HXA65 therefore also allows immediate addressing with the PEA mnemonic
+to better reflect what actually happens.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>PEI Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+PEI $12
+<TD>
+direct
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+PEI ($12)
+<TD>
+direct indirect
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+The Western Design Center standard requires the PEI instruction to be
+followed by a direct indirect address operand ("direct" is the same as
+"zero page" on the other processors).
+<P>
+However there is no actual indirection involved.
+The PEI instruction simply pushes the value stored at the
+direct address onto the stack.
+That is, the operand is not treated as an address which holds the
+effective address of the actual value (a "pointer" to the effective address),
+but as the effective address itself.
+<P>
+HXA65 therefore also allows direct addressing with the PEI mnemonic
+to better reflect what actually happens.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>WDM Mnemonic</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Syntax
+<TD>
+Mode
+<TD>
+Type
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+WDM #12
+<TD>
+immediate
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+WDM
+<TD>
+implied
+<TD>
+standard
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+WDM $12
+<TD>
+zero page
+<TD>
+extended
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+</TABLE>
+<P>
+Although the WDM instruction is reserved and currently acts as a NOP,
+any possible future instruction extensions will require WDM to be
+followed by a "signature" byte (WDM thus acting as an "escape" instruction).
+<P>
+HXA allows this presumed signature byte to be specified as an immediate or
+zero page address operand.
+The zero page mode is designed to make the instruction resemble the
+standard W65C816S COP instruction syntax.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l01">ASSUME Pseudo Opcode</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The ASSUME pseudo opcode must be followed by a string argument.
+The recognized arguments vary with the microprocessor in use.
+If no argument is recognized, an error is reported.
+<P>
+Note the case of the argument is ignored.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l04">Forced Address Mode</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+Forced address mode permits the programmer to override the address mode
+which would otherwise be selected by HXA65.
+In general, zero page instructions can be forced to absolute,
+and vice versa, on all supported microprocessors.
+In the case of the W65C816S, long instructions can also
+be forced.
+<P>
+When address forcing is applied HXA does not perform any range-checking
+on the expression following the instruction.
+A result larger than will fit in the allowed space is silently truncated
+instead of causing an error.
+Forcing the same address mode as HXA65 would itself select thus has the
+effect of preventing any potential operand size error.
+<P>
+Address forcing preserves register indexing if present.
+For example, forcing zero page X-indexed to absolute X-indexed is
+legal if the instruction allows both forms.
+<P>
+Note that in cases where multiple address modes are possible, HXA65
+defaults to choosing absolute mode (two byte operands) whenever it cannot
+resolve the associated expression on the first pass (ie., the expression
+contains a forward reference).
+Address forcing can be used in these cases to provide a "hint" as to the
+correct size to choose.
+<P>
+Address forcing applies for only a single instruction source code line.
+It must be applied to every instruction for which forcing is desired.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Forced Address Mode</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Argument String
+<TD>
+6502
+<TD>
+65C02
+<TD>
+R65C02
+<TD>
+W65C02S
+<TD>
+W65C816S
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>addr:absolute</STRONG>
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>addr:direct</STRONG>
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>addr:long</STRONG>
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+-
+<TD>
+Y
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>addr:zeropage</STRONG>
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+<TD>
+Y
+</TABLE>
+<P>
+Note all four force modes are available only in the case of the W65C816S.
+There are actually only three force modes, as ADDR:DIRECT
+and ADDR:ZEROPAGE are synonyms and have the same effect.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l05">Register Sizes (W65C816S Only)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+At startup the W65C816S microprocessor is in 8-bit emulator mode.
+When programmatically switched to 16-bit native mode, the sizes of
+the accumulator and index registers can be controlled by manipulating
+two bits in the status register.
+One bit ("M") controls the accumulator size and the other ("X")
+controls the X- and Y-index register sizes.
+<P>
+In general this doesn't matter to HXA65, as the object code produced
+doesn't change - except in the case of immediate address mode.
+HXA65 must store an immediate value as either 8- or 16-bits, but
+doesn't itself know which is appropriate at any given time.
+Therefore HXA65 uses the ASSUME pseudo opcode to allow the progammer
+to tell it which size to use.
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<CAPTION>Register Size</CAPTION>
+<TR ALIGN=CENTER>
+<TD>
+Argument String
+<TD>
+Immediate Mode Meaning
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>accum:8</STRONG>
+<TD>
+Accumulator is 8 Bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>accum:16</STRONG>
+<TD>
+Accumulator is 16 Bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>index:8</STRONG>
+<TD>
+X- and Y-Registers are 8 Bits
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>index:16</STRONG>
+<TD>
+X- and Y-Registers are 16 Bits
+</TABLE>
+<P>
+The default sizes are eight bits for both accumulator and index registers
+(equivalent to ACCUM:8 and INDEX:8, and the same as the default
+state of the microprocessor).
+It is up to the programmer to keep HXA65 in sync with the state of the
+status register bits.
+<P>
+The size value following ACCUM: or INDEX: may be any numeric expression
+that evaluates to eight or sixteen.
+Any other value causes an error and the current size remains unchanged.
+<P>
+There are some instructions which allow immediate addressing but do not
+involve the accumulator or index registers
+(eg., the REP and SEP instructions which affect status register bits).
+These always remain the same size regardless of any register size
+manipulations, whether by ASSUME pseudo opcodes during assembly or
+by status register changes during execution.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l06">Zero Page Location</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The default location of zero page on all supported processors is page zero,
+$0000-&gt;$00FF.
+However some processors and some systems with memory management chips allow
+changing the location of zero page.
+<P>
+The ZEROPAGE:expr assumption allows the programmer to inform HXA65 that
+the location of zero page has changed.
+<P>
+<EM>Expr</EM>
+ may be any numeric expression which results in an value in the range
+$00-&gt;$FF.
+It is treated as the page number of "zero page"
+(so if "expr" = "$xx", "zero page" is located at $xx00-&gt;$xxFF).
+<P>
+If an instruction allows multiple possible modes, zero page addressing
+will be chosen if the high byte of the expression matches this page number.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l03">Direct Page Location (W65C816S Only)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The default location of the direct page on the W65C816S is page zero in bank
+zero, $00:0000-&gt;$00:00FF.
+However this may be set to any bank zero location in the range
+$00:0000-&gt;$00:FF00.
+<P>
+The DIRECTPAGE:expr assumption allows the programmer to inform HXA65 that
+the location of the direct page has changed.
+<P>
+<EM>Expr</EM>
+ may be any numeric expression which results in a value in the range
+$0000-&gt;$FF00.
+It is treated as the base address of the direct page
+(so if "expr" = "$xxxx", the direct page is located at
+$00:xxxx-&gt;$00:xxxx+$FF).
+Direct addresses are specified as an offset from this base address.
+<P>
+If an instruction allows multiple possible modes, direct page addressing will
+be chosen if the direct page base &lt;= expression &lt; direct page base + 256.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=25%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l02">Data Bank Location (W65C816S Only)</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+The default location of the data bank on the W65C816S is bank zero.
+$00:0000-&gt;$00:FFFF.
+However this may be changed to any bank in the range $00-&gt;$FF.
+<P>
+The DATABANK:expr assumption allows the programmer to inform HXA65 that
+the location of the data bank has changed.
+<P>
+<EM>Expr</EM>
+ may be any numeric expression which results in an value in the range
+$00-&gt;$FF.
+It is treated as the data bank number
+(so if "expr" = "$xx", the data bank is located at $xx:0000-&gt;$xx:FFFF).
+<P>
+Every data address that is specified as a 16-bit absolute address is
+automatically extended to 24 bits using the data bank byte.
+If an instruction allows multiple possible modes, absolute addressing will
+be chosen if the bank byte of the expression matches the data bank number.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P>
+<P><HR WIDTH=50%>
+<P>
+<CENTER>
+<STRONG>
+<BIG>
+<A NAME="l10">Microprocessor Compatibility Issues</A>
+</BIG>
+</STRONG>
+</CENTER>
+<P>
+<TABLE ALIGN=CENTER BORDER=1 CELLPADDING=2>
+<TR ALIGN=CENTER>
+<TD>
+<STRONG>Issue</STRONG>
+<TD>
+<STRONG>6502</STRONG>
+<TD>
+<STRONG>65C02/R65C02/W65C02S</STRONG>
+<TD>
+<STRONG>W65C816S</STRONG>
+<TR ALIGN=CENTER>
+<TD>
+Stack Placement
+<TD>
+Page 1 / 8 Bits
+<TD>
+Page 1 / 8 Bits
+<TD>
+Page 1 / 8 Bits (E=1); Bank 1 / 16 Bits (E=0)
+<TR ALIGN=CENTER>
+<TD>
+Zero Page,X and Zero Page,Y Addressing
+<TD>
+Always Page 0
+<TD>
+Always Page 0
+<TD>
+Always Page 0 (E=1); Cross Page (E=0)
+<TR ALIGN=CENTER>
+<TD>
+Accumulator Size
+<TD>
+8 Bits
+<TD>
+8 Bits
+<TD>
+8 Bits (M=1); 16 Bits (M=0)
+<TR ALIGN=CENTER>
+<TD>
+X- and Y-Index Register Size
+<TD>
+8 Bits
+<TD>
+8 Bits
+<TD>
+8 Bits (X=1); 16 Bits (X=0)
+<TR ALIGN=CENTER>
+<TD>
+Status (P) Register N+V+D Flags in Decimal Mode
+<TD>
+invalid
+<TD>
+valid
+<TD>
+valid
+<TR ALIGN=CENTER>
+<TD>
+Status (P) Register D-Flag After Reset/Interrupt
+<TD>
+unknown/not modified
+<TD>
+clear/clear
+<TD>
+clear/clear
+<TR ALIGN=CENTER>
+<TD>
+Decimal Mode
+<TD>
+no additional cycle
+<TD>
+add one cycle
+<TD>
+no additional cycle
+<TR ALIGN=CENTER>
+<TD>
+Absolute,X Addressing w/ ASL+LSR+ROR+ROL and No Page Crossing
+<TD>
+7 cycles
+<TD>
+6 cycles
+<TD>
+7 cycles
+<TR ALIGN=CENTER>
+<TD>
+Jump Indirect Addressing with $xxFF Operand
+<TD>
+5 cycles/invalid page crossing
+<TD>
+6 cycles
+<TD>
+5 cycles
+<TR ALIGN=CENTER>
+<TD>
+Branch Across Page Boundary
+<TD>
+4 cycles
+<TD>
+4 cycles
+<TD>
+4 cycles (E=1); 3 cycles (E=0)
+<TR ALIGN=CENTER>
+<TD>
+Unused Op Codes
+<TD>
+unknown/some hang processor
+<TD>
+all NOPs
+<TD>
+only WDM (reserved; performs NOP)
+<TR ALIGN=CENTER>
+<TD>
+BRK Vector Location
+<TD>
+$FFFE/F
+<TD>
+$FFFE/F
+<TD>
+$00FFFE/F (E=1); $00FFE6/7 (E=0)
+<TR ALIGN=CENTER>
+<TD>
+B-Flag on Stack After Software Break
+<TD>
+set
+<TD>
+set
+<TD>
+set (E=1); replaced by X-Flag status (E=0)
+<TR ALIGN=CENTER>
+<TD>
+Program Bank Register (PBR) Pushed and Pulled by Interrupts+RTI
+<TD>
+n/a
+<TD>
+n/a
+<TD>
+No (E=1); Yes (E=0)
+<TR ALIGN=CENTER>
+<TD>
+Program Bank Register (PBR) Value After Reset or Interrupt
+<TD>
+n/a
+<TD>
+n/a
+<TD>
+=$00
+<TR ALIGN=CENTER>
+<TD>
+Absolute,X/Absolute,Y/(Indirect),Y Addressing Across Page Boundary
+<TD>
+extra read of invalid address
+<TD>
+extra read of last instruction
+<TD>
+extra read of invalid address
+<TR ALIGN=CENTER>
+<TD>
+Memory Lock Signal =0 During Read+Modify+Write
+<TD>
+n/a
+<TD>
+during Modify+Write
+<TD>
+during Read+Modify+Write
+<TR ALIGN=CENTER>
+<TD>
+Read/Write Signal =0 During Read+Modify+Write
+<TD>
+during Modify+Write
+<TD>
+during Write
+<TD>
+during Modify+Write (E=1); during Write (E=0)
+<TR ALIGN=CENTER>
+<TD>
+RDY Pulled During Write Cycle
+<TD>
+ignored
+<TD>
+processor stops
+<TD>
+processor stops
+<TR ALIGN=CENTER>
+<TD>
+Pin 7
+<TD>
+SYNC
+<TD>
+SYNC
+<TD>
+VPA
+</TABLE>
+<P>
+This table is based on Western Design Center references.
+<P>
+<CENTER>
+<A HREF="#top">Page Top</A>
+</CENTER>
+<P><HR WIDTH=50%>
+<EM>Last revised: Tue Sep 17 11:22:44 2013</EM>
+</BODY>
+</HTML>
