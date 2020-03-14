@@ -1,0 +1,149 @@
+; Hobby Cross-Assembler Error Test 035g
+; Expressions\Numeric Literals
+; warn: out of range numbers (signed integers more than 32 bits in size)
+
+; by Anton Treuenfels
+
+; first created: 07/09/03
+; last revised:  06/01/13
+
+; warning(s): 0
+
+; error(s): 48
+; - out of range
+; - greater than max
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+        .maxerr 200         ; raise default limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; binary numbers (Motorola format)
+
+                ;---!---!---!---!---!---!---!---!---!---!
+
+        .long   %01111111111111111111111111111111           ; 31 bits
+        .long   %101111111111111111111111111111111          ; 33 bits
+        .long   %1011111111111111111111111111111111111111   ; 40 bits
+
+        .long   %10000000000000000000000000000000           ; 32 bits
+        .long   %100000000000000000000000000000000          ; 33 bits
+        .long   %1000000000000000000000000000000000000000   ; 40 bits
+
+        .long   %11111111111111111111111111111111           ; 32 bits
+        .long   %111111111111111111111111111111111          ; 33 bits
+        .long   %1111111111111111111111111111111111111111   ; 40 bits
+
+; binary numbers (Intel format)
+
+                ;---!---!---!---!---!---!---!---!---!---!
+
+        .long   01111111111111111111111111111111b           ; 31 bits
+        .long   101111111111111111111111111111111b          ; 33 bits
+        .long   1011111111111111111111111111111111111111b   ; 40 bits
+
+        .long   10000000000000000000000000000000b           ; 32 bits
+        .long   100000000000000000000000000000000b          ; 33 bits
+        .long   1000000000000000000000000000000000000000b   ; 40 bits
+
+        .long   11111111111111111111111111111111B           ; 32 bits
+        .long   111111111111111111111111111111111B          ; 33 bits
+        .long   1111111111111111111111111111111111111111B   ; 40 bits
+
+; binary numbers (unofficial C format)
+
+                ;---!---!---!---!---!---!---!---!---!---!
+
+        .long   0B01111111111111111111111111111111          ; 31 bits
+        .long   0B101111111111111111111111111111111         ; 33 bits
+        .long   0B1011111111111111111111111111111111111111  ; 40 bits
+
+        .long   0B10000000000000000000000000000000          ; 32 bits
+        .long   0B100000000000000000000000000000000         ; 33 bits
+        .long   0B1000000000000000000000000000000000000000  ; 40 bits
+
+        .long   0B11111111111111111111111111111111          ; 32 bits
+        .long   0B111111111111111111111111111111111         ; 33 bits
+        .long   0B1111111111111111111111111111111111111111  ; 40 bits
+
+; decimal numbers (Motorla format)
+
+        .long 2147483647    ; 31 bits
+        .long 6442450943    ; 33 bits
+        .long 16442450943   ; ...more bits
+        
+        .long 2147483648    ; 32 bits
+        .long 4294967296    ; 33 bits
+        .long 14294967296   ; ...more bits
+
+        .long 4294967295    ; 32 bits
+        .long 8589934591    ; 33 bits
+        .long 18589934591   ; ...more bits
+
+; decimal numbers (Intel format (optional))
+
+        .long 2147483647d   ; 31 bits
+        .long 6442450943d   ; 33 bits
+        .long 16442450943d  ; ...more bits
+        
+        .long 2147483648d   ; 32 bits
+        .long 4294967296d   ; 33 bits
+        .long 14294967296d  ; ...more bits
+
+        .long 4294967295d   ; 32 bits
+        .long 8589934591d   ; 33 bits
+        .long 18589934591d  ; ...more bits
+
+; hexadecimal numbers (Motorola format)
+
+        .long   $7fffffff   ; 31 bits
+        .long   $17fffffff  ; 33 bits
+        .long   $bfffffffff ; 40 bits
+
+        .long   $80000000   ; 32 bits
+        .long   $100000000  ; 33 bits
+        .long   $8000000000 ; 40 bits
+
+        .long   $ffffffff   ; 32 bits
+        .long   $1ffffffff  ; 33 bits
+        .long   $ffffffffff ; 40 bits
+
+; hexadecimal numbers (Intel format)
+
+        .long   7fffffffh       ; 31 bits
+        .long   17fffffffh      ; 33 bits
+        .long   0bfffffffffh    ; 40 bits
+
+        .long   80000000h       ; 32 bits
+        .long   100000000h      ; 33 bits
+        .long   8000000000h     ; 40 bits
+
+        .long   0ffffffffh      ; 32 bits
+        .long   1ffffffffh      ; 33 bits
+        .long   0ffffffffffh    ; 40 bits
+
+; hexadecimal numbers (C format)
+
+        .long   0x7fffffff   ; 31 bits
+        .long   0x17fffffff  ; 33 bits
+        .long   0xbfffffffff ; 40 bits
+
+        .long   0x80000000   ; 32 bits
+        .long   0x100000000  ; 33 bits
+        .long   0x8000000000 ; 40 bits
+
+        .long   0xffffffff   ; 32 bits
+        .long   0x1ffffffff  ; 33 bits
+        .long   0xffffffffff ; 40 bits
+
+; -------------------------
+
+        .end

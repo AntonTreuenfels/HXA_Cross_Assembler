@@ -1,0 +1,149 @@
+; Hobby Cross-Assembler Error Test 035e
+; Expressions\Numeric Literals
+; error: malformed numeric literals
+
+; by Anton Treuenfels
+
+; first created: 07/08/03
+; last revised:  06/01/13
+
+; warning(s): 0
+
+; error(s): 95
+; - expecting expression
+; - expecting operator
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+        .maxerr     200     ; raise default limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; binary numbers (Motorola format)
+
+        .word   % 11
+        .word   %2
+        .word   %123
+        .word   %abc
+        .word   % abc
+
+        .word   %2,%a
+        .word   %3, %b
+        .word   % 4 ,% c
+        .word   % 5 , % d
+
+; binary numbers (Intel format)
+
+        .word   11 b
+        .word   2b
+        .word   123b
+        .word   abcb        ; 'abcb' accepted as symbol (label)
+        .word   abc b
+
+        .word   2B,aB       ; 'aB' accepted
+        .word   3B, bB      ; 'bB' accepted
+        .word   4 B ,c B
+        .word   5 B , d B
+
+; binary numbers (unofficial C format)
+
+        .word   0b 11       ; '0b' accepted,  '11' not
+        .word   0b2         ; '0b' accepted,  '2' not
+        .word   0b123       ; '0b1' accepted, '23' not
+        .word   0babc       ; '0b' accepted,  'abc' not
+        .word   0b abc      ; '0b' accepted,  'abc' not
+
+        .word   0b2,0ba     ; similar to above
+        .word   0b3, 0bb
+        .word   0b 4 ,0b c
+        .word   0b 5 , 0b d
+
+; binary numbers (mixed format)
+
+        .word   %01B
+        .word   % 01 b
+        .word   0b%01       ; accepted as '0b' '%' '01'
+        .word   0b% 01      ; accepted as '0b' '%' '01'
+        .word   0b01B
+        .word   0b 01 b
+
+; decimal numbers (Motorola format)
+
+        .word   123abc
+        .word   123 ghi
+
+        .word   1a,2b
+        .word   3c, 4d      ; '4d' accepted as Intel-style decimal
+        .word   5e ,6f
+        .word   7a , 8b
+
+; decimal numbers (Intel format (optional))
+
+        .word   123abcd
+        .word   123 ghid
+
+        .word   1aD,2bD
+        .word   3cD, 4dD
+        .word   5eD ,6fD
+        .word   7aD , 8bD
+
+; hexadecimal numbers (Motorola format)
+
+        .word   $ 123
+        .word   $g
+        .word   $123ghi
+        .word   $ghi
+
+        .word   $ 123,$ 456
+        .word   $g, $h
+        .word   $123ghi ,$456jkl
+        .word   $i , $j
+
+; hexadecimal numbers (Intel format)
+
+        .word   123 h
+        .word   gh          ; 'gh' accepted        
+        .word   123ghih
+        .word   ghih        ; 'ghih' accepted
+
+        .word   123 H,456 H
+        .word   gH, hH      ; 'gH','hH' accepted
+        .word   123ghiH ,456jklH
+        .word   iH , jH     ; 'iH','jH' accepted
+
+; hexadecimal numbers (C format)
+
+        .word   0x 123
+        .word   0xg
+        .word   0x123ghi
+        .word   0xghi
+
+        .word   0x 123,0x 456
+        .word   0xg, 0xh
+        .word   0x123ghi ,0x456jkl
+        .word   0xi , 0xj
+
+
+; hexadecimal numbers (mixed format)
+
+        .word   $123H
+        .word   $ 123 h
+
+        .word   0x123H
+        .word   0x 123 h
+
+        .word   $0x123H
+        .word   0x$ 123 h
+
+; ------------------------
+
+        .end

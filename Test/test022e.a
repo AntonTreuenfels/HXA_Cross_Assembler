@@ -1,0 +1,71 @@
+; Hobby Cross-Assembler Error Test 022e
+; Customization\Assembler Messages
+; warn\error: malformed "MESGTEXT" pseudo-op
+
+; by Anton Treuenfels
+
+; first created: 06/23/04
+; last revised:  04/23/11
+
+; warning(s): 2
+; - token ignored
+
+; error(s): 10
+; - expecting equate
+; - blank field
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop
+
+; -------------------------------
+
+; this one's going to work fine
+; - check out the final message this test generates :-)
+
+        .mesgtext   "Quit=Fix your bugs or you'll get nothing from me"
+
+; labels ignored (*before* new message applied)
+
+ignored .mesgtext   "Ignored=Useless clutter"
+
+; message in place now
+
+clutter .mesgtext   "BadField=Found an empty wasteland"
+
+; missing parts (bad syntax)
+
+        .mesgtext   "No equals sign in this string"
+        .mesgtext   "Nothing on right side="
+        .mesgtext   "=Nothing on left side"
+
+; unknown index
+
+        .mesgtext   "Unknown=New message"
+
+; known index but incorrect capitalization (*exact match required*)
+
+        .mesgtext   "IGNORED=New message"
+
+; blank field
+
+        .mesgtext   "Ndx=okay",
+        .mesgtext   , "Ndx=okay"
+
+; unprintable character in index value
+; - not found, of course, but what does error message look like ?
+
+        .mesgtext   "BadNdx\n=This text won't become an error message"
+
+; -------------------------------
+
+        .end

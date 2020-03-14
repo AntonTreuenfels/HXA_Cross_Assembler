@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Test 002c
+; Required\Set Program Counter
+; ok: "ORG" psop (32-bit Processor)
+
+; by Anton Treuenfels
+
+; first created: 05/09/03
+; last revised:  07/27/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_L"    ; required psop (must come before first ".org")
+        .org     $01000000  ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+        .org    $02000000   ; change program counter
+
+        .byte   $00
+
+        .org    $80         ; change it again...
+
+        .byte   $00
+
+        .org    $08000000   ; one last time...(31-bit program counter limit)
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Error Test 005j
+; Messages\User Messages
+; warn\fatal: "FATAL" psop
+
+; by Anton Treuenfels
+
+; first created: 02/14/04
+; last revised:  03/06/04
+
+; warning(s): 1
+; - token ignored
+
+; error(s): 0
+
+; fatal: 1
+; - source fault
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; label (this causes a warning as well)
+
+label1  .fatal   "Label ignored"
+
+; -------------------------------
+
+        .end

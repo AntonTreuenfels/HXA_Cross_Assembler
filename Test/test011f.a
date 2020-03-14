@@ -1,0 +1,48 @@
+; Hobby Cross-Assembler Test 011f
+; Output Files\Other Directory
+; error: non-existent error directory
+
+; by Anton Treuenfels
+
+; first created: 03/14/04
+; last revised:  06/13/06
+
+; warning(s): 0
+
+; error(s): 1
+; - bad cpu
+
+; fatal: 1
+; - bad pc
+
+; unlogged: 8
+; - can't open
+
+; -------------------------------
+
+; few environments have a "z:" directory
+; - if this one does, change the drive specifier to a non-existent drive
+
+        .listfile   <z:>                ; non-existent drive
+        .errfile    <nosubdir\found>    ; non-existent subdirectory
+
+        .objfile    <z:\nosubdir\found> ; both
+
+; because there is an error in the source code itself,
+; no list or object file will be produced, so those impossible
+; files will not be tried, and so will produce no errors
+; - HXA will try to send the error messages to the error file,
+; which will fail each time
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; required psop (here commented out)
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+; -------------------------------
+
+        .end

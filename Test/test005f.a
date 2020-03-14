@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Error Test 005f
+; Messages\User Messages
+; warn\error: "WARN" psop
+
+; by Anton Treuenfels
+
+; first created: 02/14/04
+; last revised:  12/08/07
+
+; warning(s): 5
+; - source fault
+; - token ignored
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; this just triggers a warning at this line (as it's supposed to)
+
+        .warn
+
+; this just triggers a warning at this line (as it's supposed to)
+
+        .warn   "Arguments (if any) are also shown"
+
+; this just triggers a warning at this line (as it's supposed to)
+
+        .warn   Arguments == displayed
+
+; label (this causes an extra warning)
+
+label1  .warn   "Label ignored"
+
+; -------------------------------
+
+        .end

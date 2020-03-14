@@ -1,0 +1,102 @@
+; Hobby Cross-Assembler Error Test 036e
+; Expressions\Numeric Data Definition
+; error: blank expression field(s)
+
+; by Anton Treuenfels
+
+; first created: 03/13/04
+; last revised:  04/11/06
+
+; warning(s): 0
+
+; error(s): 77
+; - unexpected blank
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+        .maxerr 200
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; no arguments, one blank field
+
+        .word
+
+; one argument, one blank field
+
+        .word   123,
+        .word   ,123
+
+        .word   123 ,
+        .word   , 123
+
+; one argument, two blank fields
+
+        .word   123,,
+        .word   ,123,
+        .word   ,,123
+
+        .word   123, ,
+        .word   , 123 ,
+        .word   , , 123
+
+; two arguments, one blank field
+
+        .word   123,456,
+        .word   123,,456
+        .word   ,123,456
+
+        .word   123, 456,
+        .word   123, , 456
+        .word   , 123, 456
+
+        .word   123 ,456,
+        .word   123 , ,456
+        .word   ,123 ,456
+
+        .word   123 , 456 ,
+        .word   123 , , 456
+        .word   , 123 , 456
+
+; two arguments, two blank fields
+
+        .word   123,456,,
+        .word   123,,456,
+        .word   123,,,456
+        .word   ,123,456,
+        .word   ,123,,456
+        .word   ,,123,456
+
+        .word   123, 456, ,
+        .word   123, , 456,
+        .word   123, , , 456
+        .word   , 123, 456,
+        .word   , 123, , 456
+        .word   , , 123, 456
+
+        .word   123 ,456 , ,
+        .word   123 , ,456 ,
+        .word   123 , , ,456
+        .word   ,123 ,456 ,
+        .word   ,123 , ,456
+        .word   , ,123 ,456
+
+        .word   123 , 456 , ,
+        .word   123 , , 456 ,
+        .word   123 , , , 456
+        .word   , 123 , 456 ,
+        .word   , 123 , , 456
+        .word   , , 123 , 456
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,48 @@
+; Hobby Cross-Assembler Test 025
+; Customization\ASSUME Strings
+; ok: "ASSUME" pseudo-op
+
+; by Anton Treuenfels
+
+; first created: 08/08/04
+; last revised:  09/04/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; no code generating psops or instructions
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; the T_XX processors simply echo their assumes...
+; note that if quotes surround a string, they are stripped off and escapes
+; processed *before* the processor-specific portion sees the string
+
+        .echo   == One argument
+
+        .assume "one=ok"
+
+        .echo   == Two arguments
+
+        .assume "one=ok", "two=ok"
+
+        .echo   == Three arguments w/ escaped newline (processed)
+
+        .assume "one=ok", "two=ok\nw/ carriage return", "three=ok"
+
+        .echo   == Three arguments w/ escaped newline (not processed)
+
+        .assume one=ok, two=ok\nw/o carriage return, three=ok
+
+; ...and we could keep it up !
+
+; -------------------------------
+
+        .end

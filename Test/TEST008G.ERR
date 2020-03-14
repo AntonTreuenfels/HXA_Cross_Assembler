@@ -1,0 +1,37 @@
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <ASSERT>
+; 0033:  assert    ; try to make it a label
+; - Unexpected blank field
+
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <ASSERT>
+; 0035:  assert .bit16 $1000  ; try to make it a label
+; - Expecting operand: <.bit16 $1000>
+
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <ASSERT>
+; 0037:  assert = $1000  ; try to assign a value
+; - Expecting operand: <= $1000>
+
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <ASSERT>
+; 0039:  assert  .macro   ; try to make it a macro name
+; - Expecting operand: <.macro>
+
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <.ENDMACRO>
+; 0040:   .endmacro  ; (empty)
+; - Matching block structure not found
+
+; >>>>>  Error in TEST\TEST008G.A
+; - While processing pseudo opcode: <.MACRO>
+; 0042:   .macro assert  ; try to make it a macro name
+; - Name reserved by assembler: <ASSERT>
+
+; >>>>>  Warning in TEST\TEST008G.A
+; - While processing pseudo opcode: <.ENDMACRO>
+; 0043:   .endmacro      
+; - Definition ignored
+
+1 Warnings detected
+6 Errors detected

@@ -1,0 +1,36 @@
+; Hobby Cross-Assembler Error Test 001g
+; Required\Set CPU
+; warn/error/fatal: pc width too small
+
+; by Anton Treuenfels
+
+; first created: 06/24/05
+; last revised:  06/13/11
+
+; warning(s): 1
+; - bad CPU
+
+; error(s): 2
+; - value too small
+; - no CPU
+
+; fatal: 1
+; - invalid pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "t_04_l"    ; pc width too small
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

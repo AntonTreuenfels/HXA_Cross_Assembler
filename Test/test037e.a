@@ -1,0 +1,103 @@
+; Hobby Cross-Assembler Error Test 037e
+; Expressions\Ranged Numeric Data Definition
+; error: values out of range (pass two)
+
+; by Anton Treuenfels
+
+; first created: 12/11/04
+; last revised:  01/05/10
+
+; warning(s): 0
+
+; error(s): 20
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; one byte values
+
+        .byte   256                 ; ok
+        .ubyte  256                 ; fail
+        .sbyte  256                 ; fail
+
+        .byte   128                 ; ok
+        .ubyte  128                 ; ok
+        .sbyte  128                 ; fail
+
+        .byte   -1                  ; ok
+        .ubyte  -1                  ; fail
+        .sbyte  -1                  ; ok
+
+        .byte   -129                ; ok
+        .ubyte  -129                ; fail
+        .sbyte  -129                ; fail
+
+; two byte values
+
+        .word   65536               ; ok
+        .uword  65536               ; fail
+        .sword  65536               ; fail
+
+        .word   32768               ; ok
+        .uword  32768               ; ok
+        .sword  32768               ; fail
+
+        .word   -1                  ; ok
+        .uword  -1                  ; fail
+        .sword  -1                  ; ok
+
+        .word   -32769              ; ok
+        .uword  -32769              ; fail
+        .sword  -32769              ; fail
+
+; three byte values
+
+        .bit24  16777216            ; ok
+        .ubit24 16777216            ; fail
+        .sbit24 16777216            ; fail
+
+        .bit24  8388608             ; ok
+        .ubit24 8388608             ; ok
+        .sbit24 8388608             ; fail
+
+        .bit24  -1                  ; ok
+        .ubit24 -1                  ; fail
+        .sbit24 -1                  ; ok
+
+        .bit24  -8388609            ; ok
+        .ubit24 -8388609            ; fail
+        .sbit24 -8388609            ; fail
+
+; four byte values
+
+;        .long   4294967296          ; fail (pass one)
+;        .ulong  4294967296          ; fail (pass one)
+;        .slong  4294967296          ; fail (pass one)
+
+        .long   2147483648          ; ok
+        .ulong  2147483648          ; ok
+        .slong  2147483648          ; fail
+
+        .long   -1                  ; ok
+        .ulong  -1                  ; fail
+        .slong  -1                  ; ok
+
+;        .long   -2147483649         ; fail (pass one)
+;        .ulong  -2147483649         ; fail (pass one)
+;        .slong  -2147483649         ; fail (pass one)
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,249 @@
+; Hobby Cross-Assembler Test 035
+; Expressions\Numeric Literals
+; ok: Motorola, Intel and C formats (LSB Processor)
+
+; by Anton Treuenfels
+
+; first created: 07/08/03
+; last revised:  06/02/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .hexfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; binary numbers (Motorola format)
+
+        .byte   %0
+        .byte   %1
+
+        .word   %1,%10,%11,%100
+        .word   %101, %110, %111, %1000
+        .word   %01001 ,%01010 ,%01011 ,%01100
+        .word   %01101 , %001110 , %0001111 , %00010000
+
+        .long   %00, %000, %0000, %00000
+
+                ;---!---!---!---!---!---!---!---!
+
+        .long   %01111111111111111111111111111110
+        .long   %01111111111111111111111111111111
+        .long   %10000000000000000000000000000000
+        .long   %10000000000000000000000000000001
+        .long   %11111111111111111111111111111110
+        .long   %11111111111111111111111111111111
+
+; binary numbers (Intel format)
+
+        .byte   0b
+        .byte   1b
+
+        .word   1b,10b,11b,100b
+        .word   101b, 110b, 111b, 1000b
+        .word   01001b ,01010b ,01011b ,01100b
+        .word   01101b , 001110b , 0001111b , 00010000b
+
+        .long   00b, 000b, 0000b, 00000b
+
+                ;---!---!---!---!---!---!---!---!
+
+        
+        .long   01111111111111111111111111111110B
+        .long   01111111111111111111111111111111B
+        .long   10000000000000000000000000000000B
+        .long   10000000000000000000000000000001B
+        .long   11111111111111111111111111111110B
+        .long   11111111111111111111111111111111B
+
+; binary numbers (unofficial C format)
+
+        .byte   0b0
+        .byte   0b1
+
+        .word   0b1,0b10,0b11,0b100
+        .word   0b101, 0b110, 0b111, 0b1000
+        .word   0b01001 ,0b01010 ,0b01011 ,0b01100
+        .word   0b01101 , 0b001110 , 0b0001111 , 0b00010000
+
+        .long   0b00, 0b000, 0b0000, 0b00000
+
+                ;---!---!---!---!---!---!---!---!
+
+        .long   0b01111111111111111111111111111110
+        .long   0b01111111111111111111111111111111
+        .long   0b10000000000000000000000000000000
+        .long   0b10000000000000000000000000000001
+        .long   0b11111111111111111111111111111110
+        .long   0b11111111111111111111111111111111
+
+; mixed Intel hexadecimal and C binary literals
+; - HXA should always look for longest match
+
+        .word   0b01, 0b01h, 0b0Ch
+        .word   0B100, 0B100H, 0B10CH
+
+; decimal numbers (Motorola format)
+
+        .byte   0
+        .byte   1
+        .byte   2
+        .byte   3
+        .byte   4
+        .byte   5
+        .byte   6
+        .byte   7
+        .byte   8
+        .byte   9
+
+        .word   1,12,123,1234
+        .word   5, 56, 567, 5678
+        .word   01 ,012 ,0123 ,01234
+        .word   05 , 0056 , 000567 , 0005678
+
+        .long   00, 000, 0000, 00000
+
+        .long   2147483646
+        .long   2147483647
+        .long   2147483648
+        .long   2147483649
+        .long   4294967294
+        .long   4294967295
+
+; decimal numbers (Intel format (optional))
+
+        .byte   0d
+        .byte   1d
+        .byte   2d
+        .byte   3d
+        .byte   4d
+        .byte   5d
+        .byte   6d
+        .byte   7d
+        .byte   8d
+        .byte   9d
+
+        .word   1d,12d,123d,1234d
+        .word   5d, 56d, 567d, 5678d
+        .word   01d ,012d ,0123d ,01234d
+        .word   05d , 0056d , 000567d , 0005678d
+
+        .long   00d, 000d, 0000d, 00000d
+
+        .long   2147483646D
+        .long   2147483647D
+        .long   2147483648D
+        .long   2147483649D
+        .long   4294967294D
+        .long   4294967295D
+
+; hexadecimal numbers (Motorola format)
+
+        .byte   $0
+        .byte   $1
+        .byte   $2
+        .byte   $3
+        .byte   $4
+        .byte   $5
+        .byte   $6
+        .byte   $7
+        .byte   $8
+        .byte   $9
+        .byte   $a
+        .byte   $b
+        .byte   $c
+        .byte   $d
+        .byte   $e
+        .byte   $f
+
+        .word   $1,$2,$3,$4
+        .word   $05, $06, $07, $08
+        .word   $9 ,$9a ,$9ab ,$9abc
+        .word   $0c , $00cd , $000cde , $0000cdef
+
+        .long   $00, $000, $0000, $00000
+
+        .long   $7ffffffe
+        .long   $7fffffff
+        .long   $80000000
+        .long   $80000001
+        .long   $FFFFFFFE
+        .long   $FFFFFFFF
+
+; hexadecimal numbers (Intel format)
+
+        .byte   0h
+        .byte   1h
+        .byte   2h
+        .byte   3h
+        .byte   4h
+        .byte   5h
+        .byte   6h
+        .byte   7h
+        .byte   8h
+        .byte   9h
+        .byte   0ah     ; must have leading decimal digit
+        .byte   0bh
+        .byte   0ch
+        .byte   0dh
+        .byte   0eh
+        .byte   0fh
+
+        .word   1h,2h,3h,4h
+        .word   5h, 6h, 7h, 8h
+        .word   9h ,9ah ,9abh ,9abch
+        .word   0cH , 00cdH , 000cdeH , 0000cdefH
+
+        .long   00h, 000h, 0000h, 00000h
+
+        .long   7ffffffeh
+        .long   7fffffffh
+        .long   80000000h
+        .long   80000001h
+        .long   0FFFFFFFEH      ; must have leading decimal digit
+        .long   0FFFFFFFFH
+
+; hexadecimal numbers (C format)
+
+        .byte   0x0
+        .byte   0x1
+        .byte   0x2
+        .byte   0x3
+        .byte   0x4
+        .byte   0x5
+        .byte   0x6
+        .byte   0x7
+        .byte   0x8
+        .byte   0x9
+        .byte   0xa
+        .byte   0b
+        .byte   0xc
+        .byte   0xd
+        .byte   0xe
+        .byte   0xf
+
+        .word   0x1,0x2,0x3,0x4
+        .word   0x05, 0x06, 0x07, 0x08
+        .word   0x9 ,0x9a ,0x9ab ,0x9abc
+        .word   0x0c , 0x00cd , 0x000cde , 0x0000cdef
+
+        .long   0x00, 0x000, 0x0000, 0x00000
+
+        .long   0X7ffffffe
+        .long   0X7fffffff
+        .long   0X80000000
+        .long   0X80000001
+        .long   0XFFFFFFFE
+        .long   0XFFFFFFFF
+
+; -------------------------------
+
+        .end

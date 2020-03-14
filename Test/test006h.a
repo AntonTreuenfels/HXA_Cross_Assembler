@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 006h
+; Messages\Warn Count
+; warn\fatal: "MAXWARN" psop set to three
+
+; by Anton Treuenfels
+
+; first created: 03/06/04
+; last revised:  07/24/12
+
+; warning(s): 4
+; - source fault
+
+; error(s): 0
+
+; fatal: 1
+; - too many warnings
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "6502"      ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .maxwarn    3
+
+        .warn   "Not fatal (first)"
+
+        .warn   "Not fatal (second)"
+
+        .warn   "Not fatal (third and last allowed)"
+
+        .warn   "Fatal (fourth - over limit)"
+
+; -------------------------------
+
+        .end

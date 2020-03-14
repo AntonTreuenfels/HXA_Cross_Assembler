@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Test 005
+; Messages\User Messages
+; ok: "ECHO" psop
+
+; by Anton Treuenfels
+
+; first created: 12/10/03
+; last revised:  03/22/06
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; string literal argument
+
+        .echo   "Echo test line one"
+
+; string delimiters are optional
+
+        .echo   Echo test line two
+
+; no argument outputs a blank line
+
+        .echo
+
+; this line and the second line should bracket a blank line in the "ERR" file
+
+        .echo   Echo test line four
+
+; -------------------------------
+
+        .end

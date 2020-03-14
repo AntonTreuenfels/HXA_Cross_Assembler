@@ -1,0 +1,56 @@
+; Hobby Cross-Assembler Error Test 025e
+; Customization\ASSUME Strings
+; error: unrecognized flag value
+
+; by Anton Treuenfels
+
+; first created: 08/20/04
+; last revised:  03/13/10
+
+; warning(s): 3
+; - odd value
+; - token ignored
+
+; error(s): 1
+; - need string
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; no code generating psops or instructions
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .assume "this is okay"
+
+        .assume as is this
+
+; labels are ignored
+
+alabel  .assume "labels are ignored", but arguments are not
+
+; ASSUME must have an argument...
+
+        .assume
+
+; ...that isn't null (though just a warning since nothing bad can happen)
+
+        .assume ""
+
+; not strictly true T_XX's don't like next line
+; - they're just programmed to respond to the string "reject" !
+
+        .assume "this will be rejected"
+
+; -------------------------------
+
+        .end

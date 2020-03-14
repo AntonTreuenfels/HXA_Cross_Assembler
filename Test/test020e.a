@@ -1,0 +1,116 @@
+; Hobby Cross-Assembler Error Test 020e
+; Customization\Pseudo Op Names
+; error: malformed "PSALIAS" pseudo-op
+
+; by Anton Treuenfels
+
+; first created: 08/30/03
+; last revised:  03/27/10
+
+; warning(s): 0
+
+; error(s): 26
+; - expecting equate
+; - unexpected blank
+; - illegal name
+; - duplicate name
+; - unknown name
+; - expecting operand (not general)
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 50          ; raise limit
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; not an equate pattern
+
+        .psalias    "where's the equal sign?"
+        .psalias    "escaped \= isn't seen"
+
+; missing alias name
+
+        .psalias    "word="
+        .psalias    "word=  "
+
+; missing psop name
+
+        .psalias    "=good"
+        .psalias    "  =good"
+
+; bad alias names
+
+        .psalias    "word=@bad"
+        .psalias    "word=]bad"
+        .psalias    "word=+"
+        .psalias    "word=123abc"
+        .psalias    "word=ver"
+        .psalias    "word=byte"
+        .psalias    "word=word"
+
+; non-existent pseudo-op
+
+        .psalias    "unknown=new"
+
+; aliases and known labels
+
+good3   .byte   $00                 ; 'good3' is now a label...
+
+        .psalias    "byte=good3"    ; ...and can't use such as an alias
+
+; labels and known aliases
+; - attempting to give a label the same name as an alias does not
+; not directly fail because HXA recognizes pseudo ops (which is what
+; aliases are) before labels. However there is often an indirect
+; failure when whatever follows the "label" does not match what
+; HXA expects to follow the pseudo op.
+
+; a simple example
+
+        .psalias  "byte=demo1"  ; ok
+
+        .demo1  $00             ; ok
+
+; now try 'demo1' as a label
+
+demo1                       ; missing expression
+
+; another simple example
+
+        .psalias  "byte=demo2"  ; ok
+
+        .demo2  $00             ; ok
+
+; now try 'demo2' as a label
+
+demo2    .byte   $00            ; unexpected token
+
+; using an existing name or alias as an alias
+
+        .psalias bit08 = bit08  ; fails
+
+        .psalias bit08 = byte   ; fails
+
+        .psalias byte = bit08   ; fails
+
+        .psalias byte = byte    ; fails
+
+; double definition
+
+        .psalias  word=dbldef   ; ok
+
+        .psalias  byte=dbldef   ; fails
+
+; -------------------------------
+
+        .end

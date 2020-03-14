@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 002m
+; Required\Set Program Counter
+; error\fatal: 24-bit PC out of range (too big; by pc advance)
+ 
+; by Anton Treuenfels
+
+; first created: 05/10/03
+; last revised:  01/23/10
+
+; warning(s): 0
+
+; error(s): 1
+; - value too big
+
+; fatal: 1
+; - invalid pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; "CPU" psop also sets allowable range for program counter values
+
+        .cpu    "T_24_L"    ; required psop
+        .org    $ffffff     ; max legal storage location
+
+; -------------------------------
+
+; store a byte at highest legal location
+
+        .byte   $00         ; pc should advance to illegal value...
+
+; can't store past that, though
+
+        .byte   $01         ; ...which can't be used
+
+; -------------------------------
+
+        .end

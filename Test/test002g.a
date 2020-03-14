@@ -1,0 +1,34 @@
+; Hobby Cross-Assembler Error Test 002g
+; Required\Set Program Counter
+; error\fatal: missing expression
+ 
+; by Anton Treuenfels
+
+; first created: 05/09/03
+; last revised:  07/24/04
+
+; warning(s):
+
+; error(s): 1
+; - expecting number
+
+; fatal: 1
+; - PC not set
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org                ; required psop (missing expression)
+
+; -------------------------------
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

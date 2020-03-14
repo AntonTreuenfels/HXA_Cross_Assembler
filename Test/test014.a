@@ -1,0 +1,29 @@
+; Hobby Cross-Assembler Test 014
+; Output Files\No Object Code
+; ok: no object code
+
+; by Anton Treuenfels
+
+; first created: 06/17/05
+; last revised:  07/18/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .objfile            ; create a binary object file
+        .hexfile            ; create an Intel hex object file
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+;        no source code to assemble...
+
+; -------------------------------
+
+        .end

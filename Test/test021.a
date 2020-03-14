@@ -1,0 +1,49 @@
+; Hobby Cross-Assembler Test 021
+; Customization\Pseudo Op Nullification
+; ok: "PSNULL" pseudo op
+
+; by Anton Treuenfels
+
+; first created: 01/05/08
+; last revised:  05/21/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; PSNULL is for porting cases where there is no equivalent HXA pseudo op
+; to create an alias for (eg., listing control directives)
+
+        .psalias    psnull=header, psnull=formfeed
+
+        header   "A Test of the PSNULL Pseudo Opcode"
+
+        formfeed                    ; taken as a label if not ignored
+
+        .byte   $00                 ; bump program counter
+
+        formfeed                    ; no error if ignored
+
+; -------------------------------
+
+        .psalias    psnull=float
+
+        .float                      ; presumably an error in the original :)
+
+        .float  1.0987E-32
+pi      .float  3.1415926
+
+        .float  2.1876E34, 3.4521
+table1  .float  56.01, 73.19, 84.23
+
+; -------------------------------
+
+        .end

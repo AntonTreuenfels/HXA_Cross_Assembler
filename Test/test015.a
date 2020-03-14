@@ -1,0 +1,33 @@
+; Hobby Cross-Assembler Test 015
+; Pass Termination\Termination
+; ok: "END" psop
+
+; by Anton Treuenfels
+
+; first created: 04/17/04
+; last revised:  04/17/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "T_16_L"    ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .echo   "This is fine!"
+
+; -------------------------------
+
+        .end                ; pass one stops here (so does list file!)
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+

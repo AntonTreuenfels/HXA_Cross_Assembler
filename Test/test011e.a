@@ -1,0 +1,47 @@
+; Hobby Cross-Assembler Test 011e
+; Output Files\Other Directory
+; error: non-existent list/object directories
+
+; by Anton Treuenfels
+
+; first created: 03/14/04
+; last revised:  06/14/06
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 0
+
+; unlogged: 2
+; - can't open
+
+; -------------------------------
+
+; few environments have a "z:" directory
+; - if this one does, change the drive specifier to a non-existent drive
+
+        .listfile   <z:>                ; non-existent drive
+        .errfile    <nosubdir\found>    ; non-existent subdirectory
+
+        .objfile    <z:\nosubdir\found> ; both
+
+; because there are no errors in the source code itself,
+; the "can't" open errors occur after the second pass.
+; But outside of passes there is no line to associate an error with,
+; and in that case HXA sends error messages only to the console.
+; Hence the lack of "can't open" message for the error file - it's
+; never used
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+; -------------------------------
+
+        .end

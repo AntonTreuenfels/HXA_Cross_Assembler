@@ -1,0 +1,68 @@
+; Hobby Cross-Assembler Test 020b
+; Customization\Pseudo Op Names
+; ok: "PSALIAS" pseudo-op (undelimited arguments)
+; - otherwise the same as test 020
+
+; by Anton Treuenfels
+
+; first created: 03/22/06
+; last revised:  03/22/26
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .psalias  org=setpc   ; SET Program Counter
+
+        .cpu    "T_16_L"    ; required psop
+        .setpc  $1000       ; required psop
+
+; -------------------------------
+
+; - note that "BYTE", "WORD" and "LONG" are actually built-in aliases already
+
+        .psalias  byte=db     ; Define Byte
+        .psalias  word=dw     ; Define Word
+        .psalias  long=ddw    ; Define Double Word
+
+        .db     $01
+        .dw     $02
+        .ddw    $03
+
+; can we alias "PSALIAS" ?
+
+        .psalias  psalias=aka ; Also Known As
+
+        .aka    cpu=setcpu    ; SET CPU
+
+; yes !
+
+        .setcpu "T_16_L"    ; no effect (already set)
+
+        .db     $04
+
+; can we alias user-defined aliases ?
+
+        .aka    db=byt, dw=da   ; BYTE, Define Address (16-bit)
+
+; yes ! (makes one's head spin, hmm ?)
+
+        .byt    $05
+        .da     $06
+
+; -------------------------------
+
+; try using period characters in alias names
+
+        .aka    byte=def.b, word=def.w, long=def.l
+
+        .def.b  $07
+        .def.w  $08
+        .def.l  $09
+
+; -------------------------------
+
+        .end

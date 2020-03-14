@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Error Test 008f
+; Messages\Assert Messages
+; error: failures detected on second pass
+
+; by Anton Treuenfels
+
+; first created: 08/24/13
+; last revised:  08/24/13
+
+; warning(s): 0
+
+; error(s): 4
+; - assert fail
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .assert cpu$()      ; there is a cpu already defined
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+;        .assert !cpu$()                 ; there is no cpu defined
+
+;        .assert cpu$() != "T_16_L"      ; this is not the cpu defined
+
+;        .assert index(cpu$(), "24")     ; this cpu is 24-bit
+
+;        .assert * < $1000               ; pc is less than $1000
+
+;        .assert * >= $8000              ; pc is at least $8000
+
+;        .assert $ > $10000              ; pc is out of range
+                                        ; - redundant, already fatal if true
+
+        ; forward references not resolved until second pass
+
+        .assert myLabel != $1000
+
+        .assert myLabel + 2 != otherLabel
+
+        .assert otherLabel <= myLabel
+
+        .assert myLabel$ != "otherLabel"
+
+myLabel
+
+        .word $1234
+
+otherLabel
+
+myLabel$    .equ    "otherLabel"
+
+; -------------------------------
+
+        .end

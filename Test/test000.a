@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 000
+; Test Templates\Templates
+; ok: tests should succeed; check response to correct input
+
+; by Anton Treuenfels
+
+; first created: 07/27/03
+; last revised:  02/17/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+
+; -------------------------------
+
+        .end

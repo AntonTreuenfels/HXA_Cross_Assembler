@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Test 002
+; Required\Set Program Counter
+; ok: "ORG" psop
+
+; by Anton Treuenfels
+
+; first created: 05/09/03
+; last revised:  07/24/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop (must come before first ".org")
+        .org     $1000      ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+        .org    $2000       ; change program counter
+
+        .byte   $00
+
+        .org    $80         ; change it again...
+
+        .byte   $00
+
+        .org    $8000       ; one last time...
+
+        .byte   $00
+
+; -------------------------------
+
+        .end

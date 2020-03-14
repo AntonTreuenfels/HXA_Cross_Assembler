@@ -1,0 +1,60 @@
+; Hobby Cross-Assembler Test 037b
+; Expressions\Ranged Numeric Data Definition
+; ok: "UBIT--" and "SBIT--" pseudo ops (MSB Processor)
+
+; by Anton Treuenfels
+
+; first created: 12/11/04
+; last revised:  01/05/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; one byte values
+
+        .byte   $ffeeddcc           ; accepts any value (drops high bytes)
+        .ubyte   0,1,254,255        ; unsigned only
+        .sbyte  -128,-127,126,127   ; signed only
+
+; two byte values
+
+        .word   $ffeeddcc
+        .uword  0, 1, 65534, 65535
+        .sword  -32768, -32767, 32766, 32767
+
+        .revword   $ffeeddcc
+        .urevword  0, 1, 65534, 65535
+        .srevword  -32768, -32767, 32766, 32767
+
+; three byte values
+
+        .bit24  $ffeeddcc
+        .ubit24 0, 1, 16777214, 16777215
+        .sbit24 -8388608, -8388607, 8388606, 8388607
+
+        .bit24r  $ffeeddcc
+        .ubit24r 0, 1, 16777214, 16777215
+        .sbit24r -8388608, -8388607, 8388606, 8388607
+
+; four byte values
+
+        .long  $ffeeddcc
+        .ulong 0, 1, 4294967294, 4294967295
+        .slong -2147483648, -2147483647, 2147483646, 2147483647
+
+        .revlong  $ffeeddcc
+        .urevlong 0, 1, 4294967294, 4294967295
+        .srevlong -2147483648, -2147483647, 2147483646, 2147483647
+
+; -------------------------------
+
+        .end                    

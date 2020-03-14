@@ -1,0 +1,88 @@
+; Hobby Cross-Assembler Test 036
+; Expressions\Numeric Data Definition
+; ok: "BIT--" pseudo ops
+
+; by Anton Treuenfels
+
+; first created: 03/20/04
+; last revised:  03/20/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .bit32r     0
+        .bit24r     0
+        .bit16r     0
+        .bit32      0
+        .bit24      0
+        .bit16      0
+        .bit08      0
+
+        .revlong    1
+        .bit24r     1
+        .revword    1
+        .long       1
+        .bit24      1
+        .word       1
+        .byte       1
+
+        .bit32r     $ff
+        .bit24r     $ff
+        .bit16r     $ff
+        .bit32      $ff
+        .bit24      $ff
+        .bit16      $ff
+        .bit08      $ff
+
+        .revlong    $100
+        .bit24r     $100
+        .revword    $100
+        .long       $100
+        .bit24      $100
+        .word       $100
+        .byte       $100
+
+        .bit32r     101h
+        .bit24r     101h
+        .bit16r     101h
+        .bit32      101h
+        .bit24      101h
+        .bit16      101h
+        .bit08      101h
+
+        .revlong    1ffH
+        .bit24r     1ffH
+        .revword    1ffH
+        .long       1ffH
+        .bit24      1ffH
+        .word       1ffH
+        .byte       1ffH
+
+        .bit32r     $ff00, $ff01, $ffff
+        .bit24r     $FF00, $FF01, $FFFF
+        .bit16r     0ff00h, 0ff01h, 0ffffh
+        .bit32      0FF00h, 0FF01h, 0FFFFh
+        .bit24      0ff00H, 0ff01H, 0ffffH
+        .bit16      0FF00H, 0FF01H, 0FFFFH
+        .bit08      65280, 65281, 65535
+
+        .revlong    $ffeeddcc, $bbaa9988, $77665544, $33221100
+        .bit24r     $FFEEDDCC, $BBAA9988, $77665544, $33221100
+        .revword    0ffeeddcch, 0bbaa9988h, 77665544h, 33221100h
+        .long       0FFEEDDCCh, 0BBAA9988h, 77665544h, 33221100h
+        .bit24      0ffeeddccH, 0bbaa9988H, 77665544H, 33221100H
+        .word       0FFEEDDCCH, 0BBAA9988H, 77665544H, 33221100H
+        .byte       15654348,  11180424,  6706500,   2232576
+
+; -------------------------------
+
+        .end

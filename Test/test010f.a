@@ -1,0 +1,71 @@
+; Hobby Cross-Assembler Test 010f
+; Output Files\Same Directory
+; warn: name changed
+
+; by Anton Treuenfels
+
+; first created: 03/14/04
+; last revised:  11/28/04
+
+; warning(s): 3
+; - value already set
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile   "mylist_f.lst"
+        .errfile    "myerr_f.err"
+
+        .objfile    "myobj_f.obj"
+
+; -------------------------------
+
+; can do again without protest
+
+        .listfile   "mylist_f.lst"
+        .errfile    "myerr_f.err"
+
+        .objfile    "myobj_f.obj"
+
+; -------------------------------
+
+; can do again using alternate syntax without protest
+
+        .listfile   <mylist_f.lst>
+        .errfile    <myerr_f.err>
+
+        .objfile    <myobj_f.obj>
+
+; -------------------------------
+
+; can do again using different case without protest
+
+        .listfile   "MYLIST_F.LST"
+        .errfile    "MYERR_F.err"
+
+        .objfile    "myobj_F.OBJ"
+
+; -------------------------------
+
+; *cannot* change names once set (will keep existing names)
+
+        .listfile   "yourlist.lst"
+        .errfile    "yourerr.err"
+
+        .objfile    "yourobj.obj"
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,29 @@
+; Hobby Cross-Assembler Test 001
+; Required\Set CPU
+; ok: "CPU" psop
+
+; by Anton Treuenfels
+
+; first created: 04/26/03
+; last revised:  07/24/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; "CPU" psop must come before first line which alters the program counter
+; - note that the "ORG" psop alters the program counter !
+
+        .cpu    "t_16_l"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+; -------------------------------
+
+        .end

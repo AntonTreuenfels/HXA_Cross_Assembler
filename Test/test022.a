@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Test 022
+; Customization\Assembler Messages
+; ok: "MESGTEXT" pseudo-op
+; - don't like the built-in messages ? Fine, create your own !
+
+; by Anton Treuenfels
+
+; first created: 06/23/04
+; last revised:  04/23/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; it's hard yet to change the pass one start message
+; - by the time the assembler gets here it's already been used
+       
+        .mesgtext   "BegOne=Picking apart your source"
+
+; these messages appear on the console (testing quoted strings)
+
+        .mesgtext   "EndOne=Done picking apart your source"
+        .mesgtext   "BegTwo=Resolving forward refs, generating code, etc"
+        .mesgtext   "EndTwo=Done with all that"
+        .mesgtext   "Fwrite=Spitting out"
+
+; these messages appear in the listfile (testing unquoted strings)
+
+        .mesgtext   ListFile=Regurgitation
+        .mesgtext   OBJECT=Here's what I saw and what I did with it
+        .mesgtext   LABELS=Here's the names you made up
+
+; another message in the listfile (testing unprintable char in message)
+
+        .mesgtext   "NoListing=Didn't see anything\nIs that what you meant?"
+
+; -------------------------------
+
+; a value in the symbol table
+
+cheeky  .byte   $00
+
+; -------------------------------
+
+        .end

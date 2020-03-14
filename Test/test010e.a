@@ -1,0 +1,59 @@
+; Hobby Cross-Assembler Test 010e
+; Output Files\Same Directory
+; warn\error: malformed name
+
+; by Anton Treuenfels
+
+; first created: 03/14/04
+; last revised:  05/14/11
+
+; warning(s): 5
+; - token ignored
+; - odd value
+; - already set
+
+; error(s): 4
+; - expecting filename
+; - expecting string op
+
+; fatal: 0
+
+; -------------------------------
+
+; create list and error files with default names
+; - flagged internally by the null string (which users cannot specify)
+; - new names cannot be specified by user after this
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        ; warnings and errors
+        ; - names are invalid but that is not directly detected,
+        ; only that they are also new (and that is not allowed)
+
+L1      .listfile   "mylist.lst
+L2      .errfile    myerr.err"
+
+        ; null names
+
+        .objfile    <>
+        .objfile    ""
+
+        ; bad expression
+
+        .objfile    "A bad" name
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much to it !
+
+; -------------------------------
+
+        .end

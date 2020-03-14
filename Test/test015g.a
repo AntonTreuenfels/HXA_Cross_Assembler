@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 015g
+; Pass Termination\Termination
+; error: "END" w/ resolvable start expression out of range
+
+; by Anton Treuenfels
+
+; first created: 08/14/13
+; last revised:  08/14/13
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+         .cpu    "T_16_L"    ; required psop
+*         .org    $1000      ; un-required psop
+
+; -------------------------------
+
+        .echo   "This is fine!"
+
+; -------------------------------
+
+        .end    $FFFF+16      ; error - out of range
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+
+; -------------------------------
+
+        .end

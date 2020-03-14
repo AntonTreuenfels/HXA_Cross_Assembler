@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 005e
+; Messages\User Messages
+; warn\error: "ECHO" psop
+
+; by Anton Treuenfels
+
+; first created: 02/14/04
+; last revised:  03/22/06
+
+; warning(s): 2
+; - token ignored
+; - no effect
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; null string argument
+
+        .echo   ""
+
+; label
+
+label1  .echo   "Label ignored"
+
+; -------------------------------
+
+        .end

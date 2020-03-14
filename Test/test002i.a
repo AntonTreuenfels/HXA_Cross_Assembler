@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Error Test 002i
+; Required\Set Program Counter
+; error\fatal: 16-bit PC out of range (too big; by ORG)
+ 
+; by Anton Treuenfels
+
+; first created: 06/27/05
+; last revised:  01/23/10
+
+; warning(s): 0
+
+; error(s): 1
+; - out of range
+
+; fatal: 1
+; - PC out of range
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; "CPU" psop also sets allowable range for program counter values
+; - pc max + 1 is legal address (but can't store anything there)
+
+        .cpu    "T_16_L"    ; required psop
+        .org    65536       ; pc max + 1 ($00010000)
+
+; -------------------------------
+
+        .byte   $00         ; fatal
+
+; -------------------------------
+
+        .end

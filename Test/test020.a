@@ -1,0 +1,90 @@
+; Hobby Cross-Assembler Test 020
+; Customization\Pseudo Op Names
+; ok: "PSALIAS" pseudo-op
+; - don't like the built-in pseudo-op names ? Fine, create your own names !
+
+; by Anton Treuenfels
+
+; first created: 08/30/03
+; last revised:  05/25/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .psalias  "org=setpc"   ; SET Program Counter
+
+        .cpu    "T_16_L"    ; required psop
+        .setpc  $1000       ; required psop
+
+; -------------------------------
+
+; - note that "BYTE", "WORD" and "LONG" are actually built-in aliases already
+
+        .psalias  "byte=db"     ; Define Byte
+        .psalias  "word=dw"     ; Define Word
+        .psalias  "long=ddw"    ; Define Double Word
+
+        .db     $01
+        .dw     $02
+        .ddw    $03
+
+; can we alias "PSALIAS" ?
+
+        .psalias  "psalias=aka" ; Also Known As
+
+        .aka    "cpu=setcpu"    ; SET CPU
+
+; yes !
+
+        .setcpu "T_16_L"    ; no effect (already set)
+
+        .db     $04
+
+; can we alias user-defined aliases ?
+
+        .aka    "db=byt", "dw=da"   ; BYTE, Define Address (16-bit)
+
+; yes ! (makes one's head spin, hmm ?)
+
+        .byt    $05
+        .da     $06
+
+; -------------------------------
+
+; try using period characters in alias names
+
+        .aka    "byte=def.b", "word=def.w", "long=def.l"
+
+        .def.b  $07
+        .def.w  $08
+        .def.l  $09
+
+; -------------------------------
+
+; try not using double-quote delimiters
+
+        .aka    def.b=set.b, def.w=set.w, def.l=set.l
+
+        .set.b  $0A
+        .set.w  $0B
+        .set.l  $0C
+
+; -------------------------------
+
+; try placing spaces around operands
+
+        .aka    ubit08 = unsigned08 , ubit16 = unsigned16
+        .aka    ubit24 = unsigned24
+
+        unsigned08  $0D
+        unsigned16  $0E
+        unsigned24  $0F
+
+; -------------------------------
+
+        .end
+

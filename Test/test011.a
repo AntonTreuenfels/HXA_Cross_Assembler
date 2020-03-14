@@ -1,0 +1,38 @@
+; Hobby Cross-Assembler Test 011
+; Output Files\Other Directory
+; ok: specified name
+
+; by Anton Treuenfels
+
+; first created: 03/14/04
+; last revised:  06/13/06
+
+; no errors to detect (as long as this file is not in root directory !)
+; - escapes processed with double-quote delimited strings,
+; so backslashes must be doubled
+
+        .listfile   "..\\mylist.lst"
+        .errfile    "..\\myerr.err"
+
+        .objfile    "..\\myobj.obj"  ; create an object file
+
+; ...however they are not processed if angle-bracket delimited,
+; so backslashes must not be doubled
+
+        .listfile   <..\mylist.lst>
+        .errfile    <..\myerr.err>
+
+        .objfile    <..\myobj.obj>  ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   $00         ; not much too it !
+
+; -------------------------------
+
+        .end

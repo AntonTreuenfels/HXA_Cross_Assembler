@@ -1,0 +1,44 @@
+; Hobby Cross-Assembler Error Test 015f
+; Pass Termination\Termination
+; error: "END" w/ resolvable start expression but no CPU defined
+
+; by Anton Treuenfels
+
+; first created: 08/14/13
+; last revised:  08/14/13
+
+; warning(s): 0
+
+; error(s): 1
+; - no cpu
+
+; fatal: 1
+; - bad pc
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "T_16_L"    ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .echo   "This is fine!"
+
+; -------------------------------
+
+        .end    $1000        ; error - no cpu, so no legal address known
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+
+; -------------------------------
+
+        .end

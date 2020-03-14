@@ -1,0 +1,72 @@
+; Hobby Cross-Assembler Error Test 035f
+; Expressions\Numeric Literals
+; error: malformed Intel numbers (during pass two)
+
+; by Anton Treuenfels
+
+; first created: 11/29/03
+; last revised:  13/14/03
+
+; warning(s): 0
+
+; error(s): 9
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; - during pass one of Test035e, certain malformed Intel-style numbers
+; were mis-interpreted as labels
+; - these mis-interpretations were not reported because assembly was
+; halted after pass one, and detection would not occur until pass two
+; - these mis-interpretations are tested separately here, so that
+; there are no errors detected during pass one
+; - summary: they are still interpreted as labels during pass two, except
+; that now errors are reported because they are never defined anywhere
+
+; binary numbers (Intel format)
+
+;        .word   11 b
+;        .word   2b
+;        .word   123b
+;         .word   abcb        ; 'abcd' accepted as symbol (label)
+        .word   abcd
+;        .word   abc b
+
+;        .word   2B,aB       ; 'aB' accepted
+        .word   aB
+;        .word   3B, bB      ; 'bB' accepted
+        .word   bB           
+;        .word   4 B ,c B
+;        .word   5 B , d B
+
+; hexadecimal numbers (Intel format)
+
+;        .word   123 h
+;        .word   gh          ; 'gh' accepted
+        .word   gh
+;        .word   123ghih
+;        .word   ghih        ; 'ghih' accepted
+        .word   ghih
+
+;        .word   123 H,456 H
+;        .word   gH, hH      ; 'gH','hH' accepted
+        .word   gH, hH
+;        .word   123ghiH ,456jklH
+;        .word   iH , jH     ; 'iH','jH' accepted
+        .word   iH , jH
+
+; -----------------------
+
+        .end

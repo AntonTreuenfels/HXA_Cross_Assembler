@@ -1,0 +1,42 @@
+; Hobby Cross-Assembler Error Test 007h
+; Messages\Error Count
+; error\fatal: "MAXERR" psop set to three
+
+; by Anton Treuenfels
+
+; first created: 03/06/04
+; last revised:  07/24/12
+
+; warning(s): 0
+
+; error(s): 4
+; - source fault
+
+; fatal: 1
+; - too many errors
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "6502"      ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        .maxerr     3
+
+        .error   "Not fatal (first)"
+
+        .error   "Not fatal (second)"
+
+        .error   "Not fatal (third and last allowed)"
+
+        .error   "Fatal (fourth - over limit)"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Test 008
+; Messages\Assert Messages
+; ok: "ASSERT" psop
+
+; by Anton Treuenfels
+
+; first created: 08/24/13
+; last revised:  08/24/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .assert !cpu$()     ; there is no cpu defined yet
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .assert cpu$()                  ; there is a cpu defined
+
+        .assert cpu$() == "T_16_L"      ; this is the cpu defined
+
+        .assert !index(cpu$(), "24")    ; this cpu is not 24-bit
+
+        .assert * >= $1000              ; pc is at least $1000
+
+        .assert * < $8000               ; pc is less than $8000
+
+        .assert !($ > $10000)           ; pc is not out of range
+                                        ; - redundant, already fatal if true
+
+        ; forward references not resolved until second pass
+
+        .assert myLabel == $1000
+
+        .assert myLabel + 2 == otherLabel
+
+        .assert otherLabel > myLabel
+
+        .assert myLabel$ == "otherLabel"
+
+myLabel
+
+        .word $1234
+
+otherLabel
+
+myLabel$    .equ    "otherLabel"
+
+; -------------------------------
+
+        .end

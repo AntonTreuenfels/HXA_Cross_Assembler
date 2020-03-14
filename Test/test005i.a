@@ -1,0 +1,37 @@
+; Hobby Cross-Assembler Error Test 005i
+; Messages\User Messages
+; fatal: "FATAL" psop
+
+; by Anton Treuenfels
+
+; first created: 02/14/04
+; last revised:  12/08/07
+
+; warning(s): 0
+
+; error(s): 0
+
+; fatal: 1
+; - source fault
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "6502"      ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; this just halts assembly at this line (as it's supposed to)
+
+        .fatal   "Arguments (if any) are also shown"
+
+; -------------------------------
+
+        .end
