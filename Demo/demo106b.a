@@ -1,0 +1,131 @@
+; Hobby Cross-Assembler Demo 106
+; 6502\Jump Tables
+; selecting different execution paths based on an index value (segmented)
+
+; by Anton Treuenfels
+
+; first created: 07/19/06
+; last revised:  07/03/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    6502
+
+; -------------------------------
+
+; for this demo we'll use four segments, which we'll set up now:
+
+        .segment    mainLoop        ; main loop code
+        .org    $1000
+        .ends
+
+        .segment    routAddrLo      ; table of routine addresses, low bytes
+routineAddrLo
+        .ends
+
+        .segment    routAddrHi      ; table of routine addresses, high byte
+routineAddrHi
+        .ends
+
+        .segment    routBlock       ; the routines themselves
+        .org    $A000
+        .ends
+
+; -------------------------------------
+
+; some fake "routines" for example purposes
+; - all we care is that they have some random address value
+; representing their "start addresses"
+
+        .segment    routBlock
+
+Routine0:   .ds 123
+Routine1:   .ds 247
+Routine2:   .ds 381
+            .ds 4598    ; the next 125 fake "routines"
+Routine128  .ds 27
+Routine129  .ds 116
+Routine130  .ds 68
+
+        .ends
+
+; -------------------------------------
+
+; our main loop
+
+; we assume the A-register holds a value the represents the index number
+; of the routine we'd like to execute next.
+; The possible index numbers should be consecutive and are most often
+; zero-based (but not always, depending on the application)
+
+        .segment    mainLoop
+
+MainLoop:       
+        .long 0             ; "fake" main loop code
+        jsr Dispatch        ; call dispatch routine
+        jmp MainLoop        ; continue main loop
+
+Dispatch:
+        tax                 ; move it to an index register
+        lda routineAddrHi,x ; load the high byte of the routine address
+        pha                 ; save it on stack
+        lda routineAddrLo,x ; load the low byte of the routine address
+        pha                 ; save it on stack
+        rts                 ; "jump" to it
+
+        .ends
+
+; -------------------------------------
+
+; now we'll create a macro to simplify maintaining
+; a split routine address table
+; - "?addr" must represent a constant integer value,
+; eg., a known label from an absolute segment
+; - this works by placing the high and low bytes in their proper segments
+; at assembly time
+; - the assembler will determine their actual locations in the object code
+; without the programmer having to worry about it
+; - the assignment to a variable label is not necessary - "?addr" could
+; be substituted directly into the same expression following each ".byte" -
+; but helps speed up assembly by reducing the work the parser has to do
+
+        .macro  split, ?addr
+
+]addr   = (?addr)-1
+
+        .segment    routAddrLo
+        .byte   <]addr
+        .ends
+
+        .segment    routAddrHi
+        .byte   >]addr
+        .ends
+
+        .endm
+
+; -------------------------------------
+
+; now we create our routine address tables: 
+
+        split  Routine0
+        split  Routine1
+        split  Routine2
+
+        ; the next 125 "routines"
+
+        .repeat 125
+        split  0
+        .endr
+
+        split  Routine128
+        split  Routine129
+        split  Routine130
+
+; -------------------------------------
+
+        .end

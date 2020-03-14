@@ -1,0 +1,336 @@
+; Hobby Cross-Assembler Demo 104
+; 6502\Utility Routines
+; ok: developing a block copy, traversing from block start to end
+
+; by Anton Treuenfels
+
+; first created: 08/13/04
+; last revised:  06/30/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; We need to know three things to copy a block:
+; 1) where the block to copy is
+; 2) how big the block to copy is
+; 3) where to copy the block to
+
+; We always start either with this information directly or with other
+; information we can derive it from.
+
+; To start we'll set up some zero page locations to serve as pointers
+; to our working addresses (no, we're not going to use self-modifying
+; code - yech!).
+; The exact addresses don't matter and can be adjusted to whatever
+; works in a particular case.
+
+        .org    $40     ; can be adjusted to whatever is needed
+
+source  .ds     2       ; two bytes per pointer
+dest    .ds     2
+
+; We also need a size to copy, so we'll set up a pair of bytes to
+; hold that.
+
+size     .ds    2       ; two bytes for up to 64K size
+
+; Note the high byte of the size is also the number of whole pages
+; to copy, and the low byte is the number of bytes to copy on the
+; last page.
+; This is handy enough that we'll alias those locations with names:
+
+partpg  .equ    size
+fullpg  .equ    size+1
+
+; We'll assume our caller fills in these values before calling our
+; routine (the exact method doesn't matter).
+
+; --------------------
+; Attempt #1
+; --------------------
+
+; a straightforward approach:
+
+        .org    $1000
+
+CopyFromStart1:
+        ldy     #$00        ; point to first byte of a page
+        ldx     fullpg      ; any full pages ?
+        beq     :+          ; b: no
+ -      lda     (source),y  ; copy a byte
+        sta     (dest),y
+        iny                 ; next byte
+        bne     :-          ; b: page not done
+        inc     source+1    ; point to next pages
+        inc     dest+1
+        dex                 ; another full page ?
+        bne     :-          ; b: yes
+ +      ldx     partpg      ; any partial page ?
+        beq     :+          ; b: no
+ -      lda     (source),y  ; copy a byte
+        sta     (dest),y
+        iny                 ; next byte
+        dex                 ; another byte ?
+        bne     :-          ; b: yes
+ +      rts
+
+; this works fine, and correctly handles the case where size=0.
+; The main objection that can be raised is speed.
+; The main loop to copy whole pages takes (at minimum) 16 cycles a byte,
+; to fill partial pages 18 cycles per byte.
+; To fill, say, 8000 bytes (= 256*31 + 64) takes roughly
+; (256*31)*16 + 64*18 = 128,128 cycles
+; More than a tenth of second with a 1-MHz clock !
+; Can we do better without resorting to self-modifying code (yech!) ?
+
+; --------------------
+; Attempt #2
+; --------------------
+
+; We'd like to have a single main loop, taking advantage of
+; the Y-register becoming zero at the end of each page.
+
+; Let's think about the case of filling just one byte.
+; To fill upwards and have the Y-register become zero, the Y-register
+; has to start with the value 255 and the original source and destination
+; address have to be lowered by 255.
+
+; Recall that the eight-bit two's complement of one is 255.
+; So: we can take the two's complement of the original count, set Y
+; to that value and also subtract it from the original destination:
+; ~CNT -> Y, SRC - ~CNT -> SRC, DST - ~CNT -> DST
+
+; Now consider that the eight bit two's complement can be found
+; by subtracting from 256:
+; DST - ~CNT = DST - ( 256 - CNT )
+;            = DST - 256 + CNT
+;            = DST + CNT - 256
+; ...and subtracting 256 from a 16-bit value can be done with a
+; simple decrement of the high byte of that value
+
+        .org    $1000
+
+CopyFromStart2:
+        ldx     fullpg      ; whole pages
+        inx                 ; account for partial page
+        ldy     partpg      ; partial page byte count
+        beq     @page       ; b: none
+
+        ; we won't do this (which is SRC - 256 + CNT, DST - 256 + CNT)
+
+;        clc
+;        dec     source+1    ; SRC - 256
+;        tya
+;        adc     source
+;        sta     source
+;        bcc     +
+;        inc     source+1    ; SRC - 256 + CNT
+;        clc                 ; make sure carry is cleared for next add
+; +      dec     dest+1      ; DST - 256
+;        tya
+;        adc     dest
+;        sta     dest
+;        bcc     +
+;        inc     dest+1      ; DST - 256 + CNT
+; +
+
+        ; we will do this (which is SRC + CNT - 256, DST + CNT - 256)
+
+        clc                 ; adjust source address
+        tya
+        adc     source
+        sta     source
+        bcs     +           ; don't bother to INC just to DEC right away
+        dec     source+1
+ +      clc                 ; adjust destination address
+        tya
+        adc     dest
+        sta     dest
+        bcs     +           ; b: don't bother to INC just to DEC right away
+        dec     dest+1
+
+ +      tya
+        eor     #$ff        ; one' complement
+        tay
+        iny                 ; two's complement
+
+        ; main loop
+
+ -      lda     (source),y  ; copy a byte
+        sta     (dest),y
+        iny
+        bne     -           ; b: page not done
+        inc     source+1    ; next pages
+        inc     dest+1
+
+@page   dex                 ; another page ?
+        bne     -           ; b: yes
+        rts
+
+; after setup every byte is moved in our main loop in 16 cycles (minimum).
+; So to copy 8000 bytes now takes 8000 * 16 = 128,000 cycles.
+; Which is of course the 64 bytes times two cycles each we've saved.
+; The address adjustment adds some time but overall a bit is saved at the
+; expense of space.
+
+; --------------------
+; Attempt #3
+; --------------------
+
+; now that we have a single main loop we can easily unroll that loop to cut
+; the number of branches in half, saving three cycles for every lost branch:
+
+        .org    $1000
+
+CopyFromStart3:
+        ldx     fullpg      ; whole pages
+        inx                 ; account for partial page
+        ldy     partpg      ; partial page byte count
+        beq     @page       ; b: none
+
+        clc                 ; adjust source address
+        tya
+        adc     source
+        sta     source
+        bcs     +           ; don't bother to INC just to DEC right away
+        dec     source+1
+ +      clc                 ; adjust destination address
+        tya
+        adc     dest
+        sta     dest
+        bcs     +           ; b: don't bother to INC just to DEC right away
+        dec     dest+1
+
+ +      tya
+        eor     #$ff        ; one' complement
+        tay
+        iny                 ; two's complement
+
+        lsr                 ; odd or even count ?
+        bcc     +           ; b: odd (one's complement value here)
+
+        ; main loop
+
+ -      lda     (source),y  ; copy a byte
+        sta     (dest),y    ; Y = 0, 2, ..., 254
+        iny
+ +      lda     (source),y  ; copy a byte
+        sta     (dest),y    ; Y = 1, 3, ..., 255
+        iny
+        bne     -           ; b: page not done
+        inc     source+1    ; next pages
+        inc     dest+1
+
+@page   dex                 ; another page ?
+        bne     -           ; b: yes
+        rts
+
+; unrolling the loop once moves two bytes in 29 cycles instead of
+; the 32 cycles of the original version, a savings of a little under 10%.
+; Moving 8000 bytes now takes 8000/2 * 29 = 116,000 cycles
+; The savings over the original version is 12,000 cycles.
+
+; --------------------
+; Attempt #4
+; --------------------
+
+; even more aggressive: four copies per loop
+
+        .org    $1000
+
+CopyFromStart4:
+        ldx     fullpg      ; whole pages
+        inx                 ; account for partial page
+        ldy     partpg      ; partial page byte count
+        beq     @nextpg     ; b: none
+
+        clc                 ; adjust source address
+        tya
+        adc     source
+        sta     source
+        bcs     +           ; don't bother to INC just to DEC right away
+        dec     source+1
+ +      clc                 ; adjust destination address
+        tya
+        adc     dest
+        sta     dest
+        bcs     +           ; b: don't bother to INC just to DEC right away
+        dec     dest+1
+
+ +      tya
+        eor     #$ff        ; one's complement
+        tay
+        iny                 ; two's complement
+
+        ; the low two bits of the original partial page count tell us
+        ; where to enter the loop.
+        ; at the end of the first loop we want the value in the Y-register
+        ; to be a multiple of four (ie., the low two bits = %00)
+
+        ; %00 -> 4, 8, ..., 252, so move four byte the first time
+        ; %01 -> 1, 5, ..., 253, so move three bytes the first time
+        ; %10 -> 2, 6, ..., 254, so move two bytes the first time
+        ; %11 -> 3, 7, ..., 255, so move one byte the first time
+
+        ; in the A-register we have the one's complement of the
+        ; original partial page count.
+        ; the low two bits have been changed:
+        ; %00 -> %11, %01 -> %10, %10 -> %01, %11 -> %00
+
+        and     #%11        ; isolate the low two bits
+        beq     @cp_11      ; b: we originally had %xxxxxx11
+        lsr
+        beq     @cp_10      ; b: we originally had %xxxxxx10
+        bcc     @cp_01      ; b: we originally had %xxxxxx01
+
+        ; we originally had %xxxxxx00
+
+        ; main loop
+
+@cp_00  lda     (source),y  ; copy a byte
+        sta     (dest),y    ; Y = 0, 4, ..., 252
+        iny
+@cp_01  lda     (source),y  ; copy a byte
+        sta     (dest),y    ; Y = 1, 5, ..., 253
+        iny                 
+@cp_10  lda     (source),y  ; copy a byte   
+        sta     (dest),y    ; Y = 2, 6, ..., 254
+        iny                 
+@cp_11  lda     (source),y  ; copy a byte
+        sta     (dest),y    ; Y = 3, 7, ..., 255
+        iny
+        bne     -           ; b: page not done
+        inc     source+1    ; next pages
+        inc     dest+1
+
+@nextpg dex                 ; another page ?
+        bne     @cp_00      ; b: yes
+        rts
+
+; this moves four bytes in 55 cycles instead of the 64 cycles of the
+; original version or the 58 cycles of the once-unrolled version.
+; Moving 8000 bytes now takes 8000/4 * 55 = 110,000 cycles.
+; About 18,000 cycles less than the original and 6,000 cycles less than
+; the once-unrolled version.
+
+; Doubling the unrolling from two to four gains only half as much as
+; unrolling from one to two.
+; This is a general rule: each doubling will gain, but only half as much
+; as the previous one.
+; Total gain quickly approaches a limit: maximum gain occurs when the loop
+; is completely unrolled and there is no branching at all, but assuming
+; indirect addressing the code size required to copy 8000 bytes would
+; be more than than 40K (8000 * 5) and would still take 104,000 cycles
+
+; -------------------------------
+
+        .end

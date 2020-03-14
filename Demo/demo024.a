@@ -1,0 +1,189 @@
+; Hobby Cross-Assembler Demo 024
+; Character Packing\Forty Char Alphabet
+; ok: code three characters into two bytes
+
+; by Anton Treuenfels
+
+; first created: 06/02/08
+; last revised:  08/07/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .if ver() < $0163
+        .fatal  "HXA version 0.163 or higher required"
+        .endif
+
+; -------------------------------
+
+; the largest three-digit base 40 number fits into 16 bits:
+
+; = 39 * 40^2 + 39 * 40^1 + 39 * 40^0
+; = 39 * 1600 + 39 * 40 + 39
+; = 62400 + 1560 + 39
+; = 63999 = 0xF9FF
+
+; fun fact:
+; 63999 is also the largest legal line number allowed by
+; Commodore BASIC intepreters (simply compare the high byte to $FA)
+
+; - any 40 character subset of all 256 one-byte characters can be encoded
+
+; the Digital Equipment Corporation (DEC) used a 3-into-2 encoding scheme
+; in many of its products called RAD50 (50 octal is the same as 40 decimal)
+
+; PDP-6, PDP-10, DECsystem 10, DECsystem 20 coding:
+
+; RAD50_PDP10$  .equ    " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.$%"
+
+; PDP-11, VAX coding:
+
+; RAD50_VAX$    .equ    " ABCDEFGHIJKLMNOPQRSTUVWXYZ$.%0123456789"
+
+; - however we will use another ordering (just because we can):
+
+CHARSET$        .equ    " ,.0123456789?ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+; - this ordering also preserves the original ASCII sort order
+; when comparing encoded strings (if that's useful)
+
+; -------------------------------
+
+; macro: convert char to a value in the range 0..39
+; - warn if not possible (and substitute default value)
+; - also set index to next character to process
+
+        .macro  RAD_40_VAL
+]CH$    = mid$( ]INP$, ]NDX, 1 )
+]VAL    = index( CHARSET$, ]CH$ ) - 1
+        .if ]VAL < 0
+        .warn "Invalid input char: " ]CH$
+]VAL    = 0                     
+        .endif
+]NDX    = ]NDX - 1
+        .endm
+
+; -------------------------------
+
+; macro: encode ASCII character string as base 40 string
+; - ]INP$ loses case and is padded to a multiple of three chars long
+; - ]OUT$ is always a multiple of two bytes long
+; - null input -> null output
+
+        .macro  ENCODE, ]INP$
+
+]INP$   = toupper$( ]INP$ ) mid$( "  ", len(]INP$)%3 )
+
+]OUT$   = ""
+]NDX    = len( ]INP$ )          ; we'll encode right->left
+
+        .while ]NDX
+
+        RAD_40_VAL
+]WORD   = ]VAL
+        RAD_40_VAL
+]WORD   = ]WORD + ]VAL * 40
+        RAD_40_VAL
+]WORD   = ]WORD + ]VAL * 1600
+
+]OUT$   = chr$( ]WORD>>8 ) chr$( ]WORD ) ]OUT$
+
+        .endw
+
+        .endm
+
+; -------------------------------
+
+; macro: decode base 40 string to ASCII string
+; - of little practical use (since at assembly time it is unlikely
+; strings will be specified in this manner), but shows one way to do it
+; - encode/decode sequence is not "lossless" since 1) case of alphabetic
+; chars is lost and 2) decoded string is always a multiple of three chars
+; long (and may end with added spaces)
+; - of course additional processing may be added - remove trailing spaces,
+; lowercase all but leading alphabetic char, etc.
+
+        .macro  DECODE, ]INP$
+
+]OUT$   = ""
+]NDX    = len( ]INP$ )          ; we'll decode right->left
+
+        while ]NDX 
+
+]WORD   = ord( ]INP$, ]NDX-1 ) << 8 | ord( ]INP$, ]NDX )
+
+]C1$    = mid$( CHARSET$, ]WORD/1600+1, 1 )
+]WORD   = ]WORD % 1600
+]C2$    = mid$( CHARSET$, ]WORD/40+1, 1 )
+]WORD   = ]WORD % 40
+]C3$    = mid$( CHARSET$, ]WORD+1, 1 )
+
+]OUT$   = ]C1$ ]C2$ ]C3$ ]OUT$
+
+]NDX    = ]NDX - 2
+
+        .endw
+
+        .endm
+        
+; -------------------------------
+
+; show string (if possible)
+
+        .macro  PSTR, ]S$
+
+        .byte   len(]S$)
+        .if     ]S$
+        .str    ]S$
+        .endif
+
+        .endm
+
+; a test macro
+
+        .macro  test, ]TEST$
+
+        PSTR    ]TEST$
+
+        ENCODE  ]TEST$
+
+        PSTR    ]OUT$
+
+        DECODE  ]OUT$
+
+        PSTR    ]OUT$
+
+        .endm
+
+; -------------------------------
+
+; try it
+
+        test    "Hello, World"
+
+        test    CHARSET$
+
+        test    "You see a small white house."
+
+        test    "May I have a large container of coffee?"
+
+        test    ""
+
+]NUM$   = "0123456789"
+        .while len(]NUM$)
+        test    ]NUM$
+]NUM$   = mid$( ]NUM$, 2 )
+        .endw
+
+; -------------------------------
+
+        .end

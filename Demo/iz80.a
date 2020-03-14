@@ -1,0 +1,731 @@
+; Hobby Cross-Assembler Processor Instruction Set
+; Macro Implementation
+; Processor: Z80
+
+; by Anton Treuenfels
+
+; first created: 03/31/05
+; last revision: 05/14/11
+
+;-----------------------------------------------
+
+; the Z80 instruction reference used here is found in
+; "Small-Mac: An Assembler for Small-C" by J E Hendrix
+; in "Dr Dobb's Toolbook of C", published by Prentice Hall, 1986
+; - I don't really know anything about the Z80; all I did here
+; was look at the instruction tables and try to deduce patterns !
+
+;-----------------------------------------------
+
+        .if ver() < $0150
+        .fatal  "HXA version 0.150 or higher required"
+        .endif
+
+;-----------------------------------------------
+
+; variable labels are used to:
+; - reduce macro substitution
+; - increase expression cache efficiency
+
+;-----------------------------------------------
+
+        .cpu    "T_16_L"    ; 16-bit little-endian
+
+;-----------------------------------------------
+
+; reserved label names
+
+]opc    .equ 0              ; opcode value
+]opc1   .equ 0              ; opcode value
+]opc2   .equ 0              ; opcode value
+]val    .equ 0              ; numeric value
+
+]addr$  .equ ""
+]arg$   .equ ""
+]bit$   .equ ""
+]dst$   .equ ""
+]flg$   .equ ""
+]reg$   .equ ""
+]src$   .equ ""
+
+; Z80 registers
+
+A       .equ    7
+B       .equ    0
+C       .equ    1
+D       .equ    2
+E       .equ    3
+H       .equ    4
+L       .equ    5
+HL      .equ    6
+
+IX      .equ    0
+IY      .equ    0
+
+BC      .equ    00H
+DE      .equ    10H
+SP      .equ    30H
+
+_rBC    .equ    00H
+_rDE    .equ    10H
+_rHL    .equ    20H
+_rSP    .equ    30H
+
+_rIX    .equ    20H
+_rIY    .equ    20H
+
+_fC     .equ    18H
+_fM     .equ    38H
+_fNC    .equ    10H
+_fNZ    .equ    00H
+_fP     .equ    30H
+_fPE    .equ    28H
+_fPO    .equ    20H
+_fZ     .equ    08H
+
+_im0    .equ    46H
+_im1    .equ    56H
+_im2    .equ    5EH
+
+_sA     .equ    7*8
+_sB     .equ    0*8
+_sC     .equ    1*8
+_sD     .equ    2*8
+_sE     .equ    3*8
+_sH     .equ    4*8
+_sL     .equ    5*8
+_sHL    .equ    6*8
+
+_rAF    .equ    30H
+
+;-----------------------------------------------
+; Error Macros
+;-----------------------------------------------
+
+        .macro _err_badarg, ?varlabel=Multiple possible
+        .error "Bad argument: " ?varlabel
+        .endm
+
+        .macro  _err_badval
+        .error  "Illegal value"
+        .endm
+
+;-----------------------------------------------
+; Helper Macros
+;-----------------------------------------------
+
+        ; secondary, tertiary, quaternary: various
+
+        .macro _ix.iy.prefix, ]reg$, ]val
+        .if ]reg$ ~ /I[XY]/
+        .byte ]reg$ ~ /IX/ ? 0DDH : 0FDH
+        .endif
+        .byte ]val
+        .endm
+
+;-----------------------------------------------
+
+        ; primary: ADD, AND, CP, OR, SUB, XOR
+        ; secondary: ADC, SBC
+
+        .macro _log.arith.op, ]src$, ]opc
+        .if ]src$ ~ /^[ABCDEHL]$|^\(HL\)$/
+        .byte ]opc+val(]src$)
+        .elseif ]src$ ~ /^\(I[XY]\+.+\)$/
+        .byte ]src$ ~ /IX/ ? 0DDH : 0FDH, ]opc+006H, val(]src$)
+        .else
+        .byte ]opc+046H, val(]src$)
+        .endif
+        .endm
+
+        ; primary: ADC, SBC
+
+        .macro _arith.carry, ]dst$, ]src$, ]opc1, ]opc2
+        .if ]dst$ == "A"
+        _log.arith.op ]src$, ]opc1
+        .elseif ]dst$ == "HL" && ]src$ ~ /^(BC|DE|HL|SP)$/
+        .byte 0EDH, ]opc2+val("_r" ]src$)
+        .else
+        _err_badarg
+        .endif
+        .endm
+
+        ; primary: ADD
+
+        .macro _add.not.acc, ]dst$, ]src$
+        .if ]dst$ ~ /^I[XY]$/
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH
+        .elseif ]dst$ != "HL"
+        _err_badarg ]dst$
+        .endif
+        .if ]src$ ~ /^(BC|DE|SP)$/ || ]src$ == ]dst$
+        .byte 009H+val("_r" ]src$)
+        .else
+        _err_badarg ]src$
+        .endif
+        .endm
+
+        ; primary: BIT, RES, SET
+
+        .macro _bit.op, ]bit$, ]dst$, ]opc
+        .if ]bit$ !~ /^[0-7]$/
+        _err_badarg ]bits$
+        .else
+]opc    .equ ]opc+val(]bit$)*8
+
+        ; primary: RL, RLC, RR, RRC, SLA, SRA, SRL
+
+        .macro _shift.op, ]dst$, ]opc
+        .if ]dst$ ~ /^[ABCDEHL]$|^\(HL\)$/
+        .byte 0CBH, ]opc+val(]dst$)
+        .elseif ]dst$ ~ /^\(I[XY]\+.+\)$/
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH, 0CBH, val(]dst$), ]opc+006H
+        .else
+        _err_badarg ]dst$
+        .endif
+        .endm           ; _shift.op
+
+        .endif
+        .endm           ; _bit.op
+
+        ; primary: CALL, JP
+
+        .macro _pc.delta, ]flg$, ]addr$, ]opc1, ]opc2
+        .if ]addr$ == "@"
+        .byte ]opc2
+        .uword val(]flg$)
+        .elseif ]flg$ ~ /^([CMPZ]|NC|NZ|PE|PO)$/
+        .byte ]opc1+val("_f" ]flg$)
+        .uword val(]addr$)
+        .else
+        _err_badarg ]flg$
+        .endif
+        .endm
+
+        ; primary: DEC, INC
+
+        .macro  _bump.one, ]dst$, ]opc1, ]opc2
+        .if ]dst$ ~ /^[ABCDEHL]$|^\(HL\)$/
+        .byte ]opc1+val(]dst$)*8
+        .elseif ]dst$ ~ /^\(I[XY]\+.+\)$/
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH, ]opc1+030H, val(]dst$)
+        .elseif ]dst$ ~ /^(BC|DE|HL|IX|IY|SP)$/
+        _ix.iy.prefix ]dst$, ]opc2+val("_r" ]dst$)
+        .else
+        _err_badarg ]dst$
+        .endif
+        .endm
+
+        ; primary: IN, OUT
+
+        .macro _io.op, ]reg$, ]arg$, ]opc1, ]opc2
+        .if ]reg$ ~ /^[ABCDEHL]$/ && ]arg$ == "(C)"
+        .byte 0EDH, ]opc1+val("_s" ]reg$)
+        .elseif ]reg$ == "A" && ]arg$ ~ /^\(.+\)$/
+        .byte ]opc2, val(]arg$)
+        .else
+        _err_badarg
+        .endif
+        .endm
+
+        ; primary: POP, PUSH
+
+        .macro _stack.op, ]reg$, ]opc
+        .if ]reg$ ~ /^(HL|IX|IY)$/
+        _ix.iy.prefix ]reg$, ]opc+020H
+        .elseif ]reg$ ~ /^(BC|DE|AF)$/
+        .byte ]opc+val("_r" ]reg$)
+        .else
+        _err_badarg ]reg$
+        .endif
+        .endm
+
+; ------------------------------------------------------------------
+; LD macros - so many they get their own section !
+; - also special in that "]dst$" and "]src$" are set during initial
+; expansion and then assumed globally (ie., not explicitly passed)
+; ------------------------------------------------------------------
+
+        ; secondary: LD
+
+        .macro _ld.a.other
+        .if ]src$ ~ /^\(BC|DE\)$/
+        .byte ]src$ == "(BC)" ? 00AH : 01AH
+        .elseif ]src$ ~ /^\(.+\)$/
+        .byte 03AH
+        .word val(]src$)
+        .elseif ]src$ ~ /^[IR]$/
+        .byte 0EDH, ]src$ == "I" ? 057H : 05FH
+        .else
+        .byte 03EH, val(]src$)
+        .endif
+        .endm
+
+        ; primary: LD
+        ; tertiary: LD
+
+        .macro  _ld.common.dst
+        .if ]src$ ~ /^[ABCDEHL]$|^\(HL\)$/
+        .byte 040H+val(]dst$)*8+val(]src$)
+        .elseif ]src$ ~ /^\(I[XY]\+.+\)$/
+        .byte ]src$ ~ /IX/ ? 0DDH : 0FDH, 046H+val(]dst$)*8, val(]src$)
+        .elseif ]dst$ != "A"
+        .byte 006H+val(]dst$)*8, val(]src$)
+        .else
+        _ld.a.other
+        .endif
+        .endm
+
+        ; tertiary: LD
+
+        .macro _ld.ind.ndx
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH
+        .if ]src$ ~ /^[ABCDEHL]$/
+        .byte 070H+val(]src$), val(]dst$)
+        .else
+        .byte 036H, val(]dst$), val(]src$)
+        .endif
+        .endm
+
+        ; quaternary: LD
+
+        .macro _ld.ind.a
+        .if ]dst$ ~ /^\((BC|DE)\)$/
+        .byte 002H+val(]dst$)
+        .else
+        .byte 032H
+        .word val(]dst$)
+        .endif
+        .endm
+
+        ; quaternary: LD
+
+        .macro _ld.ind.wptr
+        .if ]src$ ~ /^(BC|DE|SP)$/
+        .byte 0EDH, 043H+val(]src$)
+        .else
+        .if ]src$ ~ /^I[XY]$/
+        .byte ]src$ ~ /IX/ ? 0DDH : 0FDH
+        .endif
+        .byte 022H
+        .endif
+        .word val(]dst$)
+        .endm
+
+        ; tertiary: LD
+
+        .macro _ld.ind.other
+        .if ]src$ == "A"
+        _ld.ind.a
+        .elseif ]src$ ~ /^(BC|DE|HL|IX|IY|SP)$/
+        _ld.ind.wptr
+        else
+        _err_badarg ]src$
+        .endif
+        .endm
+
+        ; secondary: LD
+
+        .macro _ld.ind.dst
+        .if ]dst$ == "(HL)" && ]src$ !~ /^\((HL|I[XY]\+.+)\)$/
+        _ld.common.dst
+        .elseif ]dst$ ~ /^\(I[XY]\+.+\)$/
+        _ld.ind.ndx
+        .else
+        _ld.ind.other
+        .endif
+        .endm
+
+        ; tertiary: LD
+
+        .macro _ld.double.ind
+        .if ]dst$ ~ /^(BC|DE|SP)$/
+        .byte 0EDH, 04BH+val(]dst$)
+        .else
+        .if ]dst$ ~ /^I[XY]$/
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH
+        .endif
+        .byte 02AH
+        .endif
+        .endm
+
+        ; tertiary: LD
+        ; quaternary: LD
+
+        .macro _ld.double.dir
+        .if ]dst$ ~ /^(BC|DE|SP)$/
+        .byte 001H+val(]dst$)
+        .else
+        .if ]dst$ ~ /^I[XY]$/
+        .byte ]dst$ ~ /IX/ ? 0DDH : 0FDH
+        .endif
+        .byte 021H
+        .endif
+        .endm
+
+        ; secondary: LD
+        ; tertiary: LD
+
+        .macro _ld.double
+        .if ]src$ ~ /^\(.+\)$/
+        _ld.double.ind
+        .else
+        _ld.double.dir
+        .endif
+        .word val(]src$)
+        .endm
+
+        ; secondary: LD
+
+        .macro _ld.other.other
+        .if ]dst$ == "SP"
+        .if ]src$ ~ /^(HL|IX|IY)$/
+        _ix.iy.prefix ]src$, 0F9H
+        .else
+        _ld.double
+        .endif
+        .elseif ]dst$ ~ /^[IR]$/ && ]src$ == "A"
+        .byte 0EDH, ]dst$ == "I" ? 047H : 04FH
+        .else
+        _err_badarg
+        .endif
+        .endm
+
+        ; primary: LD
+
+        .macro _ld.other.dst
+        .if ]dst$ ~ /^\(.+\)$/
+        _ld.ind.dst
+        .elseif ]dst$ ~ /^(BC|DE|HL|IX|IY)$/
+        _ld.double
+        .else
+        _ld.other.other
+        .endif
+        .endm
+
+;-----------------------------------------------
+; Z80 Instruction Set in Alphabetical Order
+;-----------------------------------------------
+
+        .macro  ADC, ?dst, ?src
+        _arith.carry "?dst", "?src", 088H, 04AH
+        .endm
+
+        .macro ADD, ?dst, ?src
+]dst$   .equ "?dst"
+        .if ]dst$ == "A"
+        _log.arith.op "?src", 080H
+        .else
+        _add.not.acc ]dst$, "?src"
+        .endif
+        .endm
+
+        .macro AND, ?src
+        _log.arith.op "?src", 0A0H
+        .endm
+
+        .macro BIT, ?bitnum, ?dst
+        _bit.op "?bitnum", "?dst", 040H
+        .endm
+
+        .macro  CALL, ?cond, ?addr=@
+        _pc.delta "?cond", "?addr", 0C4H, 0CDH
+        .endm
+
+        .macro  CCF
+        .byte   03FH
+        .endm
+
+        .macro  CP, ?src
+        _log.arith.op "?src", 0B8H
+        .endm
+
+        .macro  CPD
+        .byte 0EDH, 0A9H
+        .endm
+
+        .macro  CPDR
+        .byte 0EDH, 0B9H
+        .endm
+
+        .macro  CPI
+        .byte 0EDH, 0A1H
+        .endm
+
+        .macro CPIR
+        .byte 0EDH, 0B1H
+        .endm
+
+        .macro CPL
+        .byte 02FH
+        .endm
+
+        .macro DAA
+        .byte 027H
+        .endm
+
+        .macro DEC, ?reg
+        _bump.one "?reg", 005H, 00BH
+        .endm
+
+        .macro DI
+        .byte 0F3H
+        .endm
+
+        .macro DJNZ, ?target
+        .byte 010H
+        .rbyte ?target
+        .endm
+
+        .macro EI
+        .byte 0FBH
+        .endm
+
+        .macro EX, ?reg1, ?reg2
+]reg$   .equ "?reg1?reg2"
+        .if ]reg$ ~ /^\(SP\)(HL|IX|IY)$/
+        _ix.iy.prefix "?reg2", 0E3H
+        .elseif ]reg$ == "AFAF'"
+        .byte 008H
+        .elseif ]reg$ == "DEHL"
+        .byte 0EBH
+        .else
+        _err_badarg ]reg$
+        endif
+        .endm
+
+        .macro EXX
+        .byte 0D9H
+        .endm
+
+        .macro HALT
+        .byte 076H
+        .endm
+
+        .macro IM, ?arg
+]arg$   .equ "?arg"
+        .if ]arg$ ~ /^[012]$/
+        .byte 0EDH, val("_im" ]arg$)
+        .else
+        _err_badarg ]arg$
+        .endif
+        .endm
+
+        .macro IN, ?reg, ?ptr
+        _io.op "?reg", "?ptr", 040H, 0DBH
+        .endm
+
+        .macro INC, ?reg
+        _bump.one "?reg", 004H, 003H
+        .endm
+
+        .macro IND
+        .byte 0EDH, 0AAH
+        .endm
+
+        .macro INDR
+        .byte 0EDH, 0BAH
+        .endm
+
+        .macro INI
+        .byte 0EDH, 0A2H
+        .endm
+
+        .macro INIR
+        .byte 0EDH, 0B2H
+        .endm
+
+        .macro JP, ?cond, ?addr=@
+        .if "?addr" == "@" && "?cond" ~ /^\((HL|IX|IY)\)$/
+        _ix.iy.prefix "?cond", 0E9H
+        .else
+        _pc.delta "?cond", "?addr", 0C2H, 0C3H
+        .endif
+        .endm
+
+        .macro JR, ?cond, ?target=@
+]flg$   .equ "?cond"
+        .if "?target" == "@"
+        .byte 018H
+        .rbyte val(]flg$)
+        .elseif ]flg$ ~ /^(C|NC|NZ|Z)$/
+        .byte 020H+val("_f" ]flg$)
+        .rbyte ?target
+        .else
+        _err_badarg
+        .endif
+        .endm
+
+        .macro  LD, ?dst, ?src
+]dst$   .equ "?dst"
+]src$   .equ "?src"
+        .if ]dst$ ~ /^[ABCDEHL]$/
+        _ld.common.dst
+        .else
+        _ld.other.dst
+        .endif
+        .endm
+
+        .macro  LDD
+        .byte 0EDH, 0A8H
+        .endm
+
+        .macro  LDDR
+        .byte 0EDH, 0B8H
+        .endm
+
+        .macro LDI
+        .byte 0EDH, 0A0H
+        .endm
+
+        .macro LDIR
+        .byte 0EDH, 0B0H
+        .endm
+
+        .macro NEG
+        .byte 0EDH, 044H
+        .endm
+
+        .macro NOP
+        .byte 000H
+        .endm
+
+        .macro OR, ?src
+        _log.arith.op "?src", 0B0H
+        .endm
+
+        .macro OTDR
+        .byte 0EDH, 0B8H
+        .endm
+
+        .macro OTIR
+        .byte 0EDH, 0B3H
+        .endm
+
+        .macro OUT, ?reg, ?ptr
+        _io.op "?ptr", "?reg", 041H, 0D3H
+        .endm
+
+        .macro OUTD
+        .byte 0EDH, 0ABH
+        .endm
+
+        .macro OUTI
+        .byte 0EDH, 0A3H
+        .endm
+
+        .macro POP, ?reg
+        _stack.op "?reg", 0C1H
+        .endm
+
+        .macro PUSH, ?reg
+        _stack.op "?reg", 0C5H
+        .endm
+
+        .macro RES, ?bitnum, ?dst
+        _bit.op "?bitnum", "?dst", 080H
+        .endm
+
+        .macro RET, ?cond=@
+]flg$   .equ "?cond"
+        .if ]flg$ == "@"
+        .byte 0C9H
+        .elseif ]flg$ ~ /^([CMPZ]|NC|NZ|PE|PO)$/
+        .byte 0C0H+val("_f" ]flg$)
+        .else
+        _err_badarg ]arg$
+        .endif
+        .endm
+
+        .macro RETI
+        .byte 0EDH, 04DH
+        .endm
+
+        .macro RETN
+        .byte 0EDH, 045H
+        .endm
+
+        .macro RL, ?reg
+        _shift.op "?reg", 010H
+        .endm
+
+        .macro RLA
+        .byte 017H
+        .endm
+
+        .macro RLC, ?reg
+        _shift.op "?reg", 000H
+        .endm
+
+        .macro RLCA
+        .byte 007H
+        .endm
+
+        .macro RLD
+        .byte 0EDH, 06FH
+        .endm
+
+        .macro RR, ?reg
+        _shift.op "?reg", 018H
+        .endm
+
+        .macro RRC, ?reg
+        _shift.op "?reg", 008H
+        .endm
+
+        .macro RRCA
+        .byte 00FH
+        .endm
+
+        .macro RRD
+        .byte 0EDH, 067H
+        .endm
+
+        .macro RRA
+        .byte 01FH
+        .endm
+
+        .macro  RST, ?num
+]opc    .equ ?num
+        .if (]opc&00000111B) == ]opc
+        .byte   0C7H+]opc*8
+        .elseif (]opc&00111000B) == ]opc
+        .byte   0C7H+]opc
+        .else
+        _err_badarg ]opc
+        .endif
+        .endm
+
+        .macro  SBC, ?dst, ?src
+        _arith.carry "?dst", "?src", 098H, 042H
+        .endm
+
+        .macro SCF
+        .byte 037H
+        .endm
+
+        .macro SET, ?bitnum, ?dst
+        _bit.op "?bitnum", "?dst", 0C0H
+        .endm
+
+        .macro SLA, ?reg
+        _shift.op "?reg", 020H
+        .endm
+
+        .macro SRA, ?reg
+        _shift.op "?reg", 028H
+        .endm
+
+        .macro SRL, ?reg
+        _shift.op "?reg", 038H
+        .endm
+
+        .macro SUB, ?src
+        _log.arith.op "?src", 090H
+        .endm
+
+        .macro XOR, ?src
+        _log.arith.op "?src", 0A8H
+        .endm
+
+;-----------------------------------------------

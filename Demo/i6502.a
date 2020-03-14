@@ -1,0 +1,536 @@
+; Hobby Cross-Assembler Processor Instruction Set
+; Macro Implementation
+; Processor: 6502
+
+; by Anton Treuenfels
+
+; first created: 06/26/06
+; last revision: 01/29/12
+
+;-----------------------------------------------
+
+        .if ver() < $0180
+        .fatal  "HXA version 0.180 or higher required"
+        .endif
+
+; ----------------------------
+
+; this file implements the same instruction set for the 6502 as
+; the HXA65 assembler, including extended instruction variants defined
+; by Western Design Center (portable) and HXA65 (not portable)
+
+; "forced address modes" (normally zero page modes to absolute and
+; vice versa) are NOT supported, however additional macros having
+; the same effect are not difficult to define
+; (eg., LDAA could be defined to "Load Absolute Always")
+
+; variable labels are used to:
+; - reduce macro substitution
+; - increase expression cache efficiency
+
+; ----------------------------
+
+        .if !cpu$()         ; cpu not defined yet ?
+
+        .cpu    "T_16_L"    ; 16-bit little-endian
+
+        .endif
+
+; ----------------------------
+
+        .if cpu$() ~ /[LM]16/   ; 16-bit "byte" (65K "zero page") ?
+abs_mask    .equ    $FFFF0000
+        .else                   ; assume 8-bit byte (256-byte "zero page")
+abs_mask    .equ    $FFFFFF00
+        .endif
+
+; ----------------------------
+
+; reserved label names - macro expansion can change their values!!
+
+]adr$   .equ    ""
+]ndx$   .equ    ""
+]opc    .equ    0
+
+; ----------------------------
+; Error Macros
+; ----------------------------
+
+        .macro badmode
+        .error "Bad address mode"
+        .endm
+
+; ----------------------------
+; Helper Macros
+; ----------------------------
+
+; store single address modes
+
+        ; store absolute
+
+        .macro _st_ab, ]opc
+        .byte ]opc
+        .uword val(]adr$)
+        .endm
+
+        ; store immediate
+
+        .macro  _st_imm, ]opc
+        .byte ]opc, val(mid$(]adr$, 2))
+        .endm
+
+        ; store implied
+
+        .macro _st_imp, ]opc
+        .byte ]opc
+        .endm
+
+        ; store program counter relative
+
+        .macro _st_pcr
+        .byte ]opc
+        .rbyte val(]adr$)
+        .endm
+
+        ; store zero page
+
+        .macro _st_zp
+        .byte ]opc
+        .ubyte val(]adr$)
+        .endm
+
+        ; store zero page x-indexed indirect
+
+        .macro  _st_zpxi
+        .byte ]opc
+        .ubyte val(mid$(]adr$,2,indexr(]adr$,",")-2))
+        .endm
+
+; store absolute or zero page address mode
+
+        ; store absolute,y or zero page indirect y-indexed
+
+        .macro  _st_aby.zpiy, ]opc
+        .if ]adr$ ~ /^\(.*\)$/
+        .byte ]opc
+        .ubyte val(]adr$)
+        .else
+        .byte ]opc+8
+        .uword val(]adr$)
+        .endif
+        .endm
+
+        ; store absolute or zero page
+        ; - absolute if addr not resolvable or not on "zero page"
+
+        .macro  _st_ab.zp
+        .if forward(]adr$) || (val(]adr$) & abs_mask)
+        .byte ]opc+8
+        .uword val(]adr$)
+        .else
+        .byte ]opc
+        .ubyte val(]adr$)
+        .endif
+        .endm
+
+; disallow illegal address modes
+
+        ; "absolute" class
+
+        .macro _chk_ab, ]opc
+        .if ]adr$ !~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        _st_ab ]opc
+        .else
+        badmode
+        .endif
+        .endm
+
+        ; "absolute and zero page" class
+
+        .macro _chk_ab.zp, ]opc
+        .if ]adr$ !~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        _st_ab.zp
+        .else
+        badmode
+        .endif
+        .endm
+
+        ; "program counter relative" class
+
+        .macro _chk_pcr, ]opc, ]adr$
+        .if ]adr$ !~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        _st_pcr
+        .else
+        badmode
+        .endif
+        .endm
+
+        ; "zero page" class
+
+        .macro _chk_zp, ]opc
+        .if ]adr$ !~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        _st_zp
+        .else
+        badmode
+        .endif
+        .endm
+
+; distinguish between multiple possible address modes
+
+        ; between absolute, immediate, zero page
+        ; and zero page x-indexed indirect
+
+        .macro  _ab.imm.zp.zpxi
+        .if ]adr$ ~ /^#/
+        _st_imm ]opc+8
+        .elseif ]adr$ ~ /^\(.+\,[ \t]*X[ \t]*\)$/i
+        _st_zpxi
+        .else
+        _chk_ab.zp ]opc+4
+        .endif
+        .endm
+
+        ; between absolute, immediate and zero page
+
+        .macro _ab.imm.zp, ]opc
+        .if ]adr$ ~ /^#/
+        _st_imm ]opc
+        .else
+        _chk_ab.zp ]opc+4
+        .endif
+        .endm
+
+        ; between absolute, absolute,x, accumulator,
+        ; zero page and zero page,x
+
+        .macro _ab.abx.acc.zp.zpx, ]opc, ]adr$, ]ndx$
+        .if ]ndx$ !~ /^[X@]$/i
+        badmode
+        .elseif ]ndx$ ~ /X/i
+        _chk_ab.zp ]opc+16
+        .elseif ]adr$ ~ /^A$/i
+        _st_imp ]opc+4
+        .else
+        _chk_ab.zp ]opc
+        .endif
+        .endm
+
+        ; between absolute, absolute,x, zero page and zero page,x
+
+        .macro  _ab.abx.zp.zpx, ]opc, ]adr$, ]ndx$
+        .if ]ndx$ ~ /^X$/i
+        _chk_ab.zp ]opc+16
+        .elseif ]ndx$ == "@"
+        _chk_ab.zp ]opc
+        .else
+        badmode
+        .endif
+        .endm
+
+; distinguish shared address class possibilities
+
+        ; "arithmetic-logic" class (load/store, too)
+
+        .macro  _arith.logic, ]opc, ]adr$, ]ndx$
+        .if ]ndx$ ~ /Y/i
+        _st_aby.zpiy ]opc+16
+        .elseif ]ndx$ ~ /X/i
+        _chk_ab.zp ]opc+20
+        .elseif ]ndx$ == "@"
+        _ab.imm.zp.zpxi
+        .else
+        badmode
+        .endif
+        .endm
+
+; ----------------------------
+; Processor Instruction Macros
+; ----------------------------
+
+        .macro  ADC, ?addr=@, ?ndx=@
+        _arith.logic $61, "?addr", "?ndx"
+        .endm
+
+        .macro  AND, ?addr=@, ?ndx=@
+        _arith.logic $21, "?addr", "?ndx"
+        .endm
+
+        .macro  ASL, ?addr=A, ?ndx=@
+        _ab.abx.acc.zp.zpx $06, "?addr", "?ndx"
+        .endm
+
+        .macro  BCC, ?addr=@
+        _chk_pcr $90, "?addr"
+        .endm
+
+        .macro  BCS, ?addr=@
+        _chk_pcr $B0, "?addr"
+        .endm
+
+        .macro  BEQ, ?addr=@
+        _chk_pcr $F0, "?addr"
+        .endm
+
+        .macro  BGE, ?addr=@    ; (wdc)
+        _chk_pcr $B0, "?addr"
+        .endm
+
+        .macro  BIT, ?addr=@
+]adr$   = "?addr"
+        _chk_ab.zp $24
+        .endm
+
+        .macro  BLT, ?addr=@    ; (wdc)
+        _chk_pcr $90, "?addr"
+        .endm
+
+        .macro  BMI, ?addr=@
+        _chk_pcr $30, "?addr"
+        .endm
+
+        .macro  BNE, ?addr=@
+        _chk_pcr $D0, "?addr"
+        .endm
+
+        .macro  BPL, ?addr=@
+        _chk_pcr $10, "?addr"
+        .endm
+
+        .macro  BRK, ?addr=@    ; (hxa)
+]adr$   .equ "?addr"
+        .if ]adr$ == "@"
+        .byte $00
+        .elseif ]adr$ ~ /^#/
+        _st_imm $00
+        .else
+        _chk_zp $00
+        .endif
+        .endm
+
+        .macro  BVC, ?addr=@
+        _chk_pcr $50, "?addr"
+        .endm
+
+        .macro  BVS, ?addr=@
+        _chk_pcr $70, "?addr"
+        .endm
+
+        .macro  CLC
+        .byte $18
+        .endm
+
+        .macro  CLD
+        .byte $D8
+        .endm
+
+        .macro  CLI
+        .byte $58
+        .endm
+
+        .macro  CLV
+        .byte $B8
+        .endm
+
+        .macro  CMP, ?addr=@, ?ndx=@
+        _arith.logic $C1, "?addr", "?ndx"
+        .endm
+
+        .macro  CPX, ?addr=@
+]adr$   .equ "?addr"
+        _ab.imm.zp $E0
+        .endm
+
+        .macro  CPY, ?addr=@
+]adr$   .equ "?addr"
+        _ab.imm.zp $C0
+        .endm
+
+        .macro  DEC, ?addr=@, ?ndx=@
+        _ab.abx.zp.zpx $C6, "?addr", "?ndx"
+        .endm
+
+        .macro  DEX
+        .byte $CA
+        .endm
+
+        .macro  DEY
+        .byte $88
+        .endm
+
+        .macro  EOR, ?addr=@, ?ndx=@
+        _arith.logic $41, "?addr", "?ndx"
+        .endm
+
+        .macro  INC, ?addr=@, ?ndx=@
+        _ab.abx.zp.zpx $E6, "?addr", "?ndx"
+        .endm
+
+        .macro  INX
+        .byte $E8
+        .endm
+
+        .macro  INY
+        .byte $C8
+        .endm
+
+        .macro  JMP, ?addr=@
+]adr$   .equ "?addr"
+        .if ]adr$ ~ /^\([^\)]+\)$/
+        _st_ab $6C
+        .else
+        _chk_ab $4C
+        .endif
+        .endm
+
+        .macro  JSR, ?addr=@
+]adr$   = "?addr"
+        _chk_ab $20
+        .endm
+
+        .macro  LDA, ?addr=@, ?ndx=@
+        _arith.logic $A1, "?addr", "?ndx"
+        .endm
+
+        .macro  LDX, ?addr=@, ?ndx=@
+]adr$   .equ "?addr"
+]ndx$   .equ "?ndx"
+        .if ]ndx$ ~ /^Y$/i
+        _chk_ab.zp $B6
+        .elseif ]ndx$ == "@"
+        _ab.imm.zp $A2
+        .else
+        badmode
+        .endif
+        .endm
+
+        .macro  LDY, ?addr=@, ?ndx=@
+]adr$   .equ "?addr"
+]ndx$   .equ "?ndx"
+        .if ]ndx$ ~ /^X$/i
+        _chk_ab.zp $B4
+        .elseif ]ndx$ == "@"
+        _ab.imm.zp $A0
+        .else
+        badmode
+        .endif
+        .endm
+
+        .macro LSR, ?addr=A, ?ndx=@
+        _ab.abx.acc.zp.zpx $46, "?addr", "?ndx"
+        .endm
+
+        .macro  NOP
+        .byte $EA
+        .endm
+
+        .macro  ORA, ?addr=@, ?ndx=@
+        _arith.logic $01, "?addr", "?ndx"
+        .endm
+
+        .macro  PHA
+        .byte $48
+        .endm
+
+        .macro  PHP
+        .byte $08
+        .endm
+
+        .macro  PLA
+        .byte $68
+        .endm
+
+        .macro  PLP
+        .byte $28
+        .endm
+
+        .macro  ROL, ?addr=A, ?ndx=@
+        _ab.abx.acc.zp.zpx $26, "?addr", "?ndx"
+        .endm
+
+        .macro  ROR, ?addr=A, ?ndx=@
+        _ab.abx.acc.zp.zpx $66, "?addr", "?ndx"
+        .endm
+
+        .macro  RTI
+        .byte $40
+        .endm
+
+        .macro  RTS
+        .byte $60
+        .endm
+
+        .macro  SBC, ?addr=@, ?ndx=@
+        _arith.logic $E1, "?addr", "?ndx"
+        .endm
+
+        .macro  SEC
+        .byte $38
+        .endm
+
+        .macro  SED
+        .byte $F8
+        .endm
+
+        .macro  SEI
+        .byte $78
+        .endm
+
+        .macro  STA, ?addr=@, ?ndx=@
+]adr$   .equ "?addr"
+        .if ]adr$ !~ /^#/
+        _arith.logic $81, "?addr", "?ndx"
+        .else
+        badmode
+        .endif
+        .endm
+
+        .macro  STX, ?addr=@, ?ndx=@
+]adr$   .equ "?addr"
+]ndx$   .equ "?ndx"
+        .if ]ndx$ ~ /^Y$/i
+        _chk_zp $96
+        .elseif ]ndx$ == "@"
+        _chk_ab.zp $86
+        .else
+        badmode
+        .endif
+        .endm
+
+        .macro  STY, ?addr=@, ?ndx=@
+]adr$   .equ "?addr"
+]ndx$   .equ "?ndx"
+        .if ]ndx$ ~ /^X$/i
+        _chk_zp $94
+        .elseif ]ndx$ == "@"
+        _chk_ab.zp $84
+        .else
+        badmode
+        .endif
+        .endm
+
+        .macro  TAX
+        .byte $AA
+        .endm
+
+        .macro  TAY
+        .byte $A8
+        .endm
+
+        .macro  TSX
+        .byte $BA
+        .endm
+
+        .macro  TXA
+        .byte $8A
+        .endm
+
+        .macro  TXS
+        .byte $9A
+        .endm
+
+        .macro  TYA
+        .byte $98
+        .endm
+
+; ----------------------------
+

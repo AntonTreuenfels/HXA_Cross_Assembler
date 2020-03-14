@@ -1,0 +1,172 @@
+; Hobby Cross-Assembler Demo 021
+; Type Conversion\BCD Macros
+; ok: convert an integer to Binary Coded Decimal form
+
+; by Anton Treuenfels
+
+; first created: 07/21/04
+; last revised:  01/08/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; create a Least Significant Byte-First BCD number
+
+; strategy: first, we don't know anything about how to represent sign,
+; so we're going to make negative values illegal. Second, we know that
+; a 31-bit number is about ten decimal digits, so at most we'll need
+; five bytes at two digits per byte to represent every significant bit
+; in our numbers. We may, however, want more or fewer bytes in our
+; finished number. So we'll create a core macro that will create a
+; BCD number of any length (with a default of five bytes) and then
+; a test macro to make it easy to check various lengths. Note that
+; every byte past the fifth is guaranteed to be zero
+
+        .macro  BCD_LSB, ?expr, ?len=5
+]MAN    =   ?expr           ; evaluate only once (no forward reference)
+        .if ]MAN >= 0
+        .repeat ?len
+]LO_NYB = ]MAN % 10
+]MAN    = ]MAN / 10
+]HI_NYB = ]MAN % 10
+]MAN    = ]MAN / 10
+        .byte   ]HI_NYB << 4 | ]LO_NYB
+        .endr
+        .else
+        .error  "Can't use negative value!"
+        .endif
+        .endm
+
+; a test macro (to save a lot of typing!). The ".word" pseudo ops are just
+; to make the listing easier to read, since we're not showing expansions
+
+        .macro  TEST_BCD, ?expr
+        .word   5
+        BCD_LSB ?expr
+]LEN    =   1
+        .repeat 6
+        .word   ]LEN
+        BCD_LSB ?expr, ]LEN
+]LEN    .equ    ]LEN + 1
+        .endr
+        .endm
+
+; test BCD_LSB
+
+        TEST_BCD    0           ; 00 00 00 00 00 00
+
+        TEST_BCD    1           ; 01 00 00 00 00 00
+        TEST_BCD    2           ; 02 00 00 00 00 00
+        TEST_BCD    3           ; 03 00 00 00 00 00
+        TEST_BCD    4           ; 04 00 00 00 00 00
+        TEST_BCD    5           ; 05 00 00 00 00 00
+
+        TEST_BCD    10          ; 10 00 00 00 00 00
+        TEST_BCD    100         ; 00 01 00 00 00 00
+        TEST_BCD    1000        ; 00 10 00 00 00 00
+        TEST_BCD    1000000     ; 00 00 00 01 00 00
+        TEST_BCD    1000000000  ; 00 00 00 00 10 00
+
+        TEST_BCD    2147483647  ; 47 36 48 47 21 00
+
+; this is a more-or-less general solution to the problem.
+; In actual practice we might be interested in just one BCD format.
+; In that case we'd probably create a macro for just that length.
+; If overflow of that length was a problem, we'd also add a check
+; for maximum value. For example:
+
+;       .macro MAKE_BCD, ?expr
+;       .if ?expr < 0 || ?expr > MAX_VAL
+;       .error "Value out of range"
+;       .else
+;       ...         ; do conversion
+;       .endif
+;       .endm
+
+; -------------------------------
+
+; create a Most Significant Byte-First BCD number
+
+; strategy: as before, we'll create a general-purpose macro to handle
+; any length BCD number we desire (and as before, we'll be able to
+; create a shorter, more focused macro based on this one if we're only
+; interested in one specific size BCD number). We'll lop pairs of
+; digits off the high end of the number until there are no pairs left.
+; Each time we do, we'll check to see if we're supposed to show the pair.
+
+        .macro  BCD_MSB, ?expr, ?len=5
+]MAN    = ?expr             ; evaluate only once (no forward reference)
+        .if ]MAN < 0
+        .error "Illegal value"
+
+        .else
+]CNT    = ?len              ; evaluate only once (no forward reference)
+
+        .while  ]CNT > 5    ; more than 32 bits required ?
+        .byte   $00
+]CNT    .equ    ]CNT - 1
+        .endw
+
+; the main loop starts here
+
+]DIV    = 100000000         ; divisor = one hundred million
+]SHOW   = 4                 ; cutoff to show byte this iteration
+        .repeat 4
+]DIGITS = ]MAN / ]DIV       ; get top two digits of ]MAN
+        .if ]CNT >= ]SHOW
+        .byte   ]DIGITS / 10 << 4 | ]DIGITS % 10
+        .endif
+]MAN    = ]MAN % ]DIV       ; prepare for next iteration
+]DIV    = ]DIV / 100
+]SHOW   .equ    ]SHOW - 1
+        .endr
+        .byte   ]MAN / 10 << 4 | ]MAN % 10
+
+        .endif
+        .endm
+
+; re-create our test macro
+
+        .undef  TEST_BCD
+
+        .macro  TEST_BCD, ?expr
+        .word   5
+        BCD_MSB ?expr
+]LEN    =   1
+        .repeat 6
+        .word   ]LEN
+        BCD_MSB ?expr, ]LEN
+]LEN    .equ    ]LEN + 1
+        .endr
+        .endm
+
+; test BCD_MSB
+
+        TEST_BCD    0           ; 00 00 00 00 00 00
+
+        TEST_BCD    1           ; 00 00 00 00 00 01
+        TEST_BCD    2           ; 00 00 00 00 00 02
+        TEST_BCD    3           ; 00 00 00 00 00 03
+        TEST_BCD    4           ; 00 00 00 00 00 04
+        TEST_BCD    5           ; 00 00 00 00 00 05
+
+        TEST_BCD    10          ; 00 00 00 00 00 10
+        TEST_BCD    100         ; 00 00 00 00 01 00
+        TEST_BCD    1000        ; 00 00 00 00 10 00
+        TEST_BCD    1000000     ; 00 00 01 00 00 00
+        TEST_BCD    1000000000  ; 00 10 00 00 00 00
+
+        TEST_BCD    2147483647  ; 00 21 47 48 36 47
+
+; -------------------------------
+
+        .end

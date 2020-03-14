@@ -1,0 +1,243 @@
+; Hobby Cross-Assembler Demo 117b
+; 6502\Structured Programming Macro Tests
+; ok: BEGIN..AGAIN, BEGIN..UNTIL, BEGIN..WHILE..REPEAT
+
+; by Anton Treuenfels
+
+; first created: 08/02/13
+; last revision: 08/05/13
+
+; -------------------------------
+
+        .listfile               ; make a listing
+        .errfile                ; record any errors
+
+        .listoff includes       ; don't show
+
+; -------------------------------
+
+        .cpu    6502            ; minimum required cpu
+
+; -------------------------------
+
+;        .include "demo115.a"    ; the "full" macro versions
+        .include "demo115b.a"   ; the "compact" macro versions
+
+; -------------------------------
+
+        ; ------------------------
+        ; BEGIN..AGAIN
+        ; ------------------------
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        AGAIN
+        rts
+
+        ; ------------------------
+        ; BEGIN..UNTIL_xx
+        ; ------------------------
+
+        ; a macro "harness" for testing
+        ; - the "rts" instruction is there to force its address to be shown
+        ; in the listing file (any instruction would serve the same purpose)
+
+        .macro test.until, ?cond
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        cmp #$80                ; "set flags"
+        .putback UNTIL_?cond    ; make test
+        rts                     ; mark location
+
+        .endm
+
+        test.until EQ
+        test.until ZERO
+        test.until NEQ
+        test.until NOT_ZERO
+        test.until PLUS
+        test.until MINUS
+        test.until NEG
+        test.until C_SET
+        test.until C_CLR
+        test.until V_SET
+        test.until V_CLR
+        test.until GE
+        test.until LT
+
+        ; ------------------------
+        ; BEGIN..WHILE_xx..REPEAT
+        ; ------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.while, ?cond
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        cmp #$80                ; "set flags"       
+        .putback WHILE_?cond    ; make test
+        .fill 8
+        REPEAT_
+        rts                     ; mark location
+
+        .endm
+
+        test.while EQ
+        test.while ZERO
+        test.while NEQ
+        test.while NOT_ZERO
+        test.while PLUS
+        test.while MINUS
+        test.while NEG
+        test.while C_SET
+        test.while C_CLR
+        test.while V_SET
+        test.while V_CLR
+        test.while GE
+        test.while LT
+
+        ; ------------------------
+        ; BEGIN..UNTIL_BIT
+        ; ------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.until.bit, ?bit_no
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        UNTIL_BIT $8080, ?bit_no, IS_HIGH
+        rts                     ; mark location
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        UNTIL_BIT $8080, ?bit_no, IS_LOW
+        rts                     ; mark location
+
+        .endm
+
+        test.until.bit 7
+        test.until.bit 6
+        test.until.bit 5
+        test.until.bit 4
+        test.until.bit 3
+        test.until.bit 2
+        test.until.bit 1
+        test.until.bit 0
+
+        ; -------------------------
+        ; BEGIN..WHILE_BIT..REPEAT_
+        ; -------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.while.bit, ?bit_no
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        WHILE_BIT $8080, ?bit_no, IS_HIGH
+        .fill 8
+        REPEAT_
+        rts                     ; mark location
+
+        .org    $4000
+
+        BEGIN
+        .fill 8
+        WHILE_BIT $8080, ?bit_no, IS_LOW
+        .fill 8
+        REPEAT_
+        rts                     ; mark location
+
+        .endm
+
+        test.while.bit 7
+        test.while.bit 6
+        test.while.bit 5
+        test.while.bit 4
+        test.while.bit 3
+        test.while.bit 2
+        test.while.bit 1
+        test.while.bit 0
+
+        ; ---------------------------
+        ; BEGIN..BEGIN..AGAIN..AGAIN
+        ; ---------------------------
+
+        .org    $4000
+
+        BEGIN       ; <----|
+        .fill 4     ;      |
+        BEGIN       ; <-|  |
+        .fill 4     ;   |  |
+        AGAIN       ; --|  |
+        .fill 4     ;      |
+        AGAIN       ; -----|
+        rts
+
+        .org    $4000
+
+        BEGIN       ; <----|
+        .fill 4     ;      |
+        BEGIN       ; <-|  |
+        .fill 4     ;   |  |
+        UNTIL_EQ    ; --|  |
+        .fill 4     ;      |
+        AGAIN       ; -----|
+        rts
+
+        .org    $4000
+
+        BEGIN       ; <----|
+        .fill 4     ;      |
+        BEGIN       ; <-|  |
+        .fill 4     ;   |  |
+        AGAIN       ; --|  |
+        .fill 4     ;      |
+        UNTIL_NEQ   ; -----|
+        rts
+
+        .org    $4000
+
+        BEGIN       ; <-------|
+        .fill 4     ;         |
+        BEGIN       ; <----|  |
+        .fill 4     ;      |  |
+        WHILE_EQ    ; --|  |  |
+        .fill 4     ;   |  |  |
+        REPEAT_     ; --+--|  |
+        .fill 4     ; <-|     |
+        AGAIN       ; --------|
+        rts
+
+        .org    $4000
+
+        BEGIN       ; <-------|
+        .fill 4     ;         |
+        WHILE_EQ    ; -----|  |
+        .fill 4     ;      |  |
+        BEGIN       ; <-|  |  |
+        .fill 4     ;   |  |  |
+        AGAIN       ; --|  |  |
+        .fill 4     ;      |  |
+        REPEAT_     ; -----+--|
+        rts         ; <----|
+
+; -------------------------------
+
+        .end
+

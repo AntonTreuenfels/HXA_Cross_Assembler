@@ -1,0 +1,215 @@
+; Hobby Cross-Assembler Demo 020
+; Type Conversion\FLOAT Macros
+; ok: convert an integer to floating point form
+
+; by Anton Treuenfels
+
+; first created: 03/27/04
+; last revised:  05/19/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston stats
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; determine normalized mantissa and exponent values
+
+; integer format:
+; bit 00-30: magnitude
+; bit    31: sign
+
+; strategy: disregarding sign for the moment, we make the following
+; equate between an integer and its floating point form:
+
+; integer = whole.fraction * 2^exponent
+
+; Note that "whole" and "fraction", taken together, have the same sequence
+; of one and zero bits as "integer". Where the binary point between them
+; is placed determines the value of "exponent". We will consider two
+; possibilities. First, to the right of all the bits in "integer". Then
+; "whole" equals "integer" and both "fraction" and "exponent" equal zero:
+
+; integer = whole.0 * 2^0
+
+; Alternatively, to the left of all the bits in "integer". Then "whole" is
+; zero, "fraction" equals "integer", and "exponent" equals 31 (the number
+; of magnitude bits in "integer"):
+
+; integer = 0.fraction * 2^31
+
+; We're going to treat the input integer as being a floating point number
+; in this second form. We'll "normalize" the floating point form by
+; shifting "fraction" left (and decreasing "exponent" by one each time
+; we do) until "whole" becomes one (ie., until we've shifted the leftmost
+; one bit in "fraction" out of it). Then we'll have:
+
+; integer = 1.(fraction << #shifts) * 2^(31 - #shifts)
+
+; At least in principle. In practice instead of multiple shifts we'll
+; try to locate the position of the most significant magnitude bit in
+; the input value via binary search.
+
+; NORMALIZE_FP will set three values:
+
+; ]MAN = normalized manitissa
+; ]SGN = $80000000 (negative) or $00000000 (positive or zero)
+; ]EXP = ?bias+1 to ?bias+31 (or zero if ]MAN is zero)
+
+; After the binary search ]MSB will have a value from 1->31 (not 0->30),
+; representing the position of the most significant bit in ]MAN.
+; To move the bit in that position to position 32 we shift ]MAN by 32 - ]MSB
+; (and then erase it, since we know it always going to be one).
+; ]EXP is then 31 - (32 - ]MSB) = 31 - 32 + ]MSB = ]MSB - 1.
+
+        .macro NORMALIZE_FP, ?expr, ?bias
+]MAN    = ?expr                 ; evaluate once only (no forward reference)
+]SGN    = ]MAN & $80000000      ; get sign bit
+
+        .if ]MAN                ; non-zero ?
+
+        .if ]SGN                ; negative ?
+]MAN    = -]MAN                 ; get absolute value
+        .endif
+
+]LSB    = 0
+]MSB    = 31
+
+        .while ]LSB+1 != ]MSB   ; find most significant bit of mantissa
+]MID    = (]LSB + ]MSB) / 2
+        .if ]MAN & ($7FFFFFF << ]MID)
+]LSB    = ]MID
+        .else
+]MSB    = ]MID
+        .endif
+        .endw
+
+]MAN    = (]MAN << (32 - ]MSB)) & $7FFFFFFF
+]EXP    = (]MSB - 1) + ?bias
+
+        .else                   ; zero value mantissa
+]EXP    = 0
+        .endif
+
+        .endm
+
+; store an integer in single-precision IEEE-754 floating point form
+
+; format:
+; bit 00-23: mantissa magnitude
+; bit 24-30: exponent value (bias +127)
+; bit    31: mantissa sign (1=negative)
+
+; - implied ".1" (leading one bit and binary point) to right of bit 23
+; - note this format stores at most only 24 bits of original 31-bit integer
+
+        .macro FLOAT_IEEE, ?expr
+        NORMALIZE_FP  ?expr, 127
+        .long   ]SGN | ]EXP << 23 | ]MAN >> 8
+        .endm
+
+; test it
+
+        FLOAT_IEEE  0           ; 00 00 00 00
+
+        FLOAT_IEEE  1           ; 3F 80 00 00
+        FLOAT_IEEE  2           ; 40 00 00 00
+        FLOAT_IEEE  3           ; 40 40 00 00
+        FLOAT_IEEE  4           ; 40 80 00 00
+        FLOAT_IEEE  5           ; 40 A0 00 00
+
+        FLOAT_IEEE  10          ; 41 20 00 00
+        FLOAT_IEEE  100         ; 42 C8 00 00
+        FLOAT_IEEE  1000        ; 44 7A 00 00
+        FLOAT_IEEE  1000000     ; 49 74 24 00
+        FLOAT_IEEE  1000000000  ; 4E 6E 6B 28
+
+        FLOAT_IEEE  2147483647  ; 4E FF FF FF
+
+        FLOAT_IEEE  -1
+        FLOAT_IEEE  -10
+
+; store an integer in double-precision IEEE-754 floating point form
+
+; format:
+; bit 00-51: mantissa magnitude
+; bit 52-62: exponent value (bias +1023)
+; bit    63: mantissa sign (1=negative)
+
+; - implied ".1" (leading one bit and binary point) to right of bit 51
+
+        .macro DOUBLE_IEEE, ?expr
+        NORMALIZE_FP  ?expr, 1023
+        .long   ]MAN << 21
+        .long   ]SGN | ]EXP << 20 | ]MAN >> 11
+        .endm
+
+; test it
+
+        DOUBLE_IEEE  0          ; 0000 0000 0000 0000
+
+        DOUBLE_IEEE  1          ; 3FF0 0000 0000 0000
+        DOUBLE_IEEE  2          ; 4000 0000 0000 0000
+        DOUBLE_IEEE  3          ; 4008 0000 0000 0000
+        DOUBLE_IEEE  4          ; 4010 0000 0000 0000
+        DOUBLE_IEEE  5          ; 4014 0000 0000 0000
+
+        DOUBLE_IEEE  10         ; 4024 0000 0000 0000
+        DOUBLE_IEEE  100        ; 4059 0000 0000 0000
+        DOUBLE_IEEE  1000       ; 408F 4000 0000 0000
+        DOUBLE_IEEE  1000000    ; 412E 8480 0000 0000
+        DOUBLE_IEEE  1000000000 ; 41CD CD65 0000 0000
+
+        DOUBLE_IEEE  2147483647 ; 41DF FFFF FF00 0000
+
+        DOUBLE_IEEE  -1
+        DOUBLE_IEEE  -10
+
+; store an integer in Excess-80 floating point form
+; - used in Microsoft BASICs for Commodore 64/128 (and Apple II, others ?)
+
+; format:
+; bits 00-07: exponent (bias +129)
+; bit     08: mantissa sign (1=negative)
+; bits 09-39: mantissa magnitude
+
+; - implied "1." (leading one bit and binary point) to left of bit 09
+
+        .macro  FLOAT_XS80, ?expr
+        NORMALIZE_FP  ?expr, 129
+        .byte       ]EXP
+        .revlong    ]SGN | ]MAN
+        .endm
+
+; test it
+
+        FLOAT_XS80  0           ; 00 00 00 00 00
+
+        FLOAT_XS80  1
+        FLOAT_XS80  2
+        FLOAT_XS80  3
+        FLOAT_XS80  4
+        FLOAT_XS80  5
+
+        FLOAT_XS80  10
+        FLOAT_XS80  100
+        FLOAT_XS80  1000
+        FLOAT_XS80  1000000
+        FLOAT_XS80  1000000000
+
+        FLOAT_XS80  2147483647
+
+        FLOAT_XS80  -1
+        FLOAT_XS80  -10
+
+; -------------------------------
+
+        .end

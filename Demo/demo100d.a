@@ -1,0 +1,826 @@
+; Hobby Cross-Assembler Demo 100d
+; 6502\Word Macros
+; fully-developed MOVE and general macros, HXA 0.150 or higher
+
+; by Anton Treuenfels
+
+; first created: 07/20/04
+; last revision: 11/03/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston stats
+
+; -------------------------------
+
+        .if ver() < $0150
+        .fatal "HXA Version 0.150 or higher required"
+        .endif
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; define the 16-bit macros:
+
+; MOVE - copy word from one location to another
+; ZERO - store $0000 to location
+; PUSH - push word onto stack
+; PULL - pull word from stack
+; INCW - add one to word
+; DECW - subtract one from word
+; ADDB - add byte to word (clear carry flag first)
+; ADCB - add byte to word (use current carry)
+; SUBB - subtract byte from word (set carry flag first)
+; SBCB - subtract byte from word (use current carry)
+; ADDW - add word to word (clear carry flag first)
+; ADCW - add word to word (use current carry)
+; SUBW - subtract word from word (set carry flag first)
+; SBCW - subtract word from word (use current carry)
+; CMPW - compare words
+
+; ------------------------------
+
+; note that while every macro defined here generates legal code,
+; some of the arithmetic expansions are of limited practical use.
+; However their inclusion is essentially "free" due to the way
+; the macros are constructed, so it doesn't hurt to have them
+
+; it desired, the macros defined here can be isolated in their
+; own file and then "INCLUDED" wherever desired
+
+; ------------------------------
+
+; reserved label names
+
+]arg1$      .equ    ""
+]is_reg1    .equ    0
+]is_imm1    .equ    0
+]is_ind1    .equ    0
+
+]arg2$      .equ    ""
+]is_reg2    .equ    0
+]is_imm2    .equ    0
+]is_ind2    .equ    0
+
+_XY         .equ    0
+
+;-------------------------------
+; hi/lo byte helper macros
+; ------------------------------
+
+; "stringize" and analyze first argument
+
+    .macro  ARG1STR, ]arg1$
+]is_reg1    .equ    ]arg1$ == "_XY"
+    .if !]is_reg1
+]is_imm1    .equ    ]arg1$ ~ /^#/
+    .if ]is_imm1
+]arg1$      .equ    mid$(]arg1$,2)
+    .else
+]is_ind1    .equ    ]arg1$ ~ /^\(.+\)$/
+    .endif
+    .endif
+    .endm
+
+; "stringize" and analyze second argument
+
+    .macro  ARG2STR, ]arg2$
+]is_reg2    .equ    ]arg2$ == "_XY"
+    .if !]is_reg2
+]is_imm2    .equ    ]arg2$ ~ /^#/
+    .if ]is_imm2
+]arg2$      .equ    mid$(]arg2$,2)
+    .else
+]is_ind2    .equ    ]arg2$ ~ /^\(.+\)$/
+    .endif
+    .endif
+    .endm
+
+; report address type mismatch
+
+    .macro  BAD_ARG, ]arg$
+    .error "Bad argument: " ]arg$
+    .endm
+
+; load low byte
+
+    .macro  LOADLO
+    .if ]is_reg1        ; _XY
+    txa
+    .elseif ]is_imm1    ; imm
+    lda #<val(]arg1$)
+    .elseif ]is_ind1    ; (zp),y
+    lda (val(]arg1$)),y
+    .else               ; ab|zp
+    lda val(]arg1$)
+    .endif
+    .endm
+
+; store low byte
+
+    .macro  STORLO
+    .if ]is_reg1        ; _XY
+    tax
+    .elseif ]is_imm1    ; imm
+    BAD_ARG ]arg1$
+    .elseif ]is_ind1    ; (zp),y
+    sta (val(]arg1$)),y
+    .else               ; ab|zp
+    sta val(]arg1$)
+    .endif
+    .endm
+
+; load hi byte
+
+    .macro  LOADHI
+    .if ]is_reg1        ; _XY
+    tya
+    .elseif ]is_imm1    ; imm
+    lda #>val(]arg1$)
+    .elseif ]is_ind1    ; (zp),y
+    lda (val(]arg1$)),y
+    .else               ; ab|zp
+    lda 1+val(]arg1$)
+    .endif
+    .endm
+
+; store hi byte
+
+    .macro  STORHI
+    .if ]is_reg1        ; _XY
+    tay
+    .elseif ]is_imm1    ; imm
+    BAD_ARG ]arg1$
+    .elseif ]is_ind1    ; (zp),y
+    sta (val(]arg1$)),y
+    .else               ; ab|zp
+    sta 1+val(]arg1$)
+    .endif
+    .endm
+
+; increment low byte
+
+    .macro  INCLO
+    .if ]is_reg1        ; _XY
+    inx
+    .elseif ]is_imm1 || ]is_ind1
+    BAD_ARG ]arg1$
+    .else               ; ab|zp
+    inc val(]arg1$)
+    .endif
+    .endm
+
+; decrement low byte
+
+    .macro  DECLO
+    .if ]is_reg1        ; _XY
+    dex
+    .elseif ]is_imm1 || ]is_ind1
+    BAD_ARG ]arg1$
+    .else               ; ab|zp
+    dec val(]arg1$)
+    .endif
+    .endm
+
+; increment high byte
+
+    .macro  INCHI
+    .if ]is_reg1        ; _XY
+    iny
+    .elseif ]is_imm1 || ]is_ind1
+    BAD_ARG ]arg1$
+    .else               ; ab|zp
+    inc 1+val(]arg1$)
+    .endif
+    .endm
+
+; decrement high byte
+
+    .macro  DECHI
+    .if ]is_reg1        ; _XY
+    dey
+    .elseif ]is_imm1 || ]is_ind1
+    BAD_ARG ]arg1$
+    .else               ; ab|zp
+    dec 1+val(]arg1$)
+    .endif
+    .endm
+
+; add low byte
+
+    .macro  ADDLO
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    adc #<val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    adc (val(]arg2$)),y
+    .else                   ; ab|zp
+    adc val(]arg2$)
+    .endif
+    .endm
+
+; subtract low byte
+
+    .macro  SUBLO
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    sbc #<val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    sbc (val(]arg2$)),y
+    .else                   ; ab|zp
+    sbc val(]arg2$)
+    .endif
+    .endm
+
+; compare low byte (in X)
+
+    .macro  CMP_X
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    cpx #<val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    txa
+    cmp (val(]arg2$)),y
+    .else                   ; ab|zp
+    cpx val(]arg2$)
+    .endif
+    .endm
+
+; compare low byte (in A)
+
+    .macro  CMPLO
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    cmp #<val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    cmp (val(]arg2$)),y
+    .else                   ; ab|zp
+    cmp val(]arg2$)
+    .endif
+    .endm
+
+; add high byte
+
+    .macro  ADDHI
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    adc #>val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    adc (val(]arg2$)),y
+    .else                   ; ab|zp
+    adc 1+val(]arg2$)
+    .endif
+    .endm
+
+; subtract high byte
+
+    .macro  SUBHI
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    sbc #>val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    sbc (val(]arg2$)),y
+    .else                   ; ab|zp
+    sbc 1+val(]arg2$)
+    .endif
+    .endm
+
+; increment Y-register if first operand is indirect
+
+    .macro  INCIND
+    .if ]arg1$ ~ /^\(.+\)$/
+    iny
+    .endif
+    .endm
+
+; increment Y-register if either operand indirect
+
+    .macro  INCIND2
+    .if ]arg1$ ~ /^\(.+\)$/ || ]arg2$ ~ /^\(.+\)$/
+    iny
+    .endif
+    .endm
+
+; decrement Y-register if first operand is indirect
+
+    .macro  DECIND
+    .if ]arg1$ ~ /^\(.+\)$/
+    dey
+    .endif
+    .endm
+
+;-------------------------------
+; hi/lo byte helper macros (just for MOVE)
+; ------------------------------
+
+; move word through A-register
+
+    .macro  LOAD_STORE
+    .if ]is_imm2                ; imm
+    lda #<val(]arg2$)
+    .elseif ]is_ind2            ; (zp),y
+    lda (val(]arg2$)),y
+    .else                       ; ab|zp
+    lda val(]arg2$)
+    .endif
+    STORLO
+    INCIND2
+    .if ]is_imm2                ; imm
+    lda #>val(]arg2$)
+    .elseif ]is_ind2            ; (zp),y
+    lda (val(]arg2$)),y
+    .else                       ; ab|zp
+    lda 1+val(]arg2$)
+    .endif
+    STORHI
+    .endm
+
+; load _XY-register
+
+    .macro LOAD_XY
+    .if ]is_reg2            ; _XY
+    BAD_ARG ]arg2$
+    .elseif ]is_imm2        ; imm
+    ldx #<val(]arg2$)
+    ldy #>val(]arg2$)
+    .elseif ]is_ind2        ; (zp),y
+    LOAD_STORE
+    .else                   ; ab|zp
+    ldx val(]arg2$)
+    ldy 1+val(]arg2$)
+    .endif
+    .endm
+
+; store _XY-register
+
+    .macro STORE_XY
+    .if ]is_reg1 || ]is_imm1 || ]is_ind1
+    BAD_ARG ]arg1$
+    .else
+    stx val(]arg1$)
+    sty 1+val(]arg1$)
+    .endif
+    .endm
+
+; ---------------
+; "MOVE"
+; ---------------
+
+    .macro  MOVE, ?dst, ?src
+    ARG1STR "?dst"
+    ARG2STR "?src"
+    .if ]is_reg1
+    LOAD_XY
+    .elseif ]is_reg2
+    STORE_XY
+    .else
+    LOAD_STORE
+    .endif
+    .endm
+
+; ---------------
+; "ZERO"
+; ---------------
+
+; zero (clear) word
+
+    .macro  ZERO, ?dst
+    ARG1STR "?dst"
+    .if ]is_reg1        ; $00 -> _XY
+    ldx #$00
+    ldy #$00
+    .else               ; $00 -> ab|zp|(zp),y
+    lda #$00
+    STORLO
+    INCIND
+    STORHI
+    .endif
+    .endm
+
+; ---------------
+; "PUSH"
+; ---------------
+
+; push word onto stack          ; ab|imm|zp|(zp),y|_XY -> stack
+
+    .macro  PUSH, ?src
+    ARG1STR "?src"
+    LOADHI
+    pha
+    DECIND
+    LOADLO
+    pha
+    .endm
+
+; ---------------
+; "PULL"
+; ---------------
+
+; pull word from stack
+
+    .macro  PULL, ?dst          ; stack -> ab|zp|(zp),y|_XY
+    ARG1STR "?dst"
+    pla
+    STORLO
+    INCIND
+    pla
+    STORHI
+    .endm
+
+; ---------------
+; "INCW"
+; ---------------
+
+; increment word
+
+    .macro INCW, ?dst           ; ab|zp|_XY += 1
+    ARG1STR "?dst"
+    INCLO
+    bne +
+    INCHI
+ +  .endm
+
+; ---------------
+; "DECW"
+; ---------------
+
+; decrement word
+
+    .macro  DECW, ?dst          ; ab|zp|_XY -= 1
+    ARG1STR "?dst"
+    LOADLO
+    bne :+
+    DECHI
+ +  DECLO
+    .endm
+
+; ----------------
+; "ADDB"/"ADCB"
+; ----------------
+
+; add byte to word
+
+    .macro  ADDB, ?word, ?byte  ; don't know state of carry flag
+    clc
+    .macro  ADCB, ?word, ?byte  ; do know state of carry flag
+    ARG1STR "?word"
+    ARG2STR "?byte"
+    LOADLO
+    ADDLO
+    STORLO
+    bcc :+
+    INCHI
+ +  .endm
+    .endm
+
+; ----------------
+; "SUBB"/"SBCB"
+; ----------------
+
+; subtract byte from word
+
+    .macro  SUBB, ?word, ?byte  ; don't know state of carry flag
+    sec
+    .macro  SBCB, ?word, ?byte  ; do know state of carry flag
+    ARG1STR "?word"
+    ARG2STR "?byte"
+    LOADLO
+    SUBLO
+    STORLO
+    bcs :+
+    DECHI
+ +  .endm
+    .endm
+
+; ----------------
+; "ADDW"/"ADCW"
+; ----------------
+
+; add word to word
+
+    .macro  ADDW, ?word1, ?word2    ; don't know state of carry flag
+    clc
+    .macro  ADCW, ?word1, ?word2    ; do know state of carry flag
+    ARG1STR "?word1"
+    ARG2STR "?word2"
+    LOADLO
+    ADDLO
+    STORLO
+    INCIND2
+    LOADHI
+    ADDHI
+    STORHI
+    .endm
+    .endm
+
+; ----------------
+; "SUBW"/"SBCW"
+; ----------------
+
+; subtract word from word
+
+    .macro  SUBW, ?word1, ?word2    ; don't know state of carry flag
+    sec
+    .macro  SBCW, ?word1, ?word2    ; do know state of carry flag
+    ARG1STR "?word1"
+    ARG2STR "?word2"
+    LOADLO
+    SUBLO
+    STORLO
+    INCIND2
+    LOADHI
+    SUBHI
+    STORHI
+    .endm
+    .endm
+
+; ----------------
+; "CMPW"
+; ----------------
+
+; compare words
+
+    .macro  CMPW, ?word1, ?word2
+    ARG1STR "?word1"
+    ARG2STR "?word2"
+    .if ]is_reg1
+    CMP_X
+    .else
+    LOADLO
+    CMPLO
+    .endif
+    INCIND2
+    LOADHI
+    SUBHI
+    .endm
+
+; -------------------------------
+; test the macros
+; -------------------------------
+
+ZP_C0   .equ    $C0        ; backward reference
+
+; ---------------
+; "MOVE" - 18 forms
+; ---------------
+
+    MOVE    $80, ZP_C0      ; zp <- zp
+    MOVE    $80, AB_C0      ; zp <- ab
+    MOVE    $80, (ZP_C0)    ; zp <- (zp),y
+    MOVE    $80, #$AA55     ; zp <- imm
+    MOVE    $80, _XY        ; zp <- _XY
+    MOVE    $8000, ZP_C0    ; ab <- zp
+    MOVE    $8000, AB_C0    ; ab <- ab
+    MOVE    $8000, (ZP_C0)  ; ab <- (zp),y
+    MOVE    $8000, #$AA55   ; ab <- imm
+    MOVE    $8000, _XY      ; ab <- _XY
+    MOVE    ($80), ZP_C0    ; (zp),y <- zp
+    MOVE    ($80), AB_C0    ; (zp),y <- ab
+    MOVE    ($80), (ZP_C0)  ; (zp),y <- (zp),y
+    MOVE    ($80), #$AA55   ; (zp),y <- imm
+    MOVE    _XY, $80        ; _XY <- zp
+    MOVE    _XY, $8000      ; _XY <- ab
+    MOVE    _XY, (ZP_C0)    ; _XY <- (zp),y
+    MOVE    _XY, #$AA55     ; _XY <- imm
+
+; ---------------
+; "ZERO" - 4 forms
+; ---------------
+
+    ZERO    $80             ; $00 -> zp
+    ZERO    $8000           ; $00 -> ab
+    ZERO    ($80)           ; $00 -> (zp),y
+    ZERO    _XY             ; $00 ->_XY
+
+; ---------------
+; "PUSH" - 5 forms
+; ---------------
+
+    PUSH    $80             ; zp -> stack
+    PUSH    $8000           ; ab -> stack
+    PUSH    #$AA55          ; imm -> stack
+    PUSH    ($80)           ; (zp),y -> stack
+    PUSH    _XY             ; _XY -> stack
+
+; ---------------
+; "PULL" - 4 forms
+; ---------------
+
+    PULL    $80             ; stack -> zp
+    PULL    $8000           ; stack -> ab
+    PULL    ($80)           ; stack -> (zp),y
+    PULL    _XY             ; stack -> _XY
+
+; ---------------
+; "INCW" - 3 forms
+; ---------------
+
+    INCW    $80             ; zp += 1
+    INCW    $8000           ; ab += 1
+    INCW    _XY             ; _XY += 1
+
+; ---------------
+; "DECW" - 3 forms
+; ---------------
+
+    DECW    $80             ; zp -= 1
+    DECW    $8000           ; ab -= 1
+    DECW    _XY             ; _XY -= 1
+
+; ---------------
+; "ADDB" - 12 forms
+; ---------------
+
+    ADDB    $80, ZP_C0      ; zp += zp
+    ADDB    $80, AB_C0      ; zp += ab
+    ADDB    $80, (ZP_C0)    ; zp += (zp),y
+    ADDB    $80, #$55       ; zp += imm
+    ADDB    $8000, ZP_C0    ; ab += zp
+    ADDB    $8000, AB_C0    ; ab += ab
+    ADDB    $8000, (ZP_C0)  ; ab += (zp),y
+    ADDB    $8000, #$55     ; ab += imm
+    ADDB    _XY, ZP_C0      ; _XY += zp
+    ADDB    _XY, AB_C0      ; _XY += ab
+    ADDB    _XY, (ZP_C0)   ; _XY += (zp),y
+    ADDB    _XY, #$55       ; _XY += imm
+
+; ---------------
+; "ADCB" - 12 forms
+; ---------------
+
+    ADCB    $80, ZP_C0      ; zp += zp
+    ADCB    $80, AB_C0      ; zp += ab
+    ADCB    $80, (ZP_C0)    ; zp += (zp),y
+    ADCB    $80, #$55       ; zp += imm
+    ADCB    $8000, ZP_C0    ; ab += zp
+    ADCB    $8000, AB_C0    ; ab += ab
+    ADCB    $8000, (ZP_C0)  ; ab += (zp),y
+    ADCB    $8000, #$55     ; ab += imm
+    ADCB    _XY, ZP_C0      ; _XY += zp
+    ADCB    _XY, AB_C0      ; _XY += ab
+    ADCB    _XY, (ZP_C0)    ; _XY += (zp),y
+    ADCB    _XY, #$55       ; _XY += imm
+
+; ---------------
+; "SUBB" - 12 forms
+; ---------------
+
+    SUBB    $80, ZP_C0      ; zp -= zp
+    SUBB    $80, AB_C0      ; zp -= ab
+    SUBB    $80, (ZP_C0)    ; zp -= (zp),y
+    SUBB    $80, #$55       ; zp -= imm
+    SUBB    $8000, ZP_C0    ; ab -= zp
+    SUBB    $8000, AB_C0    ; ab -= ab
+    SUBB    $8000, (ZP_C0)  ; ab -= (zp),y
+    SUBB    $8000, #$55     ; ab -= imm
+    SUBB    _XY, ZP_C0      ; _XY -= zp
+    SUBB    _XY, AB_C0      ; _XY -= ab
+    SUBB    _XY, (ZP_C0)    ; _XY -= (zp),y
+    SUBB    _XY, #$55       ; _XY -= imm
+
+; ---------------
+; "SBCB" - 12 forms
+; ---------------
+
+    SBCB    $80, ZP_C0      ; zp -= zp
+    SBCB    $80, AB_C0      ; zp -= ab
+    SBCB    $80, (ZP_C0)    ; zp -= (zp),y
+    SBCB    $80, #$55       ; zp -= imm
+    SBCB    $8000, ZP_C0    ; ab -= zp
+    SBCB    $8000, AB_C0    ; ab -= ab
+    SBCB    $8000, (ZP_C0)  ; ab -= (zp),y
+    SBCB    $8000, #$55     ; ab -= imm
+    SBCB    _XY, ZP_C0      ; _XY -= zp
+    SBCB    _XY, AB_C0      ; _XY -= ab
+    SBCB    _XY, (ZP_C0)    ; _XY -= (zp),y
+    SBCB    _XY, #$55       ; _XY -= imm
+
+; ---------------
+; "ADDW" - 16 forms
+; ---------------
+
+    ADDW    $80, ZP_C0      ; zp += zp
+    ADDW    $80, AB_C0      ; zp += ab
+    ADDW    $80, (ZP_C0)    ; zp += (zp),y
+    ADDW    $80, #$AA55     ; zp += imm
+    ADDW    $8000, ZP_C0    ; ab += zp
+    ADDW    $8000, AB_C0    ; ab += ab
+    ADDW    $8000, (ZP_C0)  ; ab += (zp),y
+    ADDW    $8000, #$AA55   ; ab += imm
+    ADDW    ($80), ZP_C0    ; (zp),y += zp
+    ADDW    ($80), AB_C0    ; (zp),y += ab
+    ADDW    ($80), (ZP_C0)  ; (zp),y += (zp),y
+    ADDW    ($80), #$AA55   ; (zp),y += imm
+    ADDW    _XY, ZP_C0      ; _XY += zp
+    ADDW    _XY, AB_C0      ; _XY += ab
+    ADDW    _XY, (ZP_C0)    ; _XY += (zp),y
+    ADDW    _XY, #$AA55     ; _XY += imm
+
+; ---------------
+; "ADCW" - 16 forms
+; ---------------
+
+    ADCW    $80, ZP_C0      ; zp += zp
+    ADCW    $80, AB_C0      ; zp += ab
+    ADCW    $80, (ZP_C0)    ; zp += (zp),y
+    ADCW    $80, #$AA55     ; zp += imm
+    ADCW    $8000, ZP_C0    ; ab += zp
+    ADCW    $8000, AB_C0    ; ab += ab
+    ADCW    $8000, (ZP_C0)  ; ab += (zp),y
+    ADCW    $8000, #$AA55   ; ab += imm
+    ADCW    ($80), ZP_C0    ; (zp),y += zp
+    ADCW    ($80), AB_C0    ; (zp),y += ab
+    ADCW    ($80), (ZP_C0)  ; (zp),y += (zp),y
+    ADCW    ($80), #$AA55   ; (zp),y += imm
+    ADCW    _XY, ZP_C0      ; _XY += zp
+    ADCW    _XY, AB_C0      ; _XY += ab
+    ADCW    _XY, (ZP_C0)    ; _XY += (zp),y
+    ADCW    _XY, #$AA55     ; _XY += imm
+
+; ---------------
+; "SUBW" - 16 forms
+; ---------------
+
+    SUBW    $80, ZP_C0      ; zp -= zp
+    SUBW    $80, AB_C0      ; zp -= ab
+    SUBW    $80, (ZP_C0)    ; zp -= (zp),y
+    SUBW    $80, #$AA55     ; zp -= imm
+    SUBW    $8000, ZP_C0    ; ab -= zp
+    SUBW    $8000, AB_C0    ; ab -= ab
+    SUBW    $8000, (ZP_C0)  ; ab -= (zp),y
+    SUBW    $8000, #$AA55   ; ab -= imm
+    SUBW    ($80), ZP_C0    ; (zp),y -= zp
+    SUBW    ($80), AB_C0    ; (zp),y -= ab
+    SUBW    ($80), (ZP_C0)  ; (zp),y -= (zp),y
+    SUBW    ($80), #$AA55   ; (zp),y -= imm
+    SUBW    _XY, ZP_C0      ; _XY -= zp
+    SUBW    _XY, AB_C0      ; _XY -= ab
+    SUBW    _XY, (ZP_C0)    ; _XY -= (zp),y
+    SUBW    _XY, #$AA55     ; _XY -= imm
+
+; ---------------
+; "SBCW" - 16 forms
+; ---------------
+
+    SBCW    $80, ZP_C0      ; zp -= zp
+    SBCW    $80, AB_C0      ; zp -= ab
+    SBCW    $80, (ZP_C0)    ; zp -= (zp),y
+    SBCW    $80, #$AA55     ; zp -= imm
+    SBCW    $8000, ZP_C0    ; ab -= zp
+    SBCW    $8000, AB_C0    ; ab -= ab
+    SBCW    $8000, (ZP_C0)  ; ab -= (zp),y
+    SBCW    $8000, #$AA55   ; ab -= imm
+    SBCW    ($80), ZP_C0    ; (zp),y -= zp
+    SBCW    ($80), AB_C0    ; (zp),y -= ab
+    SBCW    ($80), (ZP_C0)  ; (zp),y -= (zp),y
+    SBCW    ($80), #$AA55   ; (zp),y -= imm
+    SBCW    _XY, ZP_C0      ; _XY -= zp
+    SBCW    _XY, AB_C0      ; _XY -= ab
+    SBCW    _XY, (ZP_C0)    ; _XY -= (zp),y
+    SBCW    _XY, #$AA55     ; _XY -= imm
+
+; ---------------
+; "CMPW" - 20 forms
+; ---------------
+
+    CMPW    $80, ZP_C0      ; zp - zp -> c_flag
+    CMPW    $80, AB_C0      ; zp - ab -> c_flag
+    CMPW    $80, (ZP_C0)    ; zp - (zp),y -> c_flag
+    CMPW    $80, #$AA55     ; zp - imm -> c_flag
+    CMPW    $8000, ZP_C0    ; ab - zp -> c_flag
+    CMPW    $8000, AB_C0    ; ab - ab -> c_flag
+    CMPW    $8000, (ZP_C0)  ; ab - (zp),y -> c_flag
+    CMPW    $8000, #$AA55   ; ab - imm -> c_flag
+    CMPW    ($80), ZP_C0    ; (zp),y - zp -> c_flag
+    CMPW    ($80), AB_C0    ; (zp),y - ab -> c_flag
+    CMPW    ($80), (ZP_C0)  ; (zp),y - (zp),y -> c_flag
+    CMPW    ($80), #$AA55   ; (zp),y - imm -> c_flag
+    CMPW    #$11FF, ZP_C0   ; imm - zp -> c_flag
+    CMPW    #$11FF, AB_C0   ; imm - ab -> c_flag
+    CMPW    #$11FF, (ZP_C0) ; imm - (zp),y -> c_flag
+    CMPW    #$11FF, #$AA55  ; imm - imm -> c_flag
+    CMPW    _XY, ZP_C0      ; _XY - zp -> c_flag
+    CMPW    _XY, AB_C0      ; _XY - ab -> c_flag
+    CMPW    _XY, (ZP_C0)    ; _XY - (zp),y -> c_flag
+    CMPW    _XY, #$AA55     ; _XY - imm -> c_flag
+
+; -------------------------------
+
+AB_C0   .equ    $C000       ; forward reference
+
+; -------------------------------
+
+        .end

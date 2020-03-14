@@ -1,0 +1,330 @@
+; Hobby Cross-Assembler Demo 104b
+; 6502\Utility Routines
+; ok: developing a block copy, traversing from block end to start
+
+; by Anton Treuenfels
+
+; first created: 08/13/04
+; last revised:  06/30/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+
+; -------------------------------
+
+; We need to know three things to copy a block:
+; 1) where the block to copy is
+; 2) how big the block to copy is
+; 3) where to copy the block to
+
+; We always start either with this information directly or with other
+; information we can derive it from.
+
+; To start we'll set up some zero page locations to serve as pointers
+; to our working addresses (no, we're not going to use self-modifying
+; code - yech!).
+; The exact addresses don't matter and can be adjusted to whatever
+; works in a particular case.
+
+        .org    $40     ; can be adjusted to whatever is needed
+
+source  .ds     2       ; two bytes per pointer
+dest    .ds     2
+
+; We also need a size to copy, so we'll set up a pair of bytes to
+; hold that.
+
+size     .ds    2       ; two bytes for up to 64K size
+
+; Note the high byte of the size is also the number of whole pages
+; to copy, and the low byte is the number of bytes to copy on the
+; last page.
+; This is handy enough that we'll alias those locations with names:
+
+partpg  .equ    size
+fullpg  .equ    size+1
+
+; We'll assume our caller fills in these values before calling our
+; routine (the exact method doesn't matter).
+
+; --------------------
+; Attempt #1
+; --------------------
+
+; a straightforward approach:
+
+        .org    $1000
+
+CopyFromEnd1:
+        ldx     fullpg      ; whole pages
+        beq     +           ; b: none
+        clc
+        txa
+        adc     source+1
+        sta     source+1    ; now points to last page
+;       clc                 ; if carry is set we have problem anyway...
+        txa
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+
+ +      inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        beq     +           ; b: none
+
+        ; main loop
+
+ -      dey                 ; Y = 255, 254, ..., 0
+        lda     (source),y  ; copy a byte
+        sta     (dest),y
+        tya                 ; page done ?
+        bne     -           ; b: no
+
+ +      dec     source+1    ; next page
+        dec     dest+1
+        dex                 ; is there another page ?
+        bne     -           ; b: yes
+        rts
+
+; this version moves a byte every 18 cycles.
+; Moving 8000 bytes takes 8000 * 18 = 144,000 cycles
+
+; --------------------
+; Attempt #2
+; --------------------
+
+; checking for the end of the loop by re-setting the Z-flag with
+; a register transfer slows the loop down.
+; Can we get rid of it ?
+
+        .org    $1000
+
+CopyFromEnd2:
+        ldx     fullpg      ; whole pages
+        beq     +           ; b: none
+        clc
+        txa
+        adc     source+1
+        sta     source+1    ; now points to last page
+;       clc                 ; if carry is set we have problem anyway...
+        txa
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+
+ +      inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        bne     @partpg     ; b: have a partial page
+        beq     @nextpg     ; b: don't have a partial page
+
+        ; main loop
+
+@wholpg dey
+ -      lda     (source),y  ; Y = 255, 254, ..., 1
+        sta     (dest),y
+@partpg dey                 ; all non-zero offsets done ?
+        bne     -           ; b: no
+        lda     (source),y  ; Y = 0
+        sta     (dest),y
+
+@nextpg dec     source+1    ; next page
+        dec     dest+1
+        dex                 ; is there another page ?
+        bne     @wholpg     ; b: yes
+        rts
+
+; --------------------
+; Attempt #2b
+; --------------------
+
+; alternatively:
+
+        .org    $1000
+
+CopyFromEnd2b:
+        ldx     fullpg      ; whole pages
+        beq     +           ; b: none
+        clc
+        txa
+        adc     source+1
+        sta     source+1    ; now points to last page
+;       clc                 ; if carry is set we have problem anyway...
+        txa
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+
+ +      inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        beq     @nextpg     ; b: none
+        cpy     #1          ; only one byte ?
+        beq     +           ; b: yes
+
+        ; count  = 255, 254, ..., 2
+
+        ; main loop
+
+@wholpg dey
+ -      lda     (source),y  ; Y = 255, 254, ..., 1
+        sta     (dest),y
+ +      dey                 ; all non-zero offsets done ?
+        bne     -           ; b: no
+        lda     (source),y  ; Y = 0
+        sta     (dest),y
+
+@nextpg dec     source+1    ; next page
+        dec     dest+1
+        dex                 ; is there another page ?
+        bne     @wholpg     ; b: yes
+        rts
+
+; this is a bit larger in code size but eliminates branching to enter the
+; main loop in most cases (so it's "prettier" and ever-so-slightly faster)
+
+; this version moves a byte every 16 cycles.
+; Moving 8000 bytes takes 8000 * 16 = 128,000 cycles
+
+; --------------------
+; Attempt #3
+; --------------------
+
+; we can of course unroll the main loop, here twice:
+
+        .org    $1000
+
+CopyFromEnd3:
+        ldx     fullpg      ; whole pages
+        beq     +           ; b: none
+        clc
+        txa
+        adc     source+1
+        sta     source+1    ; now points to last page
+;       clc                 ; if carry is set we have problem anyway...
+        txa
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+
+ +      inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        beq     @nextpg     ; b: count = 0
+        tya
+        lsr
+        bcc     @cp_0       ; b: count = 254, 252, ..., 2
+        dey
+        beq     +           ; b: count = 1 (a special case)
+
+        ; fall through: count = 255, 253, ..., 3
+
+        ; main loop
+
+ -      lda     (source),y  ; Y = 254, 252, ..., 2
+        sta     (dest),y
+@cp_0   dey
+        lda     (source),y  ; Y = 255, 253, ..., 1
+        sta     (dest),y
+        dey                 ; all non-zero offsets done ?
+        bne     -           ; b: no
+ +      lda     (source),y  ; Y = 0
+        sta     (dest),y
+
+@nextpg dec     source+1    ; next page
+        dec     dest+1
+        dex                 ; is there another page ?
+        bne     @cp_0       ; b: yes
+        rts
+
+; unrolling the loop once moves two bytes in 29 cycles instead of
+; the 32 cycles of the previous version, a savings of a little under 10%.
+; Moving 8000 bytes now takes 8000/2 * 29 = 116,000 cycles
+; The savings over the previous version is 12,000 cycles.
+
+; --------------------
+; Attempt #4
+; --------------------
+
+; even more aggressive: four copies per loop
+
+        .org    $1000
+
+CopyFromEnd4:
+        ldx     fullpg      ; whole pages
+        beq     +           ; b: none
+        clc
+        txa
+        adc     source+1
+        sta     source+1    ; now points to last page
+;       clc                 ; if carry is set we have problem anyway...
+        txa
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+
+ +      inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        beq     @nextpg     ; b: none
+
+        ; the low two bits of the original partial page count tell us
+        ; where to enter the loop.
+        ; at the end of the first loop we want the value in the Y-register
+        ; to be a multiple of four (ie., the low two bits = %00)
+
+        ; %00 -> 4, 8, ..., 252, so move four byte the first time
+        ; %01 -> 1, 5, ..., 253, so move three bytes the first time
+        ; %10 -> 2, 6, ..., 254, so move two bytes the first time
+        ; %11 -> 3, 7, ..., 255, so move one byte the first time
+
+        tya
+        and     #%11        ; %00, %01, %10, %11
+        beq     @cp_00      ; b: %00, count = 252, 248, ..., 4
+        lsr
+        bcc     @cp_10      ; b: %10, count = 254, 250, ..., 2
+        bne     @cp_11      ; b: %11, count = 255, 251, ..., 3
+        dey
+        beq     +           ; b: %01, count = 1 (a special case)
+
+        ; fall through: %01, count = 253, 249, ..., 5
+
+        ; main loop
+
+ -      lda     (source),y  ; Y = 252, 248, ..., 4
+        sta     (dest),y
+@cp_00  dey
+        lda     (source),y  ; Y = 255, 251, ..., 3
+        sta     (dest),y
+@cp_11  dey
+        lda     (source),y  ; Y = 254, 250, ..., 2
+        sta     (dest),y
+@cp_10  dey
+        lda     (source),y  ; Y = 253, 249, ..., 1
+        sta     (dest),y
+        dey                 ; all non-zero offsets done ?
+        bne     -           ; b: no
+ +      lda     (source),y  ; Y = 0
+        sta     (dest),y
+
+@nextpg dec     source+1    ; next page
+        dec     dest+1
+        dex                 ; is there another page ?
+        bne     @cp_00      ; b: yes
+        rts
+
+; this moves four bytes in 55 cycles instead of the 64 cycles of the
+; original version or the 58 cycles of the once-unrolled version.
+; Moving 8000 bytes now takes 8000/4 * 55 = 110,000 cycles.
+; About 18,000 cycles less than the original and 6,000 cycles less then
+; the once-unrolled version.
+
+; Doubling the unrolling from two to four gains only half as much as
+; unrolling from one to two.
+; This is a general rule: each doubling will gain, but only half as much
+; as the previous one.
+; Total gain quickly approaches a limit: maximum gain occurs when the loop
+; is completely unrolled and there is no branching at all, but assuming
+; indirect addressing the code size required to copy 8000 bytes would
+; be more than than 40K (8000 * 5) and would still take 104,000 cycles
+
+; -------------------------------
+
+        .end

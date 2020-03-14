@@ -1,0 +1,1278 @@
+; Hobby Cross-Assembler Demo 032
+; Macro Instruction Set\Z80
+; ok: Z80 instruction set
+
+; by Anton Treuenfels
+
+; first created: 03/31/05
+; last revised:  05/14/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .listoff    includes
+        .liston     stats
+
+        .include "iz80.a"   ; Z80 macro implementation
+
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; backward reference
+
+bakbyt  .equ    34H
+bakwrd  .equ    5678H
+
+; a simple test of all legal instructions using legal address modes
+; - no complicated expressions
+
+        ADC A,A
+        ADC A,B
+        ADC A,C
+        ADC A,D
+        ADC A,E
+        ADC A,H
+        ADC A,L
+        ADC A,(HL)
+
+        ADC A,12H
+        ADC A,bakbyt
+        ADC A,fwdbyt
+
+        ADC A,(IX+12H)
+        ADC A,(IX+bakbyt)
+        ADC A,(IX+fwdbyt)
+        ADC A,(IY+12H)
+        ADC A,(IY+bakbyt)
+        ADC A,(IY+fwdbyt)
+
+        ADC HL,BC
+        ADC HL,DE
+        ADC HL,HL
+        ADC HL,SP
+
+        ADD A,A
+        ADD A,B
+        ADD A,C
+        ADD A,D
+        ADD A,E
+        ADD A,H
+        ADD A,L
+        ADD A,(HL)
+
+        ADD A,12H
+        ADD A,bakbyt
+        ADD A,fwdbyt
+
+        ADD A,(IX+12H)
+        ADD A,(IX+bakbyt)
+        ADD A,(IX+fwdbyt)
+        ADD A,(IY+12H)
+        ADD A,(IY+bakbyt)
+        ADD A,(IY+fwdbyt)
+
+        ADD HL,BC
+        ADD HL,DE
+        ADD HL,HL
+        ADD HL,SP
+
+        ADD IX,BC
+        ADD IX,DE
+        ADD IX,IX
+        ADD IX,SP
+
+        ADD IY,BC
+        ADD IY,DE
+        ADD IY,IY
+        ADD IY,SP
+
+        AND A
+        AND B
+        AND C
+        AND D
+        AND E
+        AND H
+        AND L
+        AND (HL)
+
+        AND 12H
+        AND bakbyt
+        AND fwdbyt
+
+        AND (IX+12H)
+        AND (IX+bakbyt)
+        AND (IX+fwdbyt)
+        AND (IY+12H)
+        AND (IY+bakbyt)
+        AND (IY+fwdbyt)
+
+        BIT 0,A
+        BIT 0,B
+        BIT 0,C
+        BIT 0,D
+        BIT 0,E
+        BIT 0,H
+        BIT 0,L
+        BIT 0,(HL)
+
+        BIT 0,(IX+12H)
+        BIT 0,(IX+bakbyt)
+        BIT 0,(IX+fwdbyt)
+        BIT 0,(IY+12H)
+        BIT 0,(IY+bakbyt)
+        BIT 0,(IY+fwdbyt)
+
+        BIT 1,A
+        BIT 1,B
+        BIT 1,C
+        BIT 1,D
+        BIT 1,E
+        BIT 1,H
+        BIT 1,L
+        BIT 1,(HL)
+
+        BIT 1,(IX+12H)
+        BIT 1,(IX+bakbyt)
+        BIT 1,(IX+fwdbyt)
+        BIT 1,(IY+12H)
+        BIT 1,(IY+bakbyt)
+        BIT 1,(IY+fwdbyt)
+
+        BIT 2,A
+        BIT 2,B
+        BIT 2,C
+        BIT 2,D
+        BIT 2,E
+        BIT 2,H
+        BIT 2,L
+        BIT 2,(HL)
+
+        BIT 2,(IX+12H)
+        BIT 2,(IX+bakbyt)
+        BIT 2,(IX+fwdbyt)
+        BIT 2,(IY+12H)
+        BIT 2,(IY+bakbyt)
+        BIT 2,(IY+fwdbyt)
+
+        BIT 3,A
+        BIT 3,B
+        BIT 3,C
+        BIT 3,D
+        BIT 3,E
+        BIT 3,H
+        BIT 3,L
+        BIT 3,(HL)
+
+        BIT 3,(IX+12H)
+        BIT 3,(IX+bakbyt)
+        BIT 3,(IX+fwdbyt)
+        BIT 3,(IY+12H)
+        BIT 3,(IY+bakbyt)
+        BIT 3,(IY+fwdbyt)
+
+        BIT 4,A
+        BIT 4,B
+        BIT 4,C
+        BIT 4,D
+        BIT 4,E
+        BIT 4,H
+        BIT 4,L
+        BIT 4,(HL)
+
+        BIT 4,(IX+12H)
+        BIT 4,(IX+bakbyt)
+        BIT 4,(IX+fwdbyt)
+        BIT 4,(IY+12H)
+        BIT 4,(IY+bakbyt)
+        BIT 4,(IY+fwdbyt)
+
+        BIT 5,A
+        BIT 5,B
+        BIT 5,C
+        BIT 5,D
+        BIT 5,E
+        BIT 5,H
+        BIT 5,L
+        BIT 5,(HL)
+
+        BIT 5,(IX+12H)
+        BIT 5,(IX+bakbyt)
+        BIT 5,(IX+fwdbyt)
+        BIT 5,(IY+12H)
+        BIT 5,(IY+bakbyt)
+        BIT 5,(IY+fwdbyt)
+
+        BIT 6,A
+        BIT 6,B
+        BIT 6,C
+        BIT 6,D
+        BIT 6,E
+        BIT 6,H
+        BIT 6,L
+        BIT 6,(HL)
+
+        BIT 6,(IX+12H)
+        BIT 6,(IX+bakbyt)
+        BIT 6,(IX+fwdbyt)
+        BIT 6,(IY+12H)
+        BIT 6,(IY+bakbyt)
+        BIT 6,(IY+fwdbyt)
+
+        BIT 7,A
+        BIT 7,B
+        BIT 7,C
+        BIT 7,D
+        BIT 7,E
+        BIT 7,H
+        BIT 7,L
+        BIT 7,(HL)
+
+        BIT 7,(IX+12H)
+        BIT 7,(IX+bakbyt)
+        BIT 7,(IX+fwdbyt)
+        BIT 7,(IY+12H)
+        BIT 7,(IY+bakbyt)
+        BIT 7,(IY+fwdbyt)
+
+        CALL C,1234H
+        CALL C,bakwrd
+        CALL C,fwdwrd
+        CALL M,1234H
+        CALL M,bakwrd
+        CALL M,fwdwrd
+        CALL NC,1234H
+        CALL NC,bakwrd
+        CALL NC,fwdwrd
+        CALL NZ,1234H
+        CALL NZ,bakwrd
+        CALL NZ,fwdwrd
+        CALL P,1234H
+        CALL P,bakwrd
+        CALL P,fwdwrd
+        CALL PE,1234H
+        CALL PE,bakwrd
+        CALL PE,fwdwrd
+        CALL PO,1234H
+        CALL PO,bakwrd
+        CALL PO,fwdwrd
+        CALL Z,1234H
+        CALL Z,bakwrd
+        CALL Z,fwdwrd
+
+        CALL 1234H
+        CALL bakwrd
+        CALL fwdwrd
+
+        CCF
+
+        CP  A
+        CP  B
+        CP  C
+        CP  D
+        CP  E
+        CP  H
+        CP  L
+        CP  (HL)
+
+        CP  12H
+        CP  bakbyt
+        CP  fwdbyt
+
+        CP  (IX+12H)
+        CP  (IX+bakbyt)
+        CP  (IX+fwdbyt)
+        CP  (IY+12H)
+        CP  (IY+bakbyt)
+        CP  (IY+fwdbyt)
+
+        CPD
+
+        CPDR
+
+        CPI
+
+        CPIR
+
+        CPL
+
+        DAA
+
+        DEC A
+        DEC B
+        DEC C
+        DEC D
+        DEC E
+        DEC H
+        DEC L
+        DEC (HL)
+
+        DEC (IX+12H)
+        DEC (IX+bakbyt)
+        DEC (IX+fwdbyt)
+        DEC (IY+12H)
+        DEC (IY+bakbyt)
+        DEC (IY+fwdbyt)
+
+        DEC BC
+        DEC DE
+        DEC HL
+        DEC SP
+
+        DEC IX
+        DEC IY
+
+        DI
+
+]target:
+
+        DJNZ ]target
+
+        EI
+
+        EX (SP),HL
+        EX (SP),IX
+        EX (SP),IY
+        EX AF,AF'
+        EX DE,HL
+
+        EXX
+
+        HALT
+
+        IM 0
+        IM 1
+        IM 2
+
+        IN A,(C)
+        IN B,(C)
+        IN C,(C)
+        IN D,(C)
+        IN E,(C)
+        IN H,(C)
+        IN L,(C)
+
+        IN A,(12H)
+        IN A,(bakbyt)
+        IN A,(fwdbyt)
+
+        INC A
+        INC B
+        INC C
+        INC D
+        INC E
+        INC H
+        INC L
+        INC (HL)
+
+        INC (IX+12H)
+        INC (IX+bakbyt)
+        INC (IX+fwdbyt)
+        INC (IY+12H)
+        INC (IY+bakbyt)
+        INC (IY+fwdbyt)
+
+        INC BC
+        INC DE
+        INC HL
+        INC SP
+
+        INC IX
+        INC IY
+
+        IND
+
+        INDR
+
+        INI
+
+        INIR
+
+        JP C,1234H
+        JP C,bakwrd
+        JP C,fwdwrd
+        JP M,1234H
+        JP M,bakwrd
+        JP M,fwdwrd
+        JP NC,1234H
+        JP NC,bakwrd
+        JP NC,fwdwrd
+        JP NZ,1234H
+        JP NZ,bakwrd
+        JP NZ,fwdwrd
+        JP P,1234H
+        JP P,bakwrd
+        JP P,fwdwrd
+        JP PE,1234H
+        JP PE,bakwrd
+        JP PE,fwdwrd
+        JP PO,1234H
+        JP PO,bakwrd
+        JP PO,fwdwrd
+        JP Z,1234H
+        JP Z,bakwrd
+        JP Z,fwdwrd
+
+        JP 1234H
+        JP bakwrd
+        JP fwdwrd
+
+        JP (HL)
+        JP (IX)
+        JP (IY)
+
+]target:
+
+        JR C,]target
+        JR NC,]target
+        JR NZ,]target
+        JR Z,]target
+
+        JR ]target
+
+        LD (BC),A
+        LD (DE),A
+
+        LD (HL),A
+        LD (HL),B
+        LD (HL),C
+        LD (HL),D
+        LD (HL),E
+        LD (HL),H
+        LD (HL),L
+
+        LD (HL),12H
+        LD (HL),bakbyt
+        LD (HL),fwdbyt
+
+        LD (IX+12H),A
+        LD (IX+bakbyt),A
+        LD (IX+fwdbyt),A
+        LD (IX+12H),B
+        LD (IX+bakbyt),B
+        LD (IX+fwdbyt),B
+        LD (IX+12H),C
+        LD (IX+bakbyt),C
+        LD (IX+fwdbyt),C
+        LD (IX+12H),D
+        LD (IX+bakbyt),D
+        LD (IX+fwdbyt),D
+        LD (IX+12H),E
+        LD (IX+bakbyt),E
+        LD (IX+fwdbyt),E
+        LD (IX+12H),H
+        LD (IX+bakbyt),H
+        LD (IX+fwdbyt),H
+        LD (IX+12H),L
+        LD (IX+bakbyt),L
+        LD (IX+fwdbyt),L
+
+        LD (IX+12H),34H
+        LD (IX+bakbyt),34H
+        LD (IX+fwdbyt),34H
+
+        LD (IY+12H),A
+        LD (IY+bakbyt),A
+        LD (IY+fwdbyt),A
+        LD (IY+12H),B
+        LD (IY+bakbyt),B
+        LD (IY+fwdbyt),B
+        LD (IY+12H),C
+        LD (IY+bakbyt),C
+        LD (IY+fwdbyt),C
+        LD (IY+12H),D
+        LD (IY+bakbyt),D
+        LD (IY+fwdbyt),D
+        LD (IY+12H),E
+        LD (IY+bakbyt),E
+        LD (IY+fwdbyt),E
+        LD (IY+12H),H
+        LD (IY+bakbyt),H
+        LD (IY+fwdbyt),H
+        LD (IY+12H),L
+        LD (IY+bakbyt),L
+        LD (IY+fwdbyt),L
+
+        LD (IY+12H),34H
+        LD (IY+bakbyt),34H
+        LD (IY+fwdbyt),34H
+
+        LD (1234H),BC
+        LD (bakwrd),BC
+        LD (fwdwrd),BC
+        LD (1234H),DE
+        LD (bakwrd),DE
+        LD (fwdwrd),DE
+        LD (1234H),HL
+        LD (bakwrd),HL
+        LD (fwdwrd),HL
+        LD (1234H),IX
+        LD (bakwrd),IX
+        LD (fwdwrd),IX
+        LD (1234H),IY
+        LD (bakwrd),IY
+        LD (fwdwrd),IY
+        LD (1234H),SP
+        LD (bakwrd),SP
+        LD (fwdwrd),SP
+
+        LD A,(BC)
+        LD A,(DE)
+
+        LD A,(IX+12H)
+        LD A,(IX+bakbyt)
+        LD A,(IX+fwdbyt)
+        LD A,(IY+12H)
+        LD A,(IY+bakbyt)
+        LD A,(IY+fwdbyt)
+
+        LD A,A
+        LD A,B
+        LD A,C
+        LD A,D
+        LD A,E
+        LD A,H
+        LD A,L
+        LD A,(HL)
+
+        LD A,I
+
+        LD A,R
+
+        LD A,(1234H)
+        LD A,(bakwrd)
+        LD A,(fwdwrd)
+
+        LD A,12H
+        LD A,bakbyt
+        LD A,fwdbyt
+
+        LD B,(IX+12H)
+        LD B,(IX+bakbyt)
+        LD B,(IX+fwdbyt)
+        LD B,(IY+12H)
+        LD B,(IY+bakbyt)
+        LD B,(IY+fwdbyt)
+
+        LD B,A
+        LD B,B
+        LD B,C
+        LD B,D
+        LD B,E
+        LD B,H
+        LD B,L
+        LD B,(HL)
+
+        LD B,12H
+        LD B,bakbyt
+        LD B,fwdbyt
+
+        LD BC,(1234H)
+        LD BC,(bakwrd)
+        LD BC,(fwdwrd)
+        LD BC,1234H
+        LD BC,bakwrd
+        LD BC,fwdwrd
+
+        LD C,(IX+12H)
+        LD C,(IX+bakbyt)
+        LD C,(IX+fwdbyt)
+        LD C,(IY+12H)
+        LD C,(IY+bakbyt)
+        LD C,(IY+fwdbyt)
+
+        LD C,A
+        LD C,B
+        LD C,C
+        LD C,D
+        LD C,E
+        LD C,H
+        LD C,L
+        LD C,(HL)
+
+        LD C,12H
+        LD C,bakbyt
+        LD C,fwdbyt
+
+        LD D,(IX+12H)
+        LD D,(IX+bakbyt)
+        LD D,(IX+fwdbyt)
+        LD D,(IY+12H)
+        LD D,(IY+bakbyt)
+        LD D,(IY+fwdbyt)
+
+        LD D,A
+        LD D,B
+        LD D,C
+        LD D,D
+        LD D,E
+        LD D,H
+        LD D,L
+        LD D,(HL)
+
+        LD D,12H
+        LD D,bakbyt
+        LD D,fwdbyt
+
+        LD DE,(1234H)
+        LD DE,(bakwrd)
+        LD DE,(fwdwrd)
+        LD DE,1234H
+        LD DE,bakwrd
+        LD DE,fwdwrd
+
+        LD E,(IX+12H)
+        LD E,(IX+bakbyt)
+        LD E,(IX+fwdbyt)
+        LD E,(IY+12H)
+        LD E,(IY+bakbyt)
+        LD E,(IY+fwdbyt)
+
+        LD E,A
+        LD E,B
+        LD E,C
+        LD E,D
+        LD E,E
+        LD E,H
+        LD E,L
+        LD E,(HL)
+
+        LD E,12H
+        LD E,bakbyt
+        LD E,fwdbyt
+
+        LD H,(IX+12H)
+        LD H,(IX+bakbyt)
+        LD H,(IX+fwdbyt)
+        LD H,(IY+12H)
+        LD H,(IY+bakbyt)
+        LD H,(IY+fwdbyt)
+
+        LD H,A
+        LD H,B
+        LD H,C
+        LD H,D
+        LD H,E
+        LD H,H
+        LD H,L
+        LD H,(HL)
+
+        LD H,12H
+        LD H,bakbyt
+        LD H,fwdbyt
+
+        LD HL,(1234H)
+        LD HL,(bakwrd)
+        LD HL,(fwdwrd)
+        LD HL,1234H
+        LD HL,bakwrd
+        LD HL,fwdwrd
+
+        LD I,A
+
+        LD IX,(1234H)
+        LD IX,(bakwrd)
+        LD IX,(fwdwrd)
+        LD IX,1234H
+        LD IX,bakwrd
+        LD IX,fwdwrd
+
+        LD IY,(1234)
+        LD IY,1234H
+        LD IY,bakwrd
+        LD IY,fwdwrd
+
+        LD L,(IX+12H)
+        LD L,(IX+bakbyt)
+        LD L,(IX+fwdbyt)
+        LD L,(IY+12H)
+        LD L,(IY+bakbyt)
+        LD L,(IY+fwdbyt)
+
+        LD L,A
+        LD L,B
+        LD L,C
+        LD L,D
+        LD L,E
+        LD L,H
+        LD L,L
+        LD L,(HL)
+
+        LD L,12H
+        LD L,bakbyt
+        LD L,fwdbyt
+
+        LD R,A
+
+        LD SP,HL
+        LD SP,IX
+        LD SP,IY
+        LD SP,(1234H)
+        LD SP,(bakwrd)
+        LD SP,(fwdwrd)
+        LD SP,1234H
+        LD SP,bakwrd
+        LD SP,fwdwrd
+
+        LD (1234H),A
+        LD (bakwrd),A
+        LD (fwdwrd),A
+
+        LDD
+
+        LDDR
+
+        LDI
+
+        LDIR
+
+        NEG
+
+        NOP
+
+        OR A
+        OR B
+        OR C
+        OR D
+        OR E
+        OR H
+        OR L
+        OR (HL)
+
+        OR 12H
+        OR bakbyt
+        OR fwdbyt
+
+        OR (IX+12H)
+        OR (IX+bakbyt)
+        OR (IX+fwdbyt)
+        OR (IY+12H)
+        OR (IY+bakbyt)
+        OR (IY+fwdbyt)
+
+        OTDR
+
+        OTIR
+
+        OUT (C),A
+        OUT (C),B
+        OUT (C),C
+        OUT (C),D
+        OUT (C),E
+        OUT (C),H
+        OUT (C),L
+
+        OUT (12H),A
+        OUT (bakbyt),A
+        OUT (fwdbyt),A
+
+        OUTD
+
+        OUTI
+
+        POP AF
+        POP BC
+        POP DE
+        POP HL
+        POP IX
+        POP IY
+
+        PUSH AF
+        PUSH BC
+        PUSH DE
+        PUSH HL
+        PUSH IX
+        PUSH IY
+
+        RES 0,A
+        RES 0,B
+        RES 0,C
+        RES 0,D
+        RES 0,E
+        RES 0,H
+        RES 0,L
+        RES 0,(HL)
+
+        RES 0,(IX+12H)
+        RES 0,(IX+bakbyt)
+        RES 0,(IX+fwdbyt)
+        RES 0,(IY+12H)
+        RES 0,(IY+bakbyt)
+        RES 0,(IY+fwdbyt)
+
+        RES 1,A
+        RES 1,B
+        RES 1,C
+        RES 1,D
+        RES 1,E
+        RES 1,H
+        RES 1,L
+        RES 1,(HL)
+
+        RES 1,(IX+12H)
+        RES 1,(IX+bakbyt)
+        RES 1,(IX+fwdbyt)
+        RES 1,(IY+12H)
+        RES 1,(IY+bakbyt)
+        RES 1,(IY+fwdbyt)
+
+        RES 2,A
+        RES 2,B
+        RES 2,C
+        RES 2,D
+        RES 2,E
+        RES 2,H
+        RES 2,L
+        RES 2,(HL)
+
+        RES 2,(IX+12H)
+        RES 2,(IX+bakbyt)
+        RES 2,(IX+fwdbyt)
+        RES 2,(IY+12H)
+        RES 2,(IY+bakbyt)
+        RES 2,(IY+fwdbyt)
+
+        RES 3,A
+        RES 3,B
+        RES 3,C
+        RES 3,D
+        RES 3,E
+        RES 3,H
+        RES 3,L
+        RES 3,(HL)
+
+        RES 3,(IX+12H)
+        RES 3,(IX+bakbyt)
+        RES 3,(IX+fwdbyt)
+        RES 3,(IY+12H)
+        RES 3,(IY+bakbyt)
+        RES 3,(IY+fwdbyt)
+
+        RES 4,A
+        RES 4,B
+        RES 4,C
+        RES 4,D
+        RES 4,E
+        RES 4,H
+        RES 4,L
+        RES 4,(HL)
+
+        RES 4,(IX+12H)
+        RES 4,(IX+bakbyt)
+        RES 4,(IX+fwdbyt)
+        RES 4,(IY+12H)
+        RES 4,(IY+bakbyt)
+        RES 4,(IY+fwdbyt)
+
+        RES 5,A
+        RES 5,B
+        RES 5,C
+        RES 5,D
+        RES 5,E
+        RES 5,H
+        RES 5,L
+        RES 5,(HL)
+
+        RES 5,(IX+12H)
+        RES 5,(IX+bakbyt)
+        RES 5,(IX+fwdbyt)
+        RES 5,(IY+12H)
+        RES 5,(IY+bakbyt)
+        RES 5,(IY+fwdbyt)
+
+        RES 6,A
+        RES 6,B
+        RES 6,C
+        RES 6,D
+        RES 6,E
+        RES 6,H
+        RES 6,L
+        RES 6,(HL)
+
+        RES 6,(IX+12H)
+        RES 6,(IX+bakbyt)
+        RES 6,(IX+fwdbyt)
+        RES 6,(IY+12H)
+        RES 6,(IY+bakbyt)
+        RES 6,(IY+fwdbyt)
+
+        RES 7,A
+        RES 7,B
+        RES 7,C
+        RES 7,D
+        RES 7,E
+        RES 7,H
+        RES 7,L
+        RES 7,(HL)
+
+        RES 7,(IX+12H)
+        RES 7,(IX+bakbyt)
+        RES 7,(IX+fwdbyt)
+        RES 7,(IY+12H)
+        RES 7,(IY+bakbyt)
+        RES 7,(IY+fwdbyt)
+
+        RET C
+        RET M
+        RET NC
+        RET NZ
+        RET P
+        RET PE
+        RET PO
+        RET Z
+
+        RET
+
+        RETI
+
+        RETN
+
+        RL A
+        RL B
+        RL C
+        RL D
+        RL E
+        RL H
+        RL L
+        RL (HL)
+
+        RL (IX+12H)
+        RL (IX+bakbyt)
+        RL (IX+fwdbyt)
+        RL (IY+12H)
+        RL (IY+bakbyt)
+        RL (IY+fwdbyt)
+
+        RLA
+
+        RLC A
+        RLC B
+        RLC C
+        RLC D
+        RLC E
+        RLC H
+        RLC L
+        RLC (HL)
+
+        RLC (IX+12H)
+        RLC (IX+bakbyt)
+        RLC (IX+fwdbyt)
+        RLC (IY+12H)
+        RLC (IY+bakbyt)
+        RLC (IY+fwdbyt)
+
+        RLCA
+
+        RLD
+
+        RR A
+        RR B
+        RR C
+        RR D
+        RR E
+        RR H
+        RR L
+        RR (HL)
+
+        RR (IX+12H)
+        RR (IX+bakbyt)
+        RR (IX+fwdbyt)
+        RR (IY+12H)
+        RR (IY+bakbyt)
+        RR (IY+fwdbyt)
+
+        RRA
+
+        RRC A
+        RRC B
+        RRC C
+        RRC D
+        RRC E
+        RRC H
+        RRC L
+        RRC (HL)
+
+        RRC (IX+12H)
+        RRC (IX+bakbyt)
+        RRC (IX+fwdbyt)
+        RRC (IY+12H)
+        RRC (IY+bakbyt)
+        RRC (IY+fwdbyt)
+
+        RRCA
+
+        RRD
+
+        RST 0
+        RST 1
+        RST 2
+        RST 3
+        RST 4
+        RST 5
+        RST 6
+        RST 7
+
+        RST 00H
+        RST 08H
+        RST 10H
+        RST 18H
+        RST 20H
+        RST 28H
+        RST 30H
+        RST 38H
+
+        SBC A,A
+        SBC A,B
+        SBC A,C
+        SBC A,D
+        SBC A,E
+        SBC A,H
+        SBC A,L
+        SBC A,(HL)
+
+        SBC A,12H
+        SBC A,bakbyt
+        SBC A,fwdbyt
+
+        SBC A,(IX+12H)
+        SBC A,(IX+bakbyt)
+        SBC A,(IX+fwdbyt)
+        SBC A,(IY+12H)
+        SBC A,(IY+bakbyt)
+        SBC A,(IY+fwdbyt)
+
+        SBC HL,BC
+        SBC HL,DE
+        SBC HL,HL
+        SBC HL,SP
+
+        SCF
+
+        SET 0,A
+        SET 0,B
+        SET 0,C
+        SET 0,D
+        SET 0,E
+        SET 0,H
+        SET 0,L
+        SET 0,(HL)
+
+        SET 0,(IX+12H)
+        SET 0,(IX+bakbyt)
+        SET 0,(IX+fwdbyt)
+        SET 0,(IY+12H)
+        SET 0,(IY+bakbyt)
+        SET 0,(IY+fwdbyt)
+
+        SET 1,A
+        SET 1,B
+        SET 1,C
+        SET 1,D
+        SET 1,E
+        SET 1,H
+        SET 1,L
+        SET 1,(HL)
+
+        SET 1,(IX+12H)
+        SET 1,(IX+bakbyt)
+        SET 1,(IX+fwdbyt)
+        SET 1,(IY+12H)
+        SET 1,(IY+bakbyt)
+        SET 1,(IY+fwdbyt)
+
+        SET 2,A
+        SET 2,B
+        SET 2,C
+        SET 2,D
+        SET 2,E
+        SET 2,H
+        SET 2,L
+        SET 2,(HL)
+
+        SET 2,(IX+12H)
+        SET 2,(IX+bakbyt)
+        SET 2,(IX+fwdbyt)
+        SET 2,(IY+12H)
+        SET 2,(IY+bakbyt)
+        SET 2,(IY+fwdbyt)
+
+        SET 3,A
+        SET 3,B
+        SET 3,C
+        SET 3,D
+        SET 3,E
+        SET 3,H
+        SET 3,L
+        SET 3,(HL)
+
+        SET 3,(IX+12H)
+        SET 3,(IX+bakbyt)
+        SET 3,(IX+fwdbyt)
+        SET 3,(IY+12H)
+        SET 3,(IY+bakbyt)
+        SET 3,(IY+fwdbyt)
+
+        SET 4,A
+        SET 4,B
+        SET 4,C
+        SET 4,D
+        SET 4,E
+        SET 4,H
+        SET 4,L
+        SET 4,(HL)
+
+        SET 4,(IX+12H)
+        SET 4,(IX+bakbyt)
+        SET 4,(IX+fwdbyt)
+        SET 4,(IY+12H)
+        SET 4,(IY+bakbyt)
+        SET 4,(IY+fwdbyt)
+
+        SET 5,A
+        SET 5,B
+        SET 5,C
+        SET 5,D
+        SET 5,E
+        SET 5,H
+        SET 5,L
+        SET 5,(HL)
+
+        SET 5,(IX+12H)
+        SET 5,(IX+bakbyt)
+        SET 5,(IX+fwdbyt)
+        SET 5,(IY+12H)
+        SET 5,(IY+bakbyt)
+        SET 5,(IY+fwdbyt)
+
+        SET 6,A
+        SET 6,B
+        SET 6,C
+        SET 6,D
+        SET 6,E
+        SET 6,H
+        SET 6,L
+        SET 6,(HL)
+
+        SET 6,(IX+12H)
+        SET 6,(IX+bakbyt)
+        SET 6,(IX+fwdbyt)
+        SET 6,(IY+12H)
+        SET 6,(IY+bakbyt)
+        SET 6,(IY+fwdbyt)
+
+        SET 7,A
+        SET 7,B
+        SET 7,C
+        SET 7,D
+        SET 7,E
+        SET 7,H
+        SET 7,L
+        SET 7,(HL)
+
+        SET 7,(IX+12H)
+        SET 7,(IX+bakbyt)
+        SET 7,(IX+fwdbyt)
+        SET 7,(IY+12H)
+        SET 7,(IY+bakbyt)
+        SET 7,(IY+fwdbyt)
+
+        SLA A
+        SLA B
+        SLA C
+        SLA D
+        SLA E
+        SLA H
+        SLA L
+        SLA (HL)
+
+        SLA (IX+12H)
+        SLA (IX+bakbyt)
+        SLA (IX+fwdbyt)
+        SLA (IY+12H)
+        SLA (IY+bakbyt)
+        SLA (IY+fwdbyt)
+
+        SRA A
+        SRA B
+        SRA C
+        SRA D
+        SRA E
+        SRA H
+        SRA L
+        SRA (HL)
+
+        SRA (IX+12H)
+        SRA (IX+bakbyt)
+        SRA (IX+fwdbyt)
+        SRA (IY+12H)
+        SRA (IY+bakbyt)
+        SRA (IY+fwdbyt)
+
+        SRL A
+        SRL B
+        SRL C
+        SRL D
+        SRL E
+        SRL H
+        SRL L
+        SRL (HL)
+
+        SRL (IX+12H)
+        SRL (IX+bakbyt)
+        SRL (IX+fwdbyt)
+        SRL (IY+12H)
+        SRL (IY+bakbyt)
+        SRL (IY+fwdbyt)
+
+        SUB A
+        SUB B
+        SUB C
+        SUB D
+        SUB E
+        SUB H
+        SUB L
+        SUB (HL)
+
+        SUB 12H
+        SUB bakbyt
+        SUB fwdbyt
+
+        SUB (IX+12H)
+        SUB (IX+bakbyt)
+        SUB (IX+fwdbyt)
+        SUB (IY+12H)
+        SUB (IY+bakbyt)
+        SUB (IY+fwdbyt)
+
+        XOR A
+        XOR B
+        XOR C
+        XOR D
+        XOR E
+        XOR H
+        XOR L
+        XOR (HL)
+
+        XOR 12H
+        XOR bakbyt
+        XOR fwdbyt
+
+        XOR (IX+12H)
+        XOR (IX+bakbyt)
+        XOR (IX+fwdbyt)
+        XOR (IY+12H)
+        XOR (IY+bakbyt)
+        XOR (IY+fwdbyt)
+
+; forward reference
+
+fwdbyt  .equ    56H
+fwdwrd  .equ    9ABCH
+
+; -------------------------------
+
+        .end

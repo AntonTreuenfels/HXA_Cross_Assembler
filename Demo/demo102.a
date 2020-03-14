@@ -1,0 +1,313 @@
+; Hobby Cross-Assembler Demo 102
+; 6502\Utility Routines
+; developing a block fill routine
+
+; by Anton Treuenfels
+
+; first created: 08/13/04
+; last revised:  06/30/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+
+; -------------------------------
+
+; We need to know three things to fill a block:
+; 1) where the block to fill is
+; 2) how big the block to fill is
+; 3) what value to fill the block with (we'll assume a single byte value)
+
+; We always start either with this information directly or with other
+; information we can derive it from (such as the start and end of a block).
+; We can fill from the start or end of the blocks as we please
+
+; To start we'll set up a zero page location to serve as a pointer
+; to our working addresses (no, we're not going to use self-modifying
+; code - yech!).
+; The exact addresses don't matter and can be adjusted to whatever
+; works in a particular case.
+
+        .org    $40     ; can be adjusted to whatever is needed
+
+dest    .ds     2       ; two bytes per pointer
+
+; We also need a size to copy, so we'll set up a pair of bytes to
+; hold that.
+
+size     .ds    2       ; two bytes for up to 64K size
+
+; Note the high byte of the size is also the number of whole pages
+; to copy, and the low byte is the number of bytes to copy on the
+; last page.
+; This is handy enough that we'll alias those locations with names:
+
+partpg  .equ    size
+fullpg  .equ    size+1
+
+; We'll assume our caller fills in these values before calling our
+; routine (the exact method doesn't matter).
+; We'll also assume our routine is called with the value of the fill
+; byte in the accumulator
+
+; --------------------
+; Attempt #1
+; --------------------
+
+        .org   $1000
+
+Fill1:
+        ldy     #$00        ; point to start of each page
+        ldx     fullpg      ; any whole pages ?
+        beq     :+          ; b: no
+ -      sta     (dest),y    ; fill a byte
+        iny                 ; next byte
+        bne     :-          ; b: page not done
+        inc     dest+1      ; next page
+        dex                 ; another page ?
+        bne     :-          ; b: yes
+ +      ldx     partpg      ; any partial page ?
+        beq     :+          ; b: no
+ -      sta     (dest),y    ; fill a byte
+        iny                 ; next byte
+        dex                 ; another byte ?
+        bne     :-          ; b: yes
+ +      rts                 ; done
+
+; this works fine, and correctly handles the case where size=0.
+; The main objection that can be raised is speed.
+; The main loop to fill whole pages takes (at minimum) 11 cycles a byte,
+; to fill partial pages 13 cycles per byte.
+; To fill, say, 8000 bytes (= 256*31 + 64) takes roughly
+; (256*31)*11 + 64*13 = 88128 cycles
+; Almost a tenth of second with a 1-MHz clock !
+; Can we do better without resorting to self-modifying code (yech!) ?
+
+; --------------------
+; Attempt #1b
+; --------------------
+
+; our first attempt filled byes consecutively from the start address upwards.
+; We can do a little better on the partial page if we fill it from the
+; end address downwards, since we'll be able to use the necessary decrement
+; of the Y-register to tell when to stop.
+; As long as we're doing that on the partial page, for symmetry we'll do
+; it on the full pages as well (but note if the memory involved is also
+; used for video display, there may be odd visual effects)
+
+        .org   $1000
+
+Fill1b:
+        ldx     fullpg      ; any whole pages ?
+        beq     :+          ; b: no
+        ldy     #$100       ; point one past end of first page (really = $00)
+ -      dey                 ; down one byte
+        sta     (dest),y    ; fill a byte (doesn't change Z-flag)
+        bne     :-          ; b: page not done
+        inc     dest+1      ; next page
+        dex                 ; another page ?
+        bne     :-          ; b: yes
+ +      ldy     partpg      ; any partial page ?
+        beq     :+          ; b: no
+ -      dey                 ; down one byte
+        sta     (dest),y    ; fill a byte (doesn't change Z-flag)
+        bne     :-          ; b: page not done
+ +      rts                 ; done
+
+; this saves a byte and is faster in the partial page loop, both Good Things.
+; But really, how much was saved ?
+; The partial page loop now runs at a minimum of 11 cycles per byte,
+; just like the full page loop.
+; So to fill 8000 bytes takes about 11 * 8000 = 88000 cycles, or only
+; 128 cycles faster than our initial version.
+; In fact the most we can save is 255 (the maximum bytes in a partial page)
+; times two (the cycles we've saved), or 510 cycles in all.
+
+; --------------------
+; Attempt #2
+; --------------------
+
+; a branch taken takes three cycles minimum, and happens 255 times for
+; each page in our whole page loop.
+; We can try loop unrolling to reduce the number of times the code
+; branches.
+; We'll duplicate the store-and-increment part of the loop some
+; power-of-two times (so that we can still take advantage of the
+; Z-flag coming true after each 256th byte filled).
+; The more we unroll, the faster the code goes, but the bigger it gets.
+
+        .org   $1000
+
+Fill2:
+        ldy     #$00        ; point to start of each page
+        ldx     fullpg      ; any whole pages ?
+        beq     :+          ; b: no
+ -      sta     (dest),y    ; fill a byte
+        iny                 ; next byte
+        sta     (dest),y
+        iny
+        sta     (dest),y
+        iny
+        sta     (dest),y
+        iny
+        bne     :-          ; b: page not done
+        inc     dest+1      ; next page
+        dex                 ; another page ?
+        bne     :-          ; b: yes
+ +      ldx     partpg      ; any partial page ?
+        bne     :+          ; b: no
+ -      sta     (dest),y    ; fill a byte
+        iny                 ; next byte
+        dex                 ; another byte ?
+        bne     :-          ; b: yes
+ +      rts                 ; done
+
+; by unrolling the whole page fill loop four times, four bytes get filled
+; in 32 cycles.
+; Add three cycles to branch back to the start of the loop and four bytes
+; get filled every 35 cycles.
+; 8000 bytes = (256*31)/4 * 35 + 64*13 = 70272
+; Compared to the 44 cycles per four bytes of the original code, this
+; version is about 20% faster and runs in about 80% of the time
+
+; still...can we do anything about that partial page ?
+; Is there a way to incorporate it into the main loop ?
+
+; --------------------
+; Attempt #3
+; --------------------
+
+        .org   $1000
+
+Fill3:
+        tay                 ; save the fill byte
+        clc
+        lda     fullpg      ; whole pages
+        tax                 ; save for counting
+        inx                 ; account for last page (full or partial)
+        adc     dest+1
+        sta     dest+1      ; now points to last page
+        tya                 ; get the fill byte back
+        ldy     partpg      ; partial page byte count
+        beq     :++         ; b: none
+        lsr     partpg      ; odd or even ?
+        bcs     :+          ; b: odd
+ -      dey                 ; Y = 255,253,...,1
+        sta     (dest),y    ; fill odd byte
+ +      dey                 ; Y = 254,252,...,0
+        sta     (dest),y    ; fill even byte
+        bne     :-          ; b: not done
+ +      dec     dest+1      ; next fill page
+        dex                 ; another page ?
+        bne     :-          ; b: no
+        rts                 ; done
+
+; after the setup this loop runs at 19 cycles per pair of bytes,
+; versus 22 cycles per pair for the original version
+; 8000 = (256*31 + 64)/2 * 19 = 76000
+; This runs in about 86% of the time of the first version.
+; So unrolling to two gains about 14%, and doubling this to four
+; gains another 6% or so.
+
+; This is a general rule: there is a real but diminishing return
+; for every doubling of the unrolling.
+; The general formula for what we can expect by unrolling this loop
+; (if we do all stores in the main loop) is:
+; cycles = #bytes/#stores * (#stores * 8 + 3)
+
+; So for 8000 bytes:        reduction:                  main loop size:
+; 1 store   = 88000 cycles                              = 6 bytes
+; 2 stores  = 76000         12000 less, 12000 total     = 9 bytes
+; 4 stores  = 70000          6000 less, 18000 total     = 15 bytes
+; 8 stores  = 67000          3000 less, 21000 total     = 27 bytes
+; 16 stores = 65500          1500 less, 22500 total     = 51 bytes
+; 32 stores = 64750           750 less, 23250 total     = 99 bytes
+; 64 stores = 64375           375 less, 23625 total     = 195 bytes
+
+; - so speed returns diminish quickly and size increases just as quickly.
+; In fact the gains are approaching a limit; if we didn't loop at all
+; and simply made 8000 stores in a row it would still take 64000 cycles
+; (assuming indirect,y addressing. Also a bit over 24000 bytes !).
+; So we make fully 50% of our theoretical maximum gain simply by
+; unrolling the loop once and adding a second store, and 75% using just
+; four stores.
+
+; --------------------
+; Attempt #4
+; --------------------
+
+; suppose we wish to fill upwards instead of downwards.
+; We'd like to have a single main loop, taking advantage of
+; the Y-register becoming zero at the end of each page.
+
+; Let's think about the case of filling just one byte.
+; To fill upwards and have the Y-register become zero, the Y-register
+; has to start with the value 255 and the original destination address
+; has to be lowered by 255.
+
+; Recall that the eight-bit two's complement of one is 255.
+; So: we can take the two's complement of the original count, set Y
+; to that value and also subtract it from the original destination:
+; ~CNT -> Y, DST - ~CNT -> DST
+
+; Now consider that the eight bit two's complement can be found
+; by subtracting from 256:
+; DST - ~CNT = DST - ( 256 - CNT )
+;            = DST - 256 + CNT
+;            = DST + CNT - 256
+; ...and subtracting 256 from a 16-bit value can be done with a
+; simple decrement of the high byte of that value
+
+        .org   $1000
+
+Fill4:
+        ldx     fullpg      ; whole pages
+        inx                 ; account for any partial page
+        ldy     partpg      ; partial page byte count
+        beq     :+++        ; b: none
+        pha                 ; save fill byte
+
+        ; we won't do this (which is DST - 256 + CNT)
+
+;        dec     dest+1      ; adjust destination address
+;        clc
+;        tya
+;        adc     dest
+;        sta     dest
+;        bcc     :+
+;        inc     dest+1      ; 12 bytes, max 24 cycles
+
+        ; we will do this (which is DST + CNT - 256)
+
+        clc                 ; adjust destination address
+        tya
+        adc     dest
+        sta     dest
+        bcs     :+          ; b: don't bother to INC just to DEC right away
+        dec     dest+1      ; 10 bytes, max 19 cycles
+
+ +      tya                 ; adjust Y-register
+        eor     #$ff        ; one's complement
+        tay
+        iny                 ; two's complement
+        lsr                 ; original count odd or even ?
+        pla                 ; recover fill byte
+        bcc     :+          ; b: odd (one's complement value)
+ -      sta     (dest),y    ; fill even byte
+        iny                 ; 1,3,...,255
+ +      sta     (dest),y    ; fill odd byte
+        iny                 ; 0,2,...,254
+        bne     :-
+        inc     dest+1
+ +      dex                 ; another page ?
+        bne     :-          ; b: yes
+        rts                 ; done
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,297 @@
+; Hobby Cross-Assembler Demo 117
+; 6502\Structured Programming Macro Tests
+; ok: IF..ELSE..ENDIF, RTS_IF
+
+; by Anton Treuenfels
+
+; first created: 08/01/13
+; last revision: 08/05/13
+
+; -------------------------------
+
+        .listfile               ; make a listing
+        .errfile                ; record any errors
+
+        .listoff includes       ; don't show
+
+; -------------------------------
+
+        .cpu    6502            ; minimum required cpu
+
+; -------------------------------
+
+;        .include "demo115.a"    ; the "full" macro versions
+        .include "demo115b.a"   ; the "compact" macro versions
+
+; -------------------------------
+
+        ; ------------------------
+        ; IF_xx..ENDIF
+        ; ------------------------
+
+        ; a macro "harness" for testing
+        ; - the "rts" instruction is there to force its address to be shown
+        ; in the listing file (any instruction would serve the same purpose)
+
+        .macro test.if, ?condition
+
+        .org    $4000
+
+        cmp #$80                ; "set flags"
+        .putback IF_?condition  ; make test
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        .endm
+
+        test.if EQ
+        test.if ZERO
+        test.if NEQ
+        test.if NOT_ZERO
+        test.if PLUS
+        test.if MINUS
+        test.if NEG
+        test.if C_SET
+        test.if C_CLR
+        test.if V_SET
+        test.if V_CLR
+        test.if GE
+        test.if LT
+
+        ; ------------------------
+        ; IF_xx..ELSE..ENDIF
+        ; ------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.else, ?condition
+
+        .org    $4000
+
+        cmp #$80                ; "set flags"
+        .putback IF_?condition  ; make test
+        .fill 8                 ; dummy true code
+        ELSE_
+        .fill 8                 ; dummy false code
+        END_IF
+        rts                     ; mark location
+
+        .endm
+
+        test.else EQ
+        test.else ZERO
+        test.else NEQ
+        test.else NOT_ZERO
+        test.else PLUS
+        test.else MINUS
+        test.else NEG
+        test.else C_SET
+        test.else C_CLR
+        test.else V_SET
+        test.else V_CLR
+        test.else GE
+        test.else LT
+
+        ; ------------------------
+        ; IF_FLAG_VAR..ENDIF
+        ; ------------------------
+
+        .org    $4000
+
+        IF_FLAG_VAR $8080, IS_SET        
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        .org    $4000
+
+        IF_FLAG_VAR $8080, IS_CLR
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        ; ------------------------
+        ; IF_MEM_BYTE_NEG..ENDIF
+        ; ------------------------
+
+        .org    $4000
+
+        IF_MEM_BYTE_NEG $8080
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        ; ------------------------
+        ; IF_MEM_BYTE_POS..ENDIF
+        ; ------------------------
+
+        .org    $4000
+
+        IF_MEM_BYTE_POS $8080
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        ; ------------------------
+        ; IF_BIT..ENDIF
+        ; ------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.bit, ?bit_no
+
+        .org    $4000
+
+        IF_BIT $8080, ?bit_no, IS_HIGH
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        .org    $4000
+
+        IF_BIT $8080, ?bit_no, IS_LOW
+        .fill 8                 ; dummy true code
+        END_IF
+        rts                     ; mark location
+
+        .endm
+
+        test.bit 7
+        test.bit 6
+        test.bit 5
+        test.bit 4
+        test.bit 3
+        test.bit 2
+        test.bit 1
+        test.bit 0
+
+        ; ------------------------------
+        ; IF_xx..IF_xx..END_IF..END_IF
+        ; ------------------------------
+
+        .org    $4000
+
+        IF_EQ           ; -----|
+        .fill 4         ;      |
+        IF_NEQ          ; --|  |
+        .fill 4         ;   |  |
+        END_IF          ;   |  |
+        .fill 4         ; <-|  |
+        END_IF          ;      |
+        rts             ; <----|
+
+        .org    $4000
+
+        IF_EQ           ; --------|
+        .fill 4         ;         |
+        IF_NEQ          ; --|     |
+        .fill 4         ;   |     |
+        ELSE_           ; --+--|  |
+        .fill 4         ; <-|  |  |
+        END_IF          ;      |  |
+        .fill 4         ; <----|  |
+        END_IF          ;         |
+        rts             ; <-------|
+
+        .org    $4000
+
+        IF_EQ           ; --|
+        .fill 4         ;   |
+        ELSE_           ; --+--|
+        .fill 4         ; <-|  |
+        IF_NEQ          ; --|  |
+        .fill 4         ;   |  |
+        END_IF          ;   |  |
+        .fill 4         ; <-|  |
+        END_IF          ;      |
+        rts             ; <----|
+
+        .org    $4000
+
+        IF_EQ           ; -----|
+        .fill 4         ;      |
+        IF_NEQ          ; --|  |
+        .fill 4         ;   |  |
+        END_IF          ;   |  |
+        .fill 4         ; <-|  |
+        ELSE_           ; -----+--|
+        .fill 4         ; <----|  |
+        END_IF          ;         |
+        rts             ; <-------|
+
+        ; ------------------------
+        ; RTS_IF_xx
+        ; ------------------------
+
+        .org    $4000
+
+        RTS_IF_EQ
+
+        .org    $4000
+
+        RTS_IF_NE
+
+        .org    $4000
+
+        RTS_IF_MINUS
+
+        .org    $4000
+
+        RTS_IF_PLUS
+
+        .org    $4000
+
+        RTS_IF_FLAG_VAR $8080, IS_SET
+
+        .org    $4000
+
+        RTS_IF_FLAG_VAR $8080, IS_CLR
+
+        .org    $4000
+
+        RTS_IF_MEM_LOC $8080, IS_POS
+
+        .org    $4000
+
+        RTS_IF_MEM_LOC $8080, IS_NEG
+
+        .org    $4000
+
+        RTS_IF_MEM_LOC  $8080, IS_0
+
+        .org    $4000
+
+        RTS_IF_MEM_LOC  $8080, IS_NON_0
+
+        ; ------------------------
+        ; RTS_IF_BIT
+        ; ------------------------
+
+        ; a macro "harness" for testing
+
+        .macro test.rts, ?bit_no
+
+        .org    $4000
+
+        RTS_IF_BIT $8080, ?bit_no, IS_HIGH
+
+        .org    $4000
+
+        RTS_IF_BIT $8080, ?bit_no, IS_LOW
+
+        .endm
+
+        test.rts 7
+        test.rts 6
+        test.rts 5
+        test.rts 4
+        test.rts 3
+        test.rts 2
+        test.rts 1
+        test.rts 0
+
+; -------------------------------
+
+        .end
+

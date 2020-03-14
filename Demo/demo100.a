@@ -1,0 +1,608 @@
+; Hobby Cross-Assembler Demo 100
+; 6502\Word Macros
+; developing a 16-bit "MOVE" macro
+
+; by Anton Treuenfels
+
+; first created: 07/01/04
+; last revision: 07/17/04
+
+; "MOVE" will be optimized for speed (it will likely be heavily used).
+; For 16-bit macros optimized for size, see "demo100b.a".
+; For a combined set of fully-developed 16-bit macros, see "demo100c.a"
+
+; ---------------
+
+    .listfile
+    .errfile
+
+; ---------------
+
+    .cpu    "6502"
+    .org    $1000
+
+; ---------------
+
+; our first choice is what we want our macro syntax to be.
+; There are two obvious choices:
+
+; 1:    MOVE    ?src, ?dst  ; left-to-right, src -> dst
+; 2:    MOVE    ?dst, ?src  ; right-to-left, dst <- src
+
+; - the second form is attractive because it matches the right-to-left
+; assignment of most high-level languages
+; - however the first form is closer to what actually happens at the
+; assembly language level (arguments appear in the order they will be
+; used) and turns out to be easier to extend to other, related macros
+
+; We'll use the first form
+
+; ---------------
+; Attempt #1:
+; ---------------
+
+    .macro  MOVE, ?src, ?dst
+    lda ?src
+    sta ?dst
+    lda 1+?src
+    sta 1+?dst
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+
+; the "1+?arg" expression form is designed to handle the cases where
+; "?arg" uses the absolute indexed ",X" or ",Y" address modes.
+; And it does - for assemblers which don't use "," as a field separator :(
+; For them expansion yields, for example, "1+addr,X" (which assembles
+; correctly) instead of "addr,X+1" (which doesn't)
+
+; but HXA splits on commas so ",X" and ",Y" show up as extra arguments.
+; Oh well - even if available, those forms don't get used often.
+; It's not a fatal flaw, it's more like a nice bonus we don't get.
+; Maybe some future version of HXA will allow changing the field separator :)
+
+; ---------------
+; Attempt #2
+; ---------------
+
+; by using conditional assembly, we can add immediate mode addressing:
+
+    .undef  MOVE
+
+    .macro  MOVE, ?src, ?dst
+    lda ?src
+    sta ?dst
+    .if "?src" ~ /^#/           ; imm -> ab|zp
+    lda ?src >> 8
+    .else                       ; ab|zp -> ab|zp
+    lda 1+?src
+    .endif
+    sta 1+?dst
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+
+; what have we gained?
+; Well, perhaps the nicest thing is that we're developing a consistent,
+; easily remembered way of copying 16-bit quantities around.
+; We can push it further:
+
+; ---------------
+; Attempt #3
+; ---------------
+
+; we can add indirect indexed addressing (which *is* often used on the 6502)
+; - we'll omit the ",Y" requirement of "(zp),Y" because it will be
+; parsed as a third argument, which is a nasty case to handle.
+; Because we control the definition, we can just as easily assume the
+; implied existence of ",Y" whenever we see an expression enclosed by
+; parentheses (although it means more code in the macro to
+; guarantee ",Y" gets tacked on properly during expansion).
+; - note omitting the ",Y" requirement causes the form we'll use to match
+; a legal address mode of the 65C02 and others.
+; We can force the macro behave like a 16-bit version of that mode by
+; initializing the Y-register to zero within the macro.
+; We won't do that because it's much handier to be able to set the
+; Y-register to whatever initial value we want outside the macro.
+; This is an important point to remember when using this address mode:
+; Y-register will increment within the macro (and end up pointing to
+; the high byte of the 16-bit value), but it will *not* be set within it
+; - also note the macro will not be as smart as the assembler at balancing
+; parentheses, so carelessness will be punished
+
+    .undef  MOVE
+
+    .macro  MOVE, ?src, ?dst
+]DSTIND = "?dst" ~ /^\(.+\)$/   ; evaluate once
+
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y -> ab|zp|(zp),y
+
+    lda ?src,y
+    .if ]DSTIND                 ; (zp),y -> (zp),y
+    sta ?dst,y
+    .else
+    sta ?dst                    ; (zp),y -> ab|zp
+    .endif
+    iny                         ; now do high byte
+    lda ?src,y
+    .if ]DSTIND
+    sta ?dst,y
+    .else
+    sta 1+?dst
+    .endif
+
+    .else
+
+    lda ?src
+    .if ]DSTIND                 ; ab|imm|zp -> (zp),y
+    sta ?dst,y
+    iny
+    .else                       ; ab|imm|zp -> ab|zp
+    sta ?dst
+    .endif
+    .if "?src" ~ /^#/           ; imm -> ab|zp|(zp),y
+    lda ?src >> 8
+    .else
+    lda 1+?src                  ; ab|zp -> ab|zp|(zp),y
+    .endif
+    .if ]DSTIND                 ; ab|imm|zp -> (zp),y
+    sta ?dst,y
+    .else
+    sta 1+?dst                  ; ab|imm|zp -> ab|zp
+    .endif
+
+    .endif
+
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+
+; this works but doesn't seem optimal.
+; The variable label (we could also use a local here) flags whether
+; or not to use indirect indexed mode.
+; The idea is that the expression is evaluated only once instead of twice.
+; Can we arrange only one evaluation no matter which branch is taken
+; without using a temporary ?
+; And does doing so improve anything ?
+
+; first let's get a number on how well this last macro performs.
+; We'll use a repeat block to get a meaningful timing.
+; We'll be adding more modes to this macro later (of course we only know
+; that because we've come back to this point from there - we can do that,
+; we control everything!), so to make more meaningful comparisons we want
+; to make sure that each repeat block creates the same number of expansions.
+
+; The current version has twelve modes, the future version eighteen.
+; If we use some multiple of 36 (the LCM) as our target number of expansions,
+; we can simply divide that by the number of modes to get the proper
+; repeat count
+
+
+testCnt    .equ    36*3     ; for a P166 - adjust for faster/slower machines 
+
+    .starttimer version3
+
+    .repeat testCnt/12
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    .endr
+
+    .showtimer  version3    ; about 9 seconds
+
+; ---------------
+; Attempt #4
+; ---------------
+
+; to arrange only one evaluation of "?dst" in any branch, we have
+; to add code:
+
+    .undef  MOVE
+
+    .macro  MOVE, ?src, ?dst
+
+    .if "?src" ~ /^\(.+\)$/
+
+    lda ?src,y
+    .if "?dst" ~ /^\(.+\)$/     ; (zp),y -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src,y
+    sta ?dst,y
+    .else                       ; (zp),y -> ab|zp
+    sta ?dst
+    iny
+    lda ?src,y
+    sta 1+?dst
+    .endif
+
+    .else
+
+    lda ?src
+    .if "?src" ~ /^#/
+
+    .if "?dst" ~ /^\(.+\)$/     ; imm -> (zp),y
+    sta ?dst,y
+    lda ?src >> 8
+    iny
+    sta ?dst,y
+    .else                       ; imm -> ab|zp
+    sta ?dst
+    lda ?src >> 8
+    sta 1+?dst
+    .endif
+
+    .elseif "?dst" ~ /^\(.+\)$/ ; ab|zp -> (zp),y
+    sta ?dst,y
+    iny
+    lda 1+?src
+    sta ?dst,y
+
+    .else                       ; ab|zp -> ab|zp
+    sta ?dst
+    lda 1+?src
+    sta 1+?dst
+    .endif
+
+    .endif
+
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+
+; let's get a number on how well this last macro performs:
+
+    .starttimer version4
+
+    .repeat testCnt/12
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    .endr
+
+    .showtimer  version4    ; about 9 seconds
+
+; little if any improvement.
+; But the macro itself is a little easier to understand and points the
+; way to another possible improvement
+
+; ---------------
+; Attempt #5
+; ---------------
+
+; we'll try nested macros in an effort to reduce overall expansion:
+
+    .undef  MOVE
+
+; move from indirect memory source
+
+    .macro  MVINDS, ?src, ?dst
+    lda ?src,y
+    .if "?dst" ~ /^\(.+\)$/     ; (zp),y -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src,y
+    sta ?dst,y
+    .else                       ; (zp),y -> ab|zp
+    sta ?dst
+    iny
+    lda ?src,y
+    sta 1+?dst
+    .endif
+    .endm
+
+; move from immediate source
+
+    .macro  MVIMMS, ?src, ?dst
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; imm -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src >> 8
+    sta ?dst,y
+    .else                       ; imm -> ab|zp
+    sta ?dst
+    lda ?src >> 8
+    sta 1+?dst
+    .endif
+    .endm
+
+; move from direct memory source
+
+    .macro  MVMEMS, ?src, ?dst
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; ab|zp -> (zp),y
+    sta ?dst,y
+    iny
+    lda 1+?src
+    sta ?dst,y
+    .else                       ; ab|zp -> ab|zp
+    sta ?dst
+    lda 1+?src
+    sta 1+?dst
+    .endif
+    .endm
+
+; now the main macro (which should expand only one of the three nested)
+
+    .macro  MOVE, ?src, ?dst
+    .if "?src" ~ /^\(.+\)$/
+    MVINDS ?src, ?dst
+    .elseif "?src" ~ /^#/
+    MVIMMS  ?src, ?dst
+    .else
+    MVMEMS  ?src, ?dst
+    .endif
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+
+; let's get a number on how well this last macro performs:
+
+    .starttimer version5
+
+    .repeat testCnt/12
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    .endr
+
+    .showtimer  version5    ; about 7 seconds
+
+; a measurable improvment - slight but worth it !
+
+; ---------------
+
+; now let's introduce a new wrinkle: a 16-bit "pseudo-register"
+; created by pairing two of the 6502's 8-bit registers
+; (this is the "future version" mentioned earlier).
+; We can pick two of three in either order for high and low bytes,
+; so we have six potential pseudo-registers.
+; Every choice makes some things we'd like to do easier and some harder
+
+; we don't have to limit ourselves to one pair, of course.
+; We can create as many as we're willing to manage.
+; But for the moment, let's choose the symbol "_XY" to mean
+; a 16-bit pseudo register with the low byte in the X-register and
+; the high byte in the Y-register.
+
+; for loading this register we'll permit ab|imm|zp|zpiy addressing.
+; For storing we'll permit ab|zp addressing.
+; For other uses of this register, see "demo100b.a"
+
+; ---------------
+; Attempt #6
+; ---------------
+
+    .undef  MVINDS
+    .undef  MVIMMS
+    .undef  MVMEMS
+    .undef  MOVE
+
+; move from indirect source
+
+    .macro  MVINDS, ?src, ?dst
+    lda ?src,y
+    .if "?dst" == "_XY"         ; (zp),y -> _XY
+    tax
+    iny
+    lda ?src,y
+    tay
+    .elseif "?dst" ~ /^\(.+\)$/ ; (zp),y -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src,y
+    sta ?dst,y
+    .else                       ; (zp),y -> ab|zp
+    sta ?dst
+    iny
+    lda ?src,y
+    sta 1+?dst
+    .endif
+    .endm
+
+; move from immediate source
+
+    .macro  MVIMMS, ?src, ?dst
+    .if "?dst" == "_XY"         ; imm -> _XY
+    ldx ?src
+    ldy ?src >> 8
+    .else
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; imm -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src >> 8
+    sta ?dst,y
+    .else                       ; imm -> ab|zp
+    sta ?dst
+    lda ?src >> 8
+    sta 1+?dst
+    .endif
+    .endif
+    .endm
+
+; move from specified memory address source
+
+    .macro  MVMEMS, ?src, ?dst
+    .if "?dst" == "_XY"         ; ab|zp -> _XY
+    ldx ?src
+    ldy 1+?src
+    .else
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; ab|zp -> (zp),y
+    sta ?dst,y
+    iny
+    lda 1+?src
+    sta ?dst,y
+    .else                       ; ab|zp -> ab|zp
+    sta ?dst
+    lda 1+?src
+    sta 1+?dst
+    .endif
+    .endif
+    .endm
+
+; now the main macro (which might not expand any of the nested macros)
+
+    .macro  MOVE, ?src, ?dst
+    .if "?src" == "_XY"
+    stx ?dst
+    sty 1+?dst
+    .elseif "?src" ~ /^\(.+\)$/
+    MVINDS ?src, ?dst
+    .elseif "?src" ~ /^#/
+    MVIMMS  ?src, ?dst
+    .else
+    MVMEMS  ?src, ?dst
+    .endif
+    .endm
+
+; try it
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $80, _XY        ; zp -> _XY
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    $8000, _XY      ; ab -> _XY
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    #$AA55, _XY     ; imm -> _XY
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    MOVE    ($80), _XY      ; (zp),y - > _XY
+    MOVE    _XY, $80        ; _XY -> zp
+    MOVE    _XY, $8000      ; _XY -> ab
+
+; how does it perform ?
+
+    .starttimer version6
+
+    .repeat testCnt/18
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $80, _XY        ; zp -> _XY
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    $8000, _XY      ; ab -> _XY
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    #$AA55, _XY     ; imm -> _XY
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    MOVE    ($80), _XY      ; (zp),y - > _XY
+    MOVE    _XY, $80        ; _XY -> zp
+    MOVE    _XY, $8000      ; _XY -> ab
+    .endr
+
+    .showtimer  version6    ; about 8 seconds
+
+; so we've given back a bit of the time we gained earlier in exchange
+; for additional power - a reasonable trade !
+
+; although we could go on like this, it's going to become harder to
+; find additional modes that would get much use
+; (in case you're wondering if we've already passed that point,
+; "_XY" is very handy for passing the address of a string to a
+; subroutine which prints it, as one example).
+; So we'll stop here as far as adding modes go
+
+; note that in general we can pick any symbol we like to mean anything
+; we like within a macro.
+; We could, for example, create a symbol such as "_STACK" and use it
+; within a "MOVE" macro to mean using the processor stack as the source
+; or destination of a move.
+; Or we might prefer to create separate "PUSH" and "PULL" macros to
+; do the same thing (as we do in "demo100b.a").
+; We're pretty much free to use our imaginations !
+
+; ---------------
+
+    .end

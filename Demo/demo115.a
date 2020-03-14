@@ -1,0 +1,1838 @@
+; Hobby Cross-Assembler Demo 115
+; 6502\Structured Programming Macros
+; GWilson's Structured Programming Macros (no macro nesting; fully commented)
+
+; by Anton Treuenfels
+
+; first created: 04/13/13
+; last revision: 08/03/13
+
+; - reference: http://wilsonminesco.com/StructureMacros/index.html
+
+; - externally these versions behave mostly the same way as Garth Wilson's
+; - internally these versions are modified for use with HXA65 (v0.200+)
+
+; differences with the originals:
+
+; - changed REPEAT to REPEAT_ to avoid built-in pseudo op name conflict
+
+; - generated code is compatible with 6502 cpu as well as 65C02:
+; - BRA instruction (65C02+) becomes JMP if 6502 cpu is in use
+
+; - CASE..ENDCASE:
+; - a fatal error happens if the "register to compare" is not specified
+; by one of the literals 'ACCUM', 'X_REG' or 'Y_REG'
+; - nested CASE..END_CASE structures are allowed
+; - no CASE_OF..END_OF structure is required within CASE..ENDCASE
+; - an unlimited number of CASE_OF..END_OF structures are allowed
+; - CASE_OF generates standard 6502 compare instructions, except numeric
+; literals less than 256 without "#" prefix generate "immediate" rather
+; than "zero page" mode (the method and only mode used by the originals)
+
+; - FOR..NEXT:
+; - the index variable name is allowed but not required
+; as an argument to NEXT
+; - nested FOR..NEXT structures are allowed
+
+; - IF_FLAG_VAR, RTS_IF_FLAG_VAR:
+; - a fatal error happens if the "condition to check" is not specified
+; by one of the literals 'IS_SET' or 'IS_CLR'
+
+; - IF_BIT, WHILE_BIT, UNTIL_BIT, RTS_IF_BIT:
+; - a fatal error happens if the "condition to check" is not specified
+; by one of the literals 'IS_HIGH' or 'IS_LOW'
+
+; - FOR_X..NEXT_X, FOR_Y..NEXT_Y:
+; - a fatal error happens if the "direction to increment" is not specified
+; by one of the literals 'UP_TO' or 'DOWN_TO'
+; - FOR__ generates standard 6502 load instructions, except numeric
+; literals less than 256 without "#" prefix generate "immediate" rather
+; than "zero page" mode (the method and only mode used by the originals)
+; - FOR_X trashes the A-reg if 6502 cpu and initialized with 'Y_REG'
+; - FOR_Y trashes the A-reg if 6502 cpu and initialized with 'X_REG'
+; - NEXT__ accepts the literal 'ZERO' as a synonym for the literal '0'
+; to set the "end value" of "until zero" loops
+; - NEXT__ accepts only the literal '-1' as a synonym for the literal
+; 'NEG_NRS' to set the "end value" of "until negative" loops
+; (ie., the literal '$FF' is disallowed)
+; - NEXT__ generates standard 6502 compare instructions, except numeric
+; literals less than 256 without "#" prefix generate "immediate" rather
+; than "zero page" mode (the method and only mode used by the originals)
+
+; RTS_IF_MEM_LOC:
+; - a fatal error happens if the "condition to check" is not specified
+; by one of the literals 'IS_POS', 'IS_NEG', 'IS_0' or 'IS_NON_0' 
+
+; - minimally commented, nested versions of these macros can be
+; found in "demo115b.a" (much more compact versions)
+
+; -------------------------------
+
+        .readonce           ; prevent multiple inclusion
+
+        .if !label(__HXA65__) || ver() < $0200
+        .fatal  "HXA65 version 0.200 or higher required"
+        .endif
+
+        .if !cpu$()
+        .cpu    6502        ; minimum required cpu
+        .endif
+
+; -------------------------------
+
+; Garth Wilson's original structured macro set:
+
+; 51 macros:
+;     IF_EQ
+;     IF_ZERO
+;     IF_NEQ
+;     IF_NOT_ZERO
+;     IF_PLUS
+;     IF_MINUS
+;     IF_NEG
+;     IF_C_SET
+;     IF_C_CLR
+;     IF_V_SET
+;     IF_V_CLR
+;     IF_GE     ; These two should refer
+;     IF_LT     ; to the C flag.
+;     ELSE_
+;     END_IF
+;
+;     BEGIN
+;     AGAIN
+
+;     UNTIL_EQ
+;     UNTIL_ZERO
+;     UNTIL_NEQ
+;     UNTIL_NOT_ZERO
+;     UNTIL_PLUS
+;     UNTIL_MINUS
+;     UNTIL_NEG
+;     UNTIL_C_CLR
+;     UNTIL_LT
+;     UNTIL_C_SET
+;     UNTIL_GE
+;     UNTIL_V_CLR
+;     UNTIL_V_SET
+
+;     WHILE_EQ
+;     WHILE_ZERO
+;     WHILE_NOT_ZERO
+;     WHILE_NEQ
+;     WHILE_PLUS
+;     WHILE_MINUS
+;     WHILE_NEG
+;     WHILE_C_CLR
+;     WHILE_LT
+;     WHILE_C_SET
+;     WHILE_GE
+;     WHILE_V_CLR
+;     WHILE_V_SET
+;     REPEAT
+;
+;     CASE
+;     CASE_OF
+;     END_OF
+;     END_CASE
+;
+;     FOR
+;     NEXT
+
+; Garth Wilson's May 2013 additions to the original set:
+
+; IF_FLAG_VAR
+; IF_BIT
+; IF_MEM_BYTE_NEG
+; IF_MEM_BYTE_POS
+
+; WHILE_BIT
+
+; UNTIL_BIT
+
+; FOR_X
+; NEXT_X
+; FOR_Y
+; NEXT_Y
+
+; RTS_IF_EQ
+; RTS_IF_NE
+; RTS_IF_MINUS
+; RTS_IF_PLUS
+; RTS_IF_FLAG_VAR
+; RTS_IF_BIT
+; RTS_IF_MEM_LOC
+
+; -------------------------------
+
+; - GWilson's macros dynamically manipulate the program counter
+; in order to make sure control transfers happen properly
+; - these versions instead dynamically generate labels
+; to let HXA handle control transfers properly at assembly time
+; - GWilson's macros "fake" a stack (used to make sure nested
+; control structures unwind properly) by re-defining the
+; contents of certain numeric labels in a particular order
+; - these versions instead use HXA's built-in user stack
+
+; the basic approach here (aka the "trick") makes use of
+; some of HXA's features:
+
+; - first, because all labels are sequences of characters,
+; they themselves are strings, and can be manipulated as strings:
+; - 1) we can create strings on the fly and,
+; - 2) we can create strings which have the form of labels, and
+; - 3) we can store strings to and recall them from a built-in stack, and
+; - 4) a string label used in an expression evaluates to its contents
+
+; - second, HXA's ".putbacks" pseudo op evaluates its argument as a
+; string expression and then "puts back" the result onto the input stream
+; - the evaluated string expression thus becomes the next input line
+
+; - so: we can create, store, recall, manipulate and place labels at will
+
+; -------------------------------
+; "housekeeping"
+; -------------------------------
+
+; the dynamic labels created have the form "__xxxx", where 'xxxx' is an
+; is an ever-increasing number starting at one thousand (1000)
+; - the form is arbitrary, except that whatever form is chosen the type
+; must be "global numeric"
+; - internally the macros treat dynamic labels as strings
+; - only when HXA sees them "for real" in dynamically created
+; input lines are they recognized as "global numeric labels"
+; - HXA will assign the current value of the program counter
+; to them when they appear on an input line by themselves
+
+; internal tracking variables (don't access directly!)
+; - labels beginning with "]" are "variable"
+; and can be assigned new values at any time
+; - labels ending in "$" are string values,
+; otherwise they are numeric (integer, actually)
+
+]DYNCNT     = 999       ; incremented for each new label
+]DYNLBL$    = ""        ; multipurpose, often the current dynamic label name
+	
+; -------------------------------
+
+;                         +-----------------+
+;                         |  IF_xx..END_IF  |
+;                         +-----------------+
+
+; the IF_xx..END_IF structure:
+
+; IF_xx                         
+;           Bxx __xxxx          ; IF condition FALSE, branch --| 
+;           ..true code..                                      |
+; END_IF                                                       |
+; __xxxx                        ; to here <--------------------|
+
+; IF_xx..END_IF structures CAN be nested
+
+;                         +---------+
+;                         |  IF_xx  |
+;                         +---------+
+
+; all IF_xx macros have three steps:
+; 1) make a new label, the target of a branch-around-TRUE
+; 2) write a conditional forward branch to it
+; 3) push it on the stack
+
+; writes one line of source code:
+
+;           Bxx __xxxx          ; branch-around-TRUE if condition FALSE
+
+; pushes one item on stack:
+
+; __xxxx                        ; target label of branch-around-TRUE
+
+;----------------
+
+; test for ZERO flag set (the first IF_xx macro)
+
+IF_EQ:      MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+;                         +----------+
+;                         |  END_IF  |
+;                         +----------+
+
+; END_IF has two steps:
+; 1) pop the top label from the stack
+; 2) write it to mark the current location as target of branch-around-TRUE
+
+; writes one line of source code:
+
+; __xxxx                        ; target label of branch-around-TRUE
+
+; pops one item from stack:
+
+; __xxxx                        ; target label of branch-around-TRUE
+
+; the two steps are combined into one:
+
+END_IF:     MACRO
+            .putbacks pop$()    ; pop and write target label
+            ENDM
+ ;----------------
+
+;                         +-------------------------+
+;                         |  IF_xx..ELSE_..END_IF   |
+;                         +-------------------------+
+
+; the IF_xx..ELSE_..END_IF structure:
+
+; IF_xx                        
+;           Bxx __xxxx          ; if condition FALSE, branch --| 
+;           ..true code..                                      |
+;           JMP __xxxx          ; TRUE branch done, branch ----+--|
+; ELSE_                                                        |  |
+; __xxxx                        ; to here <--------------------|  |
+;           ..false code..                                        |
+; END_IF                                                          |
+; __xxxx                        ; to here <-----------------------|
+
+; IF_xx..ELSE_..END_IF structures CAN be nested
+
+; ELSE_ has five steps:
+; 1) make a new label, the target of a branch-around-FALSE
+; 2) write a forward branch to it
+; 3) pop the branch-around-TRUE label from the stack
+; 4) write it to mark the current location as target of branch-around-TRUE
+; 5) push the branch-around-FALSE label on the stack
+
+; writes two lines of source code:
+
+;           JMP __xxxx          ; forced branch-around FALSE
+; __xxxx                        ; target label of branch-around-TRUE
+
+; pops one item from stack:
+
+; __xxxx                        ; the target label of branch-around-TRUE
+
+; pushes one item on stack:
+
+; __xxxx                        ; the target label of branch-around-FALSE
+
+; steps (3) and (4) are combined into one:
+
+ELSE_:      MACRO                       ; don't forget the "_" in "ELSE_" !
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .if cpu$() == "6502"        ; write branch-around-FALSE
+            .putbacks "JMP " ]DYNLBL$   ; 6502 cpu uses JMP instruction...
+            .else                       ; <- "ELSE_" avoids this conflict !
+            .putbacks "BRA " ]DYNLBL$   ; ...all others use BRA instruction
+            .endif
+            .putbacks pop$()            ; write branch-around-TRUE target
+            .pushs ]DYNLBL$             ; push branch-around-FALSE label
+            ENDM
+ ;----------------
+
+;                         +---------+
+;                         |  IF_xx  |
+;                         +---------+
+
+; all the remaining original IF_xx macros:
+
+; test for ZERO flag set
+
+IF_ZERO:    MACRO                       ; same as IF_EQ
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for ZERO flag NOT set
+
+IF_NEQ:     MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+IF_NOT_ZERO: MACRO                      ; same as IF_NEQ
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+             ENDM
+ ;----------------
+
+; test for SIGN flag set
+
+IF_MINUS:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+IF_NEG:     MACRO                       ; same as IF_MINUS
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for SIGN flag NOT set
+
+IF_PLUS     MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for CARRY flag set
+
+IF_C_SET:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+IF_GE:      MACRO                       ; same as IF_C_SET
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for CARRY flag NOT set
+
+IF_C_CLR:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+IF_LT:      MACRO                       ; same as IF_C_CLEAR
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag set
+
+IF_V_SET:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag NOT set
+
+IF_V_CLR:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+
+; -------------------------------
+
+;                        +-------------------------+
+;                        |      BEGIN..AGAIN       |
+;                        +-------------------------+
+
+; the BEGIN..AGAIN structure:
+
+; BEGIN
+; __xxxx                        ; to here <--------------------|                       
+;           ..code..                                           |
+; AGAIN                                                        |
+;           JMP __xxxx          ; iteration complete, branch --|
+
+
+; BEGIN..AGAIN structures CAN be nested
+
+;                        +-----------------+
+;                        |      BEGIN      |
+;                        +-----------------+
+
+; BEGIN has three steps:
+; 1) make a new label, the target of a branch-to-BEGIN
+; 2) write it to mark the current location as that target
+; 3) push it on the stack
+
+; writes one line of code:
+
+; __xxxx                            ; target label of branch-to-BEGIN
+
+; pushes one item on stack:
+
+; __xxxx                            ; target label of branch-to-BEGIN
+
+; BEGIN is also used with the REPEAT, UNTIL_xx and WHILE_xx macros
+
+BEGIN:      MACRO
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)    ; make it into a string
+            .putbacks ]DYNLBL$      ; use it as target of branch-to-BEGIN
+            .pushs ]DYNLBL$         ; push it on stack
+            ENDM   
+ ;----------------
+
+;                        +-----------------+
+;                        |      AGAIN      |
+;                        +-----------------+
+
+; AGAIN has two steps:
+; 1) pop the top label from the stack
+; 2) write an unconditional backward branch to it
+
+; writes one line of source code:
+
+;           JMP __xxxx              ; unconditional branch-to-BEGIN
+
+; pops one item from stack:
+
+; __xxxx                            ; target label of branch-to-BEGIN
+
+; the two steps are combined into one:
+
+AGAIN:      MACRO
+            .if cpu$() == "6502"    ; write branch-to-BEGIN
+            .putbacks "JMP " pop$() ; 6502 cpu uses JMP instruction...
+            .else
+            .putbacks "BRA " pop$() ; ...all others use BRA instruction
+            .endif
+            ENDM
+
+; -------------------------------
+
+;                        +--------------------------+
+;                        |    BEGIN...UNTIL_xx      |
+;                        +--------------------------+
+
+; the BEGIN..UNTIL_xx structure:
+
+; BEGIN
+; __xxxx                        ; to here <--------------------|                       
+;           ..code..                                           |
+; UNTIL_xx                                                     |
+;           Bxx __xxxx          ; if condition FALSE, branch --|
+
+
+; BEGIN..UNTIL structures CAN be nested
+
+;                        +-----------------+
+;                        |    UNTIL_xx     |
+;                        +-----------------+
+
+; all UNTIL_xx macros have two steps:
+; 1) pop the top label from the stack
+; 2) write a conditional backward branch to it
+
+; loop until ZERO flag set
+
+; writes one line of source code:
+
+;           Bxx __xxxx              ; conditional branch-to-BEGIN
+
+; pops one item from stack:
+
+; __xxxx                            ; target label of branch-to-BEGIN
+
+; the two steps are combined into one:
+
+UNTIL_EQ:   MACRO
+            .putbacks "BNE " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; all the remaining original UNTIL_xx macros:
+
+UNTIL_ZERO: MACRO                   ; same as UNTIL_EQ
+            .putbacks "BNE " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until ZERO flag NOT set
+
+UNTIL_NEQ:  MACRO
+            .putbacks "BEQ " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+UNTIL_NOT_ZERO: MACRO               ; same as UNTIL_EQ
+            .putbacks "BEQ " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until SIGN flag set
+
+UNTIL_MINUS:  MACRO
+            .putbacks "BPL " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+UNTIL_NEG:  MACRO                   ; same as UNTIL_MINUS
+            .putbacks "BPL " pop$() ; write conditional backward branch
+            ENDM
+;----------------
+
+; loop until SIGN flag NOT set
+
+UNTIL_PLUS: MACRO
+            .putbacks "BMI " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until CARRY flag set
+
+UNTIL_C_SET:  MACRO
+            .putbacks "BCC " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+UNTIL_GE:   MACRO                   ; same as UNTIL_C_SET
+            .putbacks "BCC " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until CARRY flag NOT set
+
+UNTIL_C_CLR:  MACRO
+            .putbacks "BCS " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+UNTIL_LT:   MACRO                   ; same as UNTIL_C_CLR
+            .putbacks "BCS " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until OVERFLOW flag set
+
+UNTIL_V_SET:  MACRO
+            .putbacks "BVC " pop$() ; write conditional backward branch
+            ENDM
+ ;----------------
+
+; loop until OVERFLOW flag NOT set
+
+UNTIL_V_CLR:  MACRO
+            .putbacks "BVS " pop$() ; write conditional backward branch
+            ENDM
+
+; -------------------------------
+
+;                        +-----------------------------+
+;                        |  BEGIN...WHILE_xx...REPEAT_ |
+;                        +-----------------------------+
+
+; the BEGIN..WHILE_xx..REPEAT structure:
+
+; BEGIN
+; __xxxx                        ; to here <--------------------|                       
+;           ..code..                                           |                                         
+; WHILE_xx                                                     |
+;           Bxx __xxxx          ; if condition FALSE, branch --+--|
+;           ..true code..                                      |  |
+; REPEAT_                                                      |  |
+;           JMP __xxxx          ; iteration complete, branch --|  |
+; __xxxx                        ; to here <-----------------------|
+
+
+; BEGIN..WHILE_xx..REPEAT_ structures CAN be nested
+
+;                        +-----------------+
+;                        |    WHILE_xx     |
+;                        +-----------------+
+
+; all WHILE_xx macros have three steps:
+; 1) make a new label, the target of a branch-around-TRUE
+; 2) write a conditional forward branch to it
+; 3) push it on the stack
+
+; writes one line of source code:
+
+;           Bxx __xxxx          ; branch-around-TRUE if condition FALSE
+
+; pushes one item on stack:
+
+; __xxxx                        ; target label of branch-around-TRUE
+
+; NOTE!!! - these are exactly the same operations as the IF_xx macros
+; - the difference is only that the new label "covers up" the BEGIN label
+; already on the stack, and that label will be needed first to create
+; the unconditional jump back to BEGIN
+; - hence the existence of the REPEAT__ macro to do just that...
+
+; test for ZERO flag set (the first WHILE_xx macro)
+
+WHILE_EQ:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+
+;                        +------------------+
+;                        |      REPEAT_     |
+;                        +------------------+
+
+; REPEAT_ has four steps:
+; 1) pop the target label of branch-around-TRUE
+; 2) pop the target label of branch-to-BEGIN
+; 3) write a backward branch-to-BEGIN
+; 4) write branch-around-TRUE target label
+
+; writes two lines of source code:
+
+;           JMP __xxxx              ; unconditional branch-to-BEGIN
+; __xxxx                            ; target of branch-around-TRUE
+
+; pops two items from stack:
+
+; __xxxx                            ; target of branch-around-TRUE (at top)
+; __xxxx                            ; target of branch-to-BEGIN
+
+; steps (2) and (3) are combined into one:
+
+REPEAT_:    MACRO                   ; don't forget the "_" in "REPEAT_" !
+]DYNLBL$    = pop$()                ; pop branch-around-TRUE label
+            .if cpu$() == "6502"    ; write branch-to-BEGIN
+            .putbacks "JMP " pop$() ; 6502 cpu uses JMP instruction...
+            .else
+            .putbacks "BRA " pop$() ; ...all others use BRA instruction
+            .endif
+            .putbacks ]DYNLBL$      ; write target of branch-around-TRUE
+            ENDM
+ ;----------------
+
+;                        +-----------------+
+;                        |    WHILE_xx     |
+;                        +-----------------+
+
+; all the remaining original WHILE_xx macros:
+
+; test for ZERO flag set
+
+WHILE_ZERO: MACRO                       ; same as WHILE_EQ
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for ZERO flag NOT set
+
+WHILE_NEQ:  MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+WHILE_NOT_ZERO: MACRO                   ; same as WHILE_NEQ
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+             ENDM
+ ;----------------
+
+; test for SIGN flag set
+
+WHILE_MINUS:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+WHILE_NEG:  MACRO                       ; same as WHILE_MINUS
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for SIGN flag NOT set
+
+WHILE_PLUS  MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for CARRY flag set
+
+WHILE_C_SET:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+WHILE_GE:   MACRO                       ; same as WHILE_C_SET
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for CARRY flag NOT set
+
+WHILE_C_CLR:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+WHILE_LT:   MACRO                       ; same as WHILE_C_CLEAR
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BCS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag set
+
+WHILE_V_SET:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag NOT set
+
+WHILE_V_CLR:   MACRO
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+            ENDM
+
+; -------------------------------
+
+;                        +------------------------------------+
+;                        |   CASE..CASE_OF..END_OF..END_CASE  |
+;                        +------------------------------------+
+
+; the CASE..CASE_OF..END_OF..END_CASE structure:
+
+; CASE
+
+; CASE_OF
+;           CMP #xx             ; execute this case ?
+;           BNE __xxxx          ; no, branch -------------|
+;           ..code...                                     |
+; END_OF                                                  |
+;           JMP __xxxx          ; case complete, branch --+--|
+; __xxxx                        ; to here <---------------|  |
+;                                                            |
+; CASE_OF                                                    |
+;           CMP #xx             ; execute this case ?        |
+;           BNE __xxxx          ; no, branch -------------|  |
+;           ..code...                                     |  |
+; END_OF                                                  |  |
+;           JMP __xxxx          ; case complete, branch --+--|
+; __xxxx                        ; to here <---------------|  |
+;                                                            |
+;           (..code..)          ; (optional = CASE_ELSE)     |
+;                                                            |
+; END_CASE                                                   |
+; __xxxx                        ; to here <------------------|
+
+; CASE..CASE_OF..END_OF..END_CASE structures CAN be nested
+
+; For this version using JMPs at the END_OFs, the only places that
+; branch distances might be excessive is the BNEs in CASE_OF,
+; and it's pretty unlikey that those would be a problem.
+
+;                        +----------------+
+;                        |      CASE      |
+;                        +----------------+
+
+; CASE has four steps:
+; 1) determine the compare instruction to use
+; 2) push it on the stack
+; 3) make a new label, the target of branch-to-END_CASE
+; 4) push it on the stack
+
+; does not write any source code
+
+; pushes two items on stack:
+
+; __xxxx                            ; target of branch-to-END_CASE (at top)
+; "CMP|CPX|CPY"	                	; a 6502 compare instruction
+ 
+; steps (1) and (2) are combined:
+
+CASE:	    MACRO ?register
+]DYNLBL$    = toupper$("?register") ; which comparison instruction to use ?
+            .if ]DYNLBL$ == "ACCUM"
+            .pushs "CMP"
+            .elseif ]DYNLBL$ == "X_REG"
+            .pushs "CPX"
+            .elseif ]DYNLBL$ == "Y_REG"
+            .pushs "CPY"
+            .else
+            .fatal "CASE: ?register"
+            .endif
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)   	; make it into a string
+            .pushs ]DYNLBL$         ; push it on stack
+            ENDM
+ ;----------------
+
+;                        +----------------+
+;                        |    CASE_OF     |
+;                        +----------------+
+
+; CASE_OF has eight steps:
+; 1) pop the branch-to-END_CASE label
+; 2) pop the compare instruction
+; 3) write compare instruction
+; 4) push the compare instruction back on stack
+; 5) push the branch-to-END_CASE label back on stack
+; 6) make a new label, the target of a branch-to-END_OF
+; 7) write a conditional forward branch to it
+; 8) push it on the stack
+
+; writes two lines of source code:
+
+;            CMP [#]?value          ; execute this branch ?
+;            BNE __xxxx             ; no, branch-to-END_OF
+
+; pushes one item on stack:
+
+; __xxxx                            ; target label of branch-to-END_OF
+
+; steps (1) - (5) can be combined into one by using the peek$() function,
+; which retrieves an arbitrary item from the stack without removing it
+; - in this case the second item from the top, the compare instruction
+; - if the '?value' argument is a numeric literal with a value less than 256,
+; CASE_OF writes a "compare immediate" instruction
+
+CASE_OF:     MACRO ?value
+]DYNLBL$    = "?value"                    ; "stringify" the argument
+            .if ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            .putbacks peek$(2) " #?value"
+            .else
+            .putbacks peek$(2) " ?value"
+            .endif
+]DYNCNT     = ]DYNCNT+1                   ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)          ; make it into a string
+            .putbacks "BNE " ]DYNLBL$     ; use it to write condition test
+            .pushs ]DYNLBL$               ; push it on stack
+            ENDM
+ ;----------------
+
+;                        +---------------+
+;                        |    END_OF     |
+;                        +---------------+
+
+; END_OF has five steps:
+; 1) pop the target label for branch-to-END_OF
+; 2) pop the target label for branch-to-END_CASE
+; 3) write unconditional branch-to-END_CASE instruction
+; 4) push the target label for branch-to-END_CASE back on stack
+; 5) write branch-to-END_OF label as target for matching CASE_OF
+
+; writes two lines of source code:
+
+;           JMP __xxxx			; branch-to-END_CASE
+; __xxxx                        ; target of branch-to-END_OF
+
+; pops one item from stack:
+
+; __xxxx                        ; target of branch-to-END_OF
+
+; steps (2) - (4) can be combined into one by using the peek$() function,
+; which retrieves an arbitray item from the stack without removing it
+; - in this case the second item from the top, the branch-to-END_CASE label
+; once that is done it is trivial to combine steps (1) and (5) into one:
+
+END_OF:	    MACRO
+            .putbacks "JMP " peek$(2)	; write branch-to-END_CASE
+            .putbacks pop$()            ; write branch-to-END-OF target label
+            ENDM
+
+ ;----------------
+
+;                        +---------------+
+;                        |   END_CASE    |
+;                        +---------------+
+
+; END_CASE has three steps:
+; 1) pop the top label from the stack
+; 2) write it to mark the current location as branch-to-END-OF target
+; 3) pop the compare instruction from the stack (and discard it)
+
+; writes one line of source code:
+
+; __xxxx				; branch-to-END_CASE target
+
+; pops two items from stack:
+
+; __xxxx				; target of branch-to-END_CASE(at top)
+; "CMP"					; compare instruction
+
+; steps (1) and (2) are combined into one:
+
+END_CASE:   MACRO
+            .putbacks pop$()		; write branch-to-END_CASE target
+]DYNLBL$    = pop$()                ; discard compare instruction
+            ENDM
+; -------------------------------
+
+;                        +---------------+
+;                        |   FOR..NEXT   |
+;                        +---------------+
+
+; FOR..NEXT below is more of a suggestion of one way to do it than anything.
+; As stated in the macros.html page, there are a lot of different
+; possibilities to implement in a FOR...NEXT, and it's perhaps not possible
+; to implement them all in the same macros.  This pair is for when the
+; index begins and ends with constants, and it increments by 1 unless you
+; put something between the FOR and NEXT to modify the index variable.
+
+; the FOR..NEXT structure:
+
+; FOR
+;	    LDA #<start_val
+;	    STA index_var
+;	    LDA #>start_val
+;	    STA index_var+1
+; __xxxx	    			; to here <----------------------|
+;       ..code..                                             |
+; NEXT                                                       |
+;       INC index_var       ; add one to index variable      |
+;       BNE +:                                               |
+;       INC index_var+1                                      |
+; +	    LDA index_var		; index variable equals limit ?	 |
+;       CMP #<limit                                          |
+;	    BNE __xxxx			; not equal, branch -------------|
+;       LDA index_var+1                                      |
+;       CMP #>limit                                          |
+;	    BNE __xxxx			; not equal, branch -------------|
+
+ ; example usage:
+ ;
+ ;      FOR  myVar, 1, TO, 1000
+ ;         ..code..
+ ;      NEXT [myVar]
+
+ ; NOTE:  FOR and NEXT will change the accumulator value (and the status).
+
+;                        +---------+
+;                        |   FOR   |
+;                        +---------+
+
+; FOR has six steps:
+; 1) write code to initialize the index variable with the starting value
+; 2) make a new label, the target of a branch-to-FOR
+; 3) write it to mark the current location as that target
+; 4) push it on the stack
+; 5) push the ending value on the stack
+; 6) push the index variable name on the stack
+
+; writes five lines of source code:
+
+;           LDA #<start
+;           STA varname
+;           LDA #>start
+;           STA 1+varname
+; __xxxx
+
+; pushes three items on stack:
+
+; "varname"			; the index variable name (at top)
+; "endvalue"        ; the ending value
+; __xxxx			; the target branch-to-FOR label
+
+FOR:        MACRO ?varname, ?start, ?dummy, ?end
+            LDA #<(?start)
+            STA ?varname
+            LDA #>(?start)
+            STA 1+?varname
+
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)    ; make it into a string
+            .putbacks ]DYNLBL$      ; use it to mark the start of FOR..NEXT block
+            .pushs ]DYNLBL$         ; save it for future reference
+            .pushs "(?end)"         ; save ending value
+            .pushs "?varname"       ; save index variable name
+            ENDM
+ ;----------------
+
+;                        +----------+
+;                        |   NEXT   |
+;                        +----------+
+
+; NEXT has four steps:
+; 1) pop the index variable name from the stack
+; 2) if NEXT was supplied with variable name, use that instead
+; 3) write code to increment the index variable by one
+; 4) write code to loop back to FOR if the index variable and ending value don't match
+
+; writes ten lines of source code:
+;       INC varname
+;       BNE :+
+;       INC 1+varname
+; +
+;       LDA varname
+;       CMP #<endvalue
+;       BNE __xxxx
+;       LDA 1+varname
+;       CMP #>endvalue
+;       BNE __xxxx
+
+; pops three items from stack:
+
+; "varname"             ; index variable name (at top)
+; "endvalue"			; ending value
+; __xxxx                ; target label of branch-to-FOR
+
+; the check against the ending value handles low and high bytes separately,
+; so the ending value and target label on the stack will be needed twice
+; - the low byte code retrieves them from the stack but does not remove them
+; - the high byte code pops them from the stack in the process of using them
+
+NEXT:       MACRO ?varname=@
+]DYNLBL$    = pop$()                ; pop index variable name
+            .if "?varname" != "@"   ; if variable name supplied...
+]DYNLBL$    = "?varname"            ; ...use it instead
+            .endif
+
+            .putbacks "INC " ]DYNLBL$
+            BNE :+
+            .putbacks "INC 1+" ]DYNLBL$
+ +
+            .putbacks "LDA " ]DYNLBL$
+            .putbacks "CMP #<" peek$(1)
+            .putbacks "BNE " peek$(2)
+
+            .putbacks "LDA 1+" ]DYNLBL$
+            .putbacks "CMP #>" pop$()
+            .putbacks "BNE " pop$()
+            ENDM
+ ;----------------
+
+; Garth Wilson's May 2013 additions to the original set:
+
+ ;----------------
+
+; test most significant bit of memory byte
+
+IF_FLAG_VAR:  MACRO ?addr, ?condition
+]DYNLBL$     = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_SET" && ]DYNLBL$ != "IS_CLR"
+            .fatal "IF_FLAG_VAR: ?condition"
+            .endif
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_SET"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                     
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .endif
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+
+IF_BIT:     MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "IF_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr                   ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number)     ; set test bit (5 -> 0)
+            BIT ?addr                   ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .endif
+            ENDM
+ ;----------------
+
+IF_MEM_BYTE_NEG:  MACRO ?addr
+            BIT ?addr                   ; set sign flag to bit 7 value
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+            ENDM
+ ;----------------
+
+IF_MEM_BYTE_POS:  MACRO ?addr
+            BIT ?addr                   ; set sign flag to bit 7 value
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+; - exactly the same as IF_BIT, except for error message
+
+WHILE_BIT:  MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "WHILE_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BPL " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BMI " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr                   ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVC " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BVS " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number)     ; set test bit (5 -> 0)
+            BIT ?addr                   ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BEQ " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack                 
+
+            .else
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "BNE " ]DYNLBL$   ; use it to create opposite-sense test
+            .pushs ]DYNLBL$             ; push it on stack
+                
+            .endif
+
+            .endif
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+
+UNTIL_BIT:  MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "UNTIL_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BPL " pop$()     ; write conditional backward branch
+            .else
+            .putbacks "BMI " pop$()     ; write conditional backward branch
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr           ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BVC " pop$()     ; write conditional backward branch
+            .else
+            .putbacks "BVS " pop$()     ; write conditional backward branch
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number)     ; set test bit (5 -> 0)
+            BIT ?addr                   ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BEQ " pop$()     ; write conditional branch-to-BEGIN
+            .else
+            .putbacks "BNE " pop$()     ; write conditional branch-to-BEGIN
+            .endif
+
+            .endif
+            ENDM
+ ;----------------
+
+;                        +-------------------+
+;                        |   FOR_X..NEXT_X   |
+;                        +-------------------+
+
+; the FOR_X..NEXT_X structure:
+
+; FOR_X
+;       [TAX|LDX [#]?beg|TYA TAX]   ; initialize X-reg (in some cases)
+; __xxxx                            ; to here <------------------|
+;       ..code..                                                 |
+; NEXT_X                                                         |
+;       INX                         ; increment index register   |
+;       [CPX [#]?end]               ; compare (in some cases)    |
+;       BNE __xxxx                  ; not complete, branch ------|
+
+;                        +-----------+
+;                        |   FOR_X   |
+;                        +-----------+
+
+; FOR_X has six steps:
+; 1) write the register initialization code (if any)
+; 2) make a new label, the target of a branch-around-TRUE
+; 3) write it as the target of a branch-to-FOR_X instruction
+; 4) push it on the stack
+; 5) push the ending (termination) condition on the stack
+; 6) push the appropriate increment instruction on the stack
+
+; writes one, two or three lines of source code:
+
+;     [TAX|LDX [#]?beg|TYA TAX]     ; initialize X-reg (in some cases)
+; __xxxx                            ; target branch-to-FOR_X label          
+
+; pushes three items on stack:
+
+; DEX|INX                           ; increment instruction (at top)
+; ending value                      ; loop termination value
+; __xxxx                            ; target branch-to-FOR_X label
+
+; '?beg' may be:
+; - 'ACCUM', 'X_REG', or 'Y_REG'
+; - a numeric literal (any base, no leading '#') less than 256
+; - anything else is taken "as-is"
+
+; "?dir" may be:
+; - DOWN_TO or UP_TO
+
+; '?end' may be:
+; - '0' or 'ZERO'; 'POS_NRs'; '-1' or 'NEG_NRs'
+; - a numeric literal (any base, no leading '#') less than 256
+; - anything else is taken "as-is"
+
+; examples:
+; FOR_X $80, DOWN_TO, ZERO
+; FOR_X #64, UP_TO, #96
+; FOR_X START, DOWN_TO, END
+; FOR_X #START, UP_TO, #END
+
+FOR_X:      MACRO ?beg, ?dir, ?end
+
+]DYNLBL$    = toupper$("?beg")
+
+            .if ]DYNLBL$ == "ACCUM"
+            TAX
+
+            .elseif ]DYNLBL$ == "Y_REG"
+            .if cpu$() == "6502"
+            TYA                     ; trashes A...       
+            TAX
+            .else
+            PHY
+            PLX
+            .endif
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            LDX   #?beg
+
+            ; ..take anything but X_REG "as-is"
+
+            .elseif ]DYNLBL$ != "X_REG"
+            LDX   ?beg
+            .endif
+
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)    ; make it into a string
+            .putbacks ]DYNLBL$      ; use it to mark the start of FOR_X..NEXT_X block
+            .pushs ]DYNLBL$         ; save it for future reference
+
+            .pushs toupper$("?end") ; save ending value
+
+]DYNLBL$    = toupper$("?dir")
+
+            .if ]DYNLBL$ == "DOWN_TO"
+            .pushs "DEX"            ; save actual instruction
+            .elseif ]DYNLBL$ == "UP_TO"
+            .pushs "INX"            ; save actual instruction
+            .else
+            .fatal "FOR_X: ?dir"
+            .endif
+            ENDM
+
+;                        +-----------+
+;                        |  NEXT_X   |
+;                        +-----------+
+
+; NEXT_X has six steps:
+; 1) pop the literal increment register instruction from the stack
+; 2) write it as code
+; 3) pop the ending condition from the stack
+; 4) write an explicit comparison instruction if one is needed
+; 5) pop the branch-to-FOR_X label from the stack
+; 6) write a branch-on-condition using that label as the target
+
+; writes two or three lines of source code:
+
+;     INX                           ; increment instruction
+;     [CPX [#]?end]                 ; compare instruction (in some cases)
+;     BNE  __xxxx                   ; conditional branch-to-FOR_X            
+
+; pops three items from stack:
+
+; DEX|INX                           ; increment instruction (at top)
+; ending value                      ; loop termination value
+; __xxxx                            ; target branch-to-FOR_X label
+
+; steps (1) and (2) are combined into one line
+; step (4) checks several special cases
+; steps (5) and (6) are combined into one line
+
+NEXT_X:     MACRO
+            .putbacks pop$()            ; "DEX" or "INX"
+
+]DYNLBL$    = pop$()                	; recover ending condition
+
+            ;  until zero ?
+
+            .if ]DYNLBL$ ~ /^(0|ZERO)$/
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            ; until positive ?
+
+            .elseif ]DYNLBL$ == "POS_NRS"
+            .putbacks "BMI " pop$()     ; write conditional branch-to-FOR_X
+
+            ; until negative ?
+
+            .elseif ]DYNLBL$ ~ /^(-1|NEG_NRS)$/
+            .putbacks "BPL " pop$()     ; write conditional branch-to-FOR_X
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            .putbacks "CPX #" ]DYNLBL$
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            ; ...take anything else "as-is"
+            ; - eg., a label or number > 255 or starts with "#"
+ 
+            .else
+            .putbacks "CPX " ]DYNLBL$   ; compare
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            .endif
+            ENDM
+ ;----------------
+
+;                        +--------------------+
+;                        |   FOR_Y...NEXT_Y   |
+;                        +--------------------+
+
+; the FOR_Y..NEXT_Y structure:
+
+; FOR_Y
+;       [TAY|LDY [#]?beg|TXA TAY]   ; initialize X-reg (in some cases)
+; __xxxx                            ; to here <------------------|
+;       ..code..                                                 |
+; NEXT_Y                                                         |
+;       INY                         ; increment index register   |
+;       [CPY [#]?end]               ; compare (in some cases)    |
+;       BNE __xxxx                  ; not complete, branch ------|
+
+;                        +-----------+
+;                        |   FOR_Y   |
+;                        +-----------+
+
+; FOR_Y has six steps:
+; 1) write the register initialization code (if any)
+; 2) make a new label, the target of a branch-around-TRUE
+; 3) write it as the target of a branch-to-FOR_Y instruction
+; 4) push it on the stack
+; 5) push the ending (termination) condition on the stack
+; 6) push the appropriate increment instruction on the stack
+
+; writes one, two or three lines of source code:
+
+;     [TAY|LDY [#]?beg|PHX PLY]     ; initialize Y-reg (in some cases)
+; __xxxx                            ; target branch-to-FOR_Y label          
+
+; pushes three items on stack:
+
+; DEY|INY                           ; increment instruction (at top)
+; ending value                      ; loop termination value
+; __xxxx			    ; target branch-to-FOR_Y label
+
+; '?beg' may be:
+; - 'ACCUM', 'X_REG', or 'Y_REG'
+; - a numeric literal (any base, no leading '#') less than 256
+; - anything else is taken "as-is"
+
+; "?dir" may be:
+; - DOWN_TO or UP_TO
+
+; '?end' may be:
+; - '0' or 'ZERO'; 'POS_NRs'; '-1' or 'NEG_NRs'
+; - a numeric literal (any base, no leading '#') less than 256
+; - anything else is taken "as-is"
+
+; examples:
+; FOR_Y $80, DOWN_TO, ZERO
+; FOR_Y #64, UP_TO, #96
+; FOR_Y START, DOWN_TO, END
+; FOR_Y #START, UP_TO, #END
+
+FOR_Y:      MACRO ?beg, ?dir, ?end
+
+]DYNLBL$    = toupper$("?beg")
+
+            .if ]DYNLBL$ == "ACCUM"
+            TAY
+
+            .elseif ]DYNLBL$ == "X_REG"
+            .if cpu$() == "6502"
+            TXA                     ; trashes A...       
+            TAY
+            .else
+            PHX
+            PLY
+            .endif
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            LDY   #?beg
+
+            ; ..take anything but Y_REG "as-is"
+
+            .elseif ]DYNLBL$ != "Y_REG"
+            LDY   ?beg
+            .endif
+
+
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)    ; make it into a string
+            .putbacks ]DYNLBL$      ; use it to mark the start of FOR_Y..NEXT_Y block
+            .pushs ]DYNLBL$         ; save it for future reference
+
+            .pushs toupper$("?end") ; save ending value
+
+]DYNLBL$    = toupper$("?dir")
+
+            .if ]DYNLBL$ == "DOWN_TO"
+            .pushs "DEY"            ; save actual instruction
+            .elseif ]DYNLBL$ == "UP_TO"
+            .pushs "INY"            ; save actual instruction
+            .else
+            .fatal "FOR_Y: ?dir"
+            .endif
+            ENDM
+
+;                        +-----------+
+;                        |  NEXT_Y   |
+;                        +-----------+
+
+; NEXT_Y has six steps:
+; 1) pop the literal increment register instruction from the stack
+; 2) write it as code
+; 3) pop the ending condition from the stack
+; 4) write an explicit comparison instruction if one is needed
+; 5) pop the branch-to-FOR_Y label from the stack
+; 6) write a branch-on-condition using that label as the target
+
+; writes two or three lines of source code:
+
+;     INY                           ; increment instruction
+;     [CPY [#]?end]                 ; compare instruction (in some cases)
+;     BNE  __xxxx                   ; conditional branch-to-FOR_Y            
+
+; pops three items from stack:
+
+; DEY|INY	                    ; increment instruction (at top)
+; ending value                      ; loop termination value
+; __xxxx			    ; target branch-to-FOR_Y label
+
+; steps (1) and (2) are combined into one line
+; step (4) checks several special cases
+; steps (5) and (6) are combined into one line
+
+NEXT_Y:     MACRO
+            .putbacks pop$()            ; "DEY" or "INY"
+
+]DYNLBL$    = pop$()                	; recover ending condition
+
+            ;  until zero ?
+
+            .if ]DYNLBL$ ~ /^(0|ZERO)$/
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_Y
+
+            ; until positive ?
+
+            .elseif ]DYNLBL$ == "POS_NRS"
+            .putbacks "BMI " pop$()     ; write conditional branch-to-FOR_Y
+
+            ; until negative ?
+
+            .elseif ]DYNLBL$ ~ /^(-1|NEG_NRS)$/
+            .putbacks "BPL " pop$()     ; write conditional branch-to-FOR_Y
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            .putbacks "CPY #" ]DYNLBL$
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_Y
+
+            ; ...take anything else "as-is"
+            ; - eg., a label or number > 255 or starts with "#"
+ 
+            .else
+            .putbacks "CPY " ]DYNLBL$   ; compare
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_Y
+
+            .endif
+            ENDM
+ ;----------------
+
+; return if Z-flag set (if zero)
+
+RTS_IF_EQ:  MACRO
+            BNE :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if Z-flag clear (if not zero)
+
+RTS_IF_NE:  MACRO
+            BEQ :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if N-flag set (if negative)
+
+RTS_IF_MINUS:  MACRO
+            BPL :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if N-flag clear (if postiive)
+
+RTS_IF_PLUS:  MACRO
+            BMI :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+RTS_IF_FLAG_VAR:  MACRO ?addr, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_SET" && ]DYNLBL$ != "IS_CLR"
+            .fatal "RTS_IF_FLAG_VAR: ?condition"
+            .endif
+
+            BIT ?addr           ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_SET"
+            BPL :+                      ; opposite sense test
+            .else
+            BMI :+                      ; opposite sense test
+            .endif
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return on condition of any bit of memory byte
+
+RTS_IF_BIT: MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "RTS_IF_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr               ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BPL :+
+            .else
+            BMI :+
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr               ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BVC :+
+            .else
+            BVS :+
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number) ; set test bit (5 -> 0)
+            BIT ?addr               ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BEQ :+
+            .else
+            BNE :+
+            .endif
+
+            .endif                   ; end of possible bits to test
+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+RTS_IF_MEM_LOC: MACRO ?addr, ?condition
+]DYNLBL$    = toupper$("?condition")
+
+            .if ]DYNLBL$ == "IS_POS"
+            BIT ?addr
+            BMI :+
+
+            .elseif ]DYNLBL$ == "IS_NEG"
+            BIT ?addr
+            BPL :+
+
+            .elseif ]DYNLBL$ == "IS_0"
+            LDY ?addr
+            BNE :+
+
+            .elseif ]DYNLBL$ == "IS_NON_0"
+            LDY ?addr
+            BEQ :+
+
+            .else
+            .fatal "RTS_IF_MEM_LOC: ?condition"
+            .endif
+
+            RTS
+ +
+            ENDM
+ ;----------------

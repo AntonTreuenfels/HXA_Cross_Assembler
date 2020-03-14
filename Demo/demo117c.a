@@ -1,0 +1,145 @@
+; Hobby Cross-Assembler Demo 117c
+; 6502\Structured Programming Macro Tests
+; ok: CASE..CASE_OF..END_OF..END_CASE
+
+; by Anton Treuenfels
+
+; first created: 08/03/13
+; last revision: 08/05/13
+
+; -------------------------------
+
+        .listfile               ; make a listing
+        .errfile                ; record any errors
+
+        .listoff includes       ; don't show
+
+; -------------------------------
+
+        .cpu    6502            ; minimum required cpu
+
+; -------------------------------
+
+;        .include "demo115.a"    ; the "full" macro versions
+        .include "demo115b.a"   ; the "compact" macro versions
+
+; -------------------------------
+
+        ; --------------------------------
+        ; CASE..END_CASE
+        ; --------------------------------
+
+        .org    $4000
+
+        CASE ACCUM              ; empty is allowed
+        END_CASE
+        rts
+
+        ; --------------------------------
+        ; CASE..CASE_OF..END_OF..ENDCASE
+        ; --------------------------------
+
+        .org    $4000
+
+        CASE X_REG              ; only one CASE_OF is allowed
+            CASE_OF $0B         ; undecorated numeric literal less than 256
+            .fill 8             ; generates "immediate" comparison
+            END_OF              ; - all other arguments generate standard
+        END_CASE                ; 6502 comparison instruction
+        rts
+
+        .org    $4000
+
+        CASE Y_REG
+            CASE_OF #$0B        ; "immediate"
+            .fill 8
+            END_OF
+            CASE_OF #$0D        ; "immediate"
+            .fill 8
+            END_OF
+        END_CASE
+        rts
+
+        .org    $4000
+
+key_esc =   $0b                 ; backward reference
+
+        CASE ACCUM
+            CASE_OF #key_esc    ; "immediate"
+            .fill 8
+            END_OF
+            CASE_OF #key_cr     ; "immediate"
+            .fill 8
+            END_OF
+            .fill 8             ; "CASE_ELSE"
+        END_CASE
+        rts
+
+key_cr  =   $0d                 ; forward reference
+
+        .org    $4000
+
+        CASE X_REG
+            CASE_OF key_esc     ; "zero page" (less than 256)
+            .fill 8
+            END_OF
+            CASE_OF key_cr      ; "zero page"
+            .fill 8
+            END_OF
+            .fill 8             ; "CASE_ELSE"
+        END_CASE
+        rts
+
+        .org    $4000
+
+        CASE Y_REG
+            CASE_OF $C000       ; "absolute"
+            .fill 8
+            END_OF
+            CASE_OF mem_addr    ; "absolute"
+            .fill 8
+            END_OF
+            .fill 8             ; "CASE_ELSE"
+        END_CASE
+
+mem_addr    =   $C000           ; forward reference
+
+        ; --------------------------------
+        ; CASE..CASE..END_CASE..END_CASE
+        ; --------------------------------
+
+        .org    $4000
+
+        CASE ACCUM
+            CASE_OF $0B
+            .fill 8
+                CASE X_REG
+                    CASE_OF #$0D
+                    .fill 8
+                    END_OF
+                    CASE_OF #key_esc
+                    .fill 8
+                    END_OF
+                    .fill 8
+                END_CASE
+            END_OF
+            CASE_OF key_cr
+            .fill 8
+                CASE Y_REG
+                    CASE_OF $C000
+                    .fill 8
+                    END_OF
+                    CASE_OF mem_addr
+                    .fill 8
+                    END_OF
+                    .fill 8
+                END_CASE
+            END_OF
+            .fill 8
+        END_CASE
+        rts
+
+; -------------------------------
+
+        .end
+

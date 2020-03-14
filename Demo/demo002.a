@@ -1,0 +1,158 @@
+; Hobby Cross-Assembler Demo 002
+; Code Alignment\EVEN, ODD and ALIGN Macros
+; ok: pad output to specific byte boundaries
+
+; by Anton Treuenfels
+
+; first created: 07/05/03
+; last revised:  03/21/07
+
+; ---------------
+
+; to a great extent use of macros to pad the object code has been
+; superceded by the PADTO pseudo op. However the macro versions
+; still retain one advantage, the ability to specify a non-zero
+; or multi-byte value to use for padding (at least so far)
+
+; ---------------
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org     $1000      ; required psop
+
+; ---------------
+; EVEN
+; ---------------
+
+; pad output to even byte alignment
+; - does nothing if currently on even byte
+
+        .macro  EVEN, ?fill=$00
+        .if (* % 2) == 1
+        .byte   ?fill
+        .endif
+        .endm
+
+; test it
+
+        .org    $1000
+
+        EVEN                ; on even address (does nothing)
+
+        .bit24  $112233     ; now on odd address
+
+        EVEN    $ff         ; should place $ff in code
+
+        EVEN    $aa         ; on even address (does nothing)
+
+        .bit24  $112233     ; now on odd address
+
+        EVEN                ; should place $00 in code
+
+; ---------------
+; ODD
+; ---------------
+
+; pad output to odd byte alignment
+; - does nothing if currently on odd byte
+
+        .macro  ODD, ?fill=$00
+        .if (* % 2) == 0
+        .byte   ?fill
+        .endif
+        .endm
+
+; test it
+
+        .org    $1001
+
+        ODD                 ; on odd address (does nothing)
+
+        .bit24  $112233     ; now on even address
+
+        ODD     $ff         ; should place $ff in code
+
+        ODD     $aa         ; on odd address (does nothing)
+
+        .bit24  $112233     ; now on even address
+
+        ODD                 ; should place $00 in code
+
+; ---------------
+; ALIGN
+; ---------------
+
+; pad output to specific byte alignment
+; - no point if less than two
+; - we'll set an upper limit to show how it's done (in practice there
+; not having one can make the macro more useful)
+; - actual pad byte value is arbitrary (and could be another argument
+; if so desired)
+
+        .macro  ALIGN, ?boundary, ?fill=$00
+]ALIGN  .=  ?boundary               ; evaluate once only
+        .if (]ALIGN > 1) && (]ALIGN <= 256)
+        .while * % ]ALIGN
+        .byte   ?fill
+        .endw
+        .else
+        .error "ALIGN boundary out of range <" str$(]ALIGN) ">"
+        .endif
+        .endm
+
+; a test macro built to force an alignment to happen
+
+        .macro  TEST_ALIGN, ?boundary
+
+        .byte   ?boundary           ; align to this
+
+        .if !(* % ?boundary)        ; make sure there's something to do
+        .byte   $ff
+        .endif
+
+        ALIGN   ?boundary
+
+        .byte   * % ?boundary       ; should be zero
+
+        .endm
+
+; ---------------
+
+        .org    $1000
+
+; we're currently at $1000, so these should not generate any code at all
+
+]BOUND  = 2
+
+        repeat 7
+        ALIGN ]BOUND
+]BOUND  = ]BOUND * 2
+        .endr
+
+; two to sixteen
+
+]BOUND  = 2
+
+        .repeat 15
+        TEST_ALIGN ]BOUND
+]BOUND  .=  ]BOUND + 1
+        .endr
+
+; some powers of two we haven't covered yet
+
+]BOUND  = 32
+
+        .repeat 3
+        TEST_ALIGN ]BOUND
+]BOUND  .=  ]BOUND * 2
+        .endr
+
+; ---------------
+
+        .end

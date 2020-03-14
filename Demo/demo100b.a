@@ -1,0 +1,410 @@
+; Hobby Cross-Assembler Demo 100b
+; 6502\Word Macros
+; developing general-purpose 16-bit macros
+
+; by Anton Treuenfels
+
+; first created: 07/18/04
+; last revision: 07/19/04
+
+; these macros will be optimized for size (not used as often).
+; For a 16-bit macro optimized for speed, see "demo100.a".
+; For a larger set of fully-integrated 16-bit macros, see "demo100c.a"
+
+; ---------------
+
+    .listfile
+    .errfile
+
+; ---------------
+
+    .cpu    "6502"
+    .org    $1000
+
+;----------------
+
+; we'll start with a simple macro, then upgrade it, then create other
+; macros, and then look for common code we can make "helper" macros out of
+
+; ------------
+; Attempt #1
+; ------------
+
+; zero (clear) word
+
+    .macro ZERO, ?dst       ; $00 -> ab|zp
+    lda #$00
+    sta ?dst
+    sta 1+?dst
+    .endm
+
+; try it
+
+    ZERO    $80             ; zp
+    ZERO    $8000           ; ab
+
+; the "1+?arg" expression form is designed to handle the cases where
+; "?arg" uses the absolute indexed ",X" or ",Y" address modes.
+; And it does - for assemblers which don't use "," as a field separator :(
+; For them expansion yields, for example, "1+addr,X" (which assembles
+; correctly) instead of "addr,X+1" (which doesn't)
+
+; but HXA splits on commas so ",X" and ",Y" show up as extra arguments.
+; Oh well - even if available, those forms don't get used often.
+; It's not a fatal flaw, it's more like a nice bonus we don't get.
+; Maybe some future version of HXA will allow changing the field separator :)
+
+; ---------------
+; Attempt #2
+; ---------------
+
+; we can add indirect indexed addressing (which *is* often used on the 6502)
+; - we'll omit the ",Y" requirement of "(zp),Y" because it will be
+; parsed as a third argument, which is a nasty case to handle.
+; Because we control the definition, we can just as easily assume the
+; implied existence of ",Y" whenever we see an expression enclosed by
+; parentheses (although it means more code in the macro to
+; guarantee ",Y" gets tacked on properly during expansion).
+; - note omitting the ",Y" requirement causes the form we'll use to match
+; a legal address mode of the 65C02 and others.
+; We can force the macro behave like a 16-bit version of that mode by
+; initializing the Y-register to zero within the macro.
+; We won't do that because it's much handier to be able to set the
+; Y-register to whatever initial value we want outside the macro.
+; This is an important point to remember when using this address mode:
+; Y-register will increment within the macro (and end up pointing to
+; the high byte of the 16-bit value), but it will *not* be set within it
+; - also note the macro will not be as smart as the assembler at balancing
+; parentheses, so carelessness will be punished
+
+    .undef  ZERO
+
+    .macro  ZERO, ?dst
+    lda #$00
+    .if "?dst" ~ /^\(.+\)$/     ; $00 -> (zp),y
+    sta ?dst,y
+    iny
+    sta ?dst,y
+    .else                       ; $00 -> ab|zp
+    sta ?dst
+    sta 1+?dst
+    .endif
+    .endm
+
+; try it
+
+    ZERO    $80                 ; zp
+    ZERO    $8000               ; ab
+    ZERO    ($80)               ; (zp),y
+
+; ---------------
+
+; now let's introduce a new wrinkle: a 16-bit "pseudo-register"
+; created by pairing two of the 6502's 8-bit registers
+; (this is the "future version" mentioned earlier).
+; We can pick two of three in either order for high and low bytes,
+; so we have six potential pseudo-registers.
+; Every choice makes some things we'd like to do easier and some harder
+
+; we don't have to limit ourselves to one pair, of course.
+; We can create as many as we're willing to manage.
+; But for the moment, let's choose the symbol "_XY" to mean
+; a 16-bit pseudo register with the low byte in the X-register and
+; the high byte in the Y-register.
+
+; we can easily extend "ZERO" to clear this register.
+; For loading and storing this register, see "demo100.A"
+
+; ---------------
+; Attempt #3
+; ---------------
+
+    .undef  ZERO
+
+    .macro  ZERO, ?dst
+    .if "?dst" == "_XY"         ; $00 -> _XY
+    ldx #$00
+    ldy #$00
+    .else
+    lda #$00
+    .if "?dst" ~ /^\(.+\)$/     ; $00 -> (zp),y
+    sta ?dst,y
+    iny
+    sta ?dst,y
+    .else                       ; $00 -> ab|zp
+    sta ?dst
+    sta 1+?dst
+    .endif
+    .endif
+    .endm
+
+; try it
+
+    ZERO    $80                 ; zp
+    ZERO    $8000               ; ab
+    ZERO    ($80)               ; (zp),y
+    ZERO    _XY                 ; _XY
+
+; ---------------
+
+; that's as far as we're going to push "ZERO".
+; Now let's turn our attention to pushing and pulling words from the stack.
+; We'll build them to accept the same address modes as "ZERO", except we'll
+; add the ability to push an immediate word onto the stack.
+; We'll also skip the intermediate development steps and go right to the
+; complete (but not optimized for size) versions:
+
+; ---------------
+; Attempt #4
+; ---------------
+
+; note we push the high byte first, then the low byte.
+; This means for an indirect source the Y-register must be pointing to
+; the high byte at start, and it will end up pointing to the low byte
+
+    .macro  PUSH, ?src
+    .if "?src" == "_XY"     ; _XY -> stack
+    tya
+    pha
+    txa
+    .elseif "?src" ~ /^\(.+\)$/ ; (zp),y -> stack
+    lda ?src,y
+    pha
+    dey
+    lda ?src,y
+    .elseif "?src" ~ /^#/   ; imm -> stack
+    lda ?src >> 8
+    pha
+    lda ?src
+    .else                   ; ab|zp -> stack
+    lda ?src
+    pha
+    lda 1+?src
+    .endif
+    pha
+    .endm
+
+; try it
+
+    PUSH    $80             ; zp
+    PUSH    $8000           ; ab
+    PUSH    #$AA55          ; imm
+    PUSH    ($80)           ; (zp),y
+    PUSH    _XY             ; _XY
+
+; ---------------
+; Attempt #5
+; ---------------
+
+    .macro  PULL, ?dst
+    pla
+    .if "?dst" == "_XY"     ; stack -> _XY
+    tax
+    pla
+    tay
+    .elseif "?dst" ~ /^\(.+\)$/ ; stack -> (zp),y
+    sta ?dst,y
+    iny
+    pla
+    sta ?dst,y
+    .else                   ; stack -> ab|zp
+    sta ?dst
+    pla
+    sta 1+?dst
+    .endif
+    .endm
+
+; try it
+
+    PULL    $80             ; zp
+    PULL    $8000           ; ab
+    PULL    ($80)           ; (zp),y
+    PULL    _XY             ; _XY
+
+; ---------------
+
+; now we have a start on a set of useful 16-bit macros.
+; Do we see at this point any common code we can place into nested macros
+; in order to simplify overall development of these and other macros ?
+
+; we do:
+; All three of these macros deal with loading and storing the low and high
+; byte of words for several different address modes.
+; One way of simplifying is to develop "helper" macros to handle each of
+; these four tasks.
+; This will reduce size somewhat and make the top-level macros easier to
+; understand, but they will also reduce performance a bit because the
+; same condition will be evaluated multiple times.
+; We'll accept that because these macros, while used frequently enough
+; to be worth creating, won't be the most heavily used ones
+
+; ---------------
+; Attempt #6
+; ---------------
+
+    .undef PULL
+    .undef PUSH
+    .undef ZERO
+
+; load low byte
+
+    .macro  LOADLO, ?src
+    .if "?src" == "_XY"         ; _XY
+    txa
+    .elseif "?src" ~ /^\(.+\)$/ ; (zp),y
+    lda ?src,y
+    .else                       ; ab|imm|zp
+    lda ?src
+    .endif
+    .endm
+
+; store low byte
+
+    .macro  STORLO, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    tax
+    .elseif "?dst" ~ /^\(.+\)$/ ; (zp),y
+    sta ?dst,y
+    .else                       ; ab|zp
+    sta ?dst
+    .endif
+    .endm
+
+; load hi byte
+
+    .macro  LOADHI, ?src
+    .if "?src" == "_XY"         ; _XY
+    tya
+    .elseif "?src" ~ /^\(.+\)$/ ; (zp),y
+    lda ?src,y
+    .elseif "?src" ~ /^#/       ; imm
+    lda ?src >> 8
+    .else                       ; ab|zp
+    lda 1+?src
+    .endif
+    .endm
+
+; store hi byte
+
+    .macro  STORHI, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    tay
+    .elseif "?dst" ~ /^\(.+\)$/     ; (zp),y
+    sta ?dst,y
+    .else                       ; ab|zp
+    sta 1+?dst
+    .endif
+    .endm
+
+; increment Y-register if argument indirect
+
+    .macro  INCIND, ?arg1
+    .if "?arg1" ~ /^\(.+\)$/
+    iny
+    .endif
+    .endm
+
+; decrement Y-register if argument indirect
+
+    .macro  DECIND, ?arg1
+    .if "?arg1" ~ /^\(.+\)$/
+    dey
+    .endif
+    .endm
+
+; ---------------
+; "ZERO"
+; ---------------
+
+    .macro  ZERO, ?dst          ; $00 -> ab|zp|(zp),y|_XY
+    lda #$00
+    STORLO  ?dst
+    INCIND  ?dst
+    STORHI  ?dst
+    .endm
+
+; try it
+
+    ZERO    $80                 ; zp
+    ZERO    $8000               ; ab
+    ZERO    ($80)               ; (zp),y
+    ZERO    _XY                 ; _XY
+
+; ---------------
+; "PUSH"
+; ---------------
+
+    .macro  PUSH, ?src          ; ab|zp|(zp),y|_XY -> stack
+    LOADHI  ?src
+    pha
+    DECIND  ?src
+    LOADLO  ?src
+    pha
+    .endm
+
+; try it
+
+    PUSH    $80             ; zp
+    PUSH    $8000           ; ab
+    PUSH    #$AA55          ; imm
+    PUSH    ($80)           ; (zp),y
+    PUSH    _XY             ; _XY
+
+; ---------------
+; "PULL"
+; ---------------
+
+    .macro  PULL, ?dst          ; stack -> ab|zp|(zp),y
+    pla
+    STORLO  ?dst
+    INCIND  ?dst
+    pla
+    STORHI  ?dst
+    .endm
+
+; try it
+
+    PULL    $80             ; zp
+    PULL    $8000           ; ab
+    PULL    ($80)           ; (zp),y
+    PULL    _XY             ; _XY
+
+; ---------------
+; Attempt #7
+; ---------------
+
+; although the "ZERO" macro works fine, we can improve the run-time speed
+; of the code it generates by making a special check for the "_XY" case.
+; This version will execute two cycles faster with the same size code:
+
+    .undef  ZERO
+
+; ---------------
+; "ZERO"
+; ---------------
+
+    .macro  ZERO, ?dst          ; $00 -> ab|zp|(zp),y|_XY
+    .if "?dst" == "_XY"         ; $00 -> _XY
+    ldx #$00
+    ldy #$00
+    .else
+    lda #$00                    ; $00 -> ab|zp|(zp),y
+    STORLO  ?dst
+    INCIND  ?dst
+    STORHI  ?dst
+    .endif
+    .endm
+
+; try it
+
+    ZERO    $80                 ; zp
+    ZERO    $8000               ; ab
+    ZERO    ($80)               ; (zp),y
+    ZERO    _XY                 ; _XY
+
+; we could go on like this for quite a while.
+; In fact we have: see "demo100c.a"
+
+; ---------------
+
+    .end

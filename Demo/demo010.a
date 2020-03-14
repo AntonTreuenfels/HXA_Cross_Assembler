@@ -1,0 +1,343 @@
+; Hobby Cross-Assembler Demo 010
+; Lookup Table\ASCII-to-7E_Parity
+; eight methods of building an ASCII to seven-bit even-parity lookup table
+
+; by Anton Treuenfels
+
+; first created: 05/30/03
+; last revised:  09/27/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     stats   ; show performance
+        .liston xref
+
+; ---------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org     $1000      ; required psop
+
+; ---------------
+
+        .if ver() < $0150
+        .fatal  "HXA version 0.150 or higher required"
+        .endif
+
+; ---------------
+
+; a byte definition macro
+; - seven data bits, one even parity bit
+
+        .macro  D7PE, ]val
+
+]PARITY = ]val & %00000001 ? $80 : $00
+
+        .if     ]val & %00000010
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .if     ]val & %00000100
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .if     ]val & %00001000
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .if     ]val & %00010000
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .if     ]val & %00100000
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .if     ]val & %01000000        ; 7th (and last) data bit
+]PARITY =   ]PARITY ^ $80
+        .endif
+
+        .byte   ]PARITY | ]val          ; set parity bit
+
+        .endm
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method One"
+
+        .starttimer method1
+
+]CHAR   = 0
+
+EvenParity1:
+
+        .repeat 128
+        D7PE    ]CHAR
+]CHAR   .equ    ]CHAR + 1
+        .endr
+
+        .showtimer  method1
+
+; ---------------
+
+; a byte definition macro
+; - seven data bits, one even parity bit
+
+        .macro  D7PE2, ?val
+
+]PARITY =   $00
+]MASK   =   $01
+
+        .repeat 7                       ; determine parity
+        .if     ?val & ]MASK
+]PARITY =   ]PARITY ^ $80
+        .endif
+]MASK   =   ]MASK << 1
+        .endr
+
+        .byte   ]PARITY | ?val          ; set parity bit
+
+        .endm
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Two"
+
+        .starttimer method2
+
+]CHAR   = 0
+
+EvenParity2:
+
+        .repeat 128
+        D7PE2   ]CHAR
+]CHAR   .equ    ]CHAR + 1
+        .endr
+
+        .showtimer  method2
+
+; ---------------
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Three"
+
+        .starttimer method3
+
+]CHAR   = 0
+
+EvenParity3:
+
+        .repeat 128
+
+]PARITY =   $00
+]MASK   =   $01
+
+        .repeat 7
+        .if     ]CHAR & ]MASK
+]PARITY =   ]PARITY ^ $80
+        .endif
+]MASK   =   ]MASK << 1
+        .endr
+
+        .byte   ]PARITY | ]CHAR
+
+]CHAR   .equ    ]CHAR + 1
+        .endr
+
+        .showtimer  method3         
+
+; ---------------
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Four"
+
+        .starttimer method4
+
+]CHAR   =   0
+
+EvenParity4:
+
+        .repeat 128
+
+]PARITY = ]CHAR & $40 ? $80 : $00
+
+        .if !(]CHAR & $20) != !(]CHAR & $10)
+]PARITY = ]PARITY ^ $80
+        .endif
+
+        .if !(]CHAR & $08) != !(]CHAR & $04)
+]PARITY = ]PARITY ^ $80
+        .endif
+
+        .if !(]CHAR & $02) != !(]CHAR & $01)
+]PARITY = ]PARITY ^ $80
+        .endif
+
+        .byte   ]PARITY | ]CHAR
+
+]CHAR   .equ    ]CHAR + 1
+
+        .endr
+
+        .showtimer  method4
+
+; ---------------
+
+; this next method is based on a subtle method of counting set bits
+; in a byte (or word or long, for that matter)
+; - essentially the least significant one bit gets dropped each iteration,
+; and when there are no more one bits we have our count
+; - example:
+; start with:       %00110110
+; subtract one:     %00110101
+; AND:              %00110100
+; subtract one:     %00110011
+; AND:              %00110000
+; subtract one:     %00101111
+; AND:              %00100000
+; subtract one:     %00011111
+; AND:              %00000000
+; - four iterations, so four set bits
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Five"
+
+        .starttimer method5
+
+]CHAR   = 0
+
+EvenParity5:
+
+        .repeat 128
+
+]PARITY = 0
+]TEMP   = ]CHAR
+
+        .repeat 7
+        .exitif !]TEMP
+]PARITY = ]PARITY ^ $80
+]TEMP   = ]TEMP & (]TEMP - 1)
+        .endr
+
+        .byte   ]PARITY | ]CHAR
+
+]CHAR   .equ    ]CHAR + 1
+
+        .endr
+
+        .showtimer  method5
+
+; ---------------
+
+; this uses the same subtle technique as method 5 but implements
+; a recursive macro to determine when to stop counting bits
+
+        .macro  MORE_BITS, ]TEMP, ]PARITY=0
+        .if ]TEMP
+        .onexpand MORE_BITS ]TEMP & (]TEMP - 1), ]PARITY ^ $80
+        .endif
+        .endm
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Six"
+
+        .starttimer method6
+
+]CHAR   = 0
+
+EvenParity6:
+
+        .repeat 128
+
+        MORE_BITS   ]CHAR
+
+        .byte   ]PARITY | ]CHAR
+
+]CHAR   .equ    ]CHAR + 1
+
+        .endr
+
+        .showtimer  method6
+
+; ---------------
+
+; this uses the same subtle technique as method 5 but
+; uses a while loop to determine when to stop counting bits
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Seven"
+
+        .starttimer method7
+
+]CHAR   = 0
+
+EvenParity7:
+
+        .while ]CHAR < 128
+
+]PARITY = 0
+]TEMP   = ]CHAR
+
+        .while ]TEMP
+]PARITY = ]PARITY ^ $80
+]TEMP   = ]TEMP & (]TEMP - 1)
+        .endw
+
+        .byte   ]PARITY | ]CHAR
+
+]CHAR   .equ    ]CHAR + 1
+
+        .endw
+
+        .showtimer  method7
+
+; ---------------
+
+; this method uses exclusive-OR to determine parity without needing to
+; know the actual number of one bits in a byte (or word or long)
+; after first shift and XOR, we care about these bits:
+; bit 4 = bit 4 ^ bit 0
+; bit 5 = bit 5 ^ bit 1
+; bit 6 = bit 6 ^ bit 2
+; bit 7 = bit 7 ^ bit 3 ( = bit 3, as bit 7 = 0 )
+; after second shift and XOR, we care about these bits:
+; bit 6 = bit 6 ^ bit 2 ^ bit 4 ^ bit 0
+; bit 7 = bit 7 ^ bit 3 ^ bit 5 ^ bit 1
+; after third shift and XOR, we care about this bit:
+; bit 7 = bit 7 ^ bit 3 ^ bit 5 ^ bit 1 ^ bit 6 ^ bit 2 ^ bit 4 ^ bit 0
+; - which is 1 if the number of originally set bits is odd, 0 if even
+
+; a lookup table of even-parity seven-bit chars
+
+        .echo   "Building D7PE Table, Method Eight"
+
+        .starttimer method8
+
+]CHAR   = 0
+
+EvenParity8:
+
+        .repeat 128
+
+]TEMP   = ]CHAR ^ (]CHAR << 4)
+]TEMP   = ]TEMP ^ (]TEMP << 2)
+]TEMP   = ]TEMP ^ (]TEMP << 1)
+
+        .byte (]TEMP & $80) | ]CHAR
+
+]CHAR   = ]CHAR + 1
+
+        .endr
+
+        .showtimer method8
+
+; ---------------
+
+        .end

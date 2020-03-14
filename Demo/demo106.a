@@ -1,0 +1,224 @@
+; Hobby Cross-Assembler Demo 106
+; 6502\Jump Tables
+; selecting different execution paths based on an index value (monolithic)
+
+; by Anton Treuenfels
+
+; first created: 07/19/06
+; last revised:  07/02/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    6502
+
+; -------------------------------
+
+; for all these we assume they are entered with a value in the A-register
+; that represents the index number of the routine we'd like to execute
+; next.
+; The possible index numbers should be consecutive and are most often
+; zero-based (but not always, depending on the application)
+
+; -------------------------------------
+
+; some fake "routines" for example purposes
+; - all we care is that they have some random address value
+; representing their "start addresses"
+
+        .org   $A000
+
+Routine0:   .ds 123
+Routine1:   .ds 247
+Routine2:   .ds 381
+            .ds 4598    ; the next 125 fake "routines"
+Routine128  .ds 27
+Routine129  .ds 116
+Routine130  .ds 68
+
+; some non-zero page variable space used for various example purposes
+; - can be any convenient location
+
+varspc      =   $800
+
+; --------------------
+; Attempt #1
+; --------------------
+
+; a straightforward approach:
+
+        .org    varspc
+jumpAddr    .ds 2
+
+        .org    $1000
+
+MainLoop1:
+        .ds 16              ; "fake" main loop code
+Dispatch1:
+        asl                 ; double the index value (for two-byte addresses)
+        tax                 ; move it to an index register
+        lda routAddr1,x     ; load the low byte of the routine address
+        sta jumpAddr        ; save it
+        lda routAddr1+1,x   ; load the high byte of the routine address
+        sta jumpAddr+1      ; save it
+        jmp (jumpAddr)      ; perform an indirect jump via the saved address
+
+; a table of routine addresses
+
+routAddr1:
+        .word   Routine0
+        .word   Routine1
+        .word   Routine2
+
+; this works fine for up to 128 routines (doubling 128 exceeds the capacity
+; of the X-register).
+; The main inconvenience is that, organized this way, each routine has to
+; end with a "jmp MainLoop1" instruction in order to continue execution.
+; That can become a nuisance, especially if later "wedging" of additional
+; routines into the main loop at run time is allowed.
+; The "wedged" routine (typically in RAM) must know the address of the
+; main loop (typically in ROM) in order to return properly
+
+; --------------------
+; Attempt #2
+; --------------------
+
+; organizing dispatch as a sub-routine of the main loop
+
+        .org    varspc
+indMain .word   Normal2     ; initialized to point to normal entry point
+
+        .org    $1000
+
+MainLoop2:
+        jmp (indMain)       ; "indMain" can be changed to allow wedging
+Normal2 .ds 16              ; "fake" main loop code
+        jsr Dispatch2       ; call dispatch routine
+        jmp MainLoop2       ; continue main loop
+
+Dispatch2:
+        asl                 ; double the index value (for two-byte addresses)
+        tax                 ; move it to an index register
+        lda routAddr2+1,x   ; load the high byte of the routine address
+        pha                 ; save it on stack
+        lda routAddr2,x     ; load the low byte of the routine address
+        pha                 ; save it on stack
+        rts                 ; "jump" to it
+
+; a table of routine addresses
+; - one subtracted from each because "rts" will add one when executed
+
+routAddr2:
+        .word   Routine0-1
+        .word   Routine1-1
+        .word   Routine2-1
+
+; when the "rts" at the end of "Dispatch2" is executed, there are two
+; return addresses on the stack.
+; The top one is the return address of the routine we want to execute,
+; essentially put there manually instead of by a "real" subroutine
+; call.
+; The one under that is the return address of the real subroutine call
+; from the main loop.
+; All any called routine (including any "wedged" in) has to do to return
+; to the main loop is execute "rts"
+
+; --------------------
+; Attempt #3
+; --------------------
+
+; more than 128 routines
+; - for example, a virtual machine instruction set
+
+        .org    $1000
+
+MainLoop3:
+        .ds 16              ; "fake" main loop code
+        jsr Dispatch3       ; call dispatch routine
+        jmp MainLoop3       ; continue main loop
+
+Dispatch3:
+        asl                 ; double the index value (for two-byte addresses)
+        tax                 ; move it to an index register
+        bcs :+              ; b: index values 128-255
+        lda routAddr3a+1,x  ; load the high byte of the routine address
+        pha                 ; save it on stack
+        lda routAddr3a,x    ; load the low byte of the routine address
+        pha                 ; save it on stack
+        rts                 ; "jump" to it
+
+ +      lda routAddr3b+1,x  ; load the high byte of the routine address
+        pha                 ; save it on stack
+        lda routAddr3b,x    ; load the low byte of the routine address
+        pha                 ; save it on stack
+        rts                 ; "jump" to it
+
+; the first 128 routines
+
+routAddr3a:
+        .word   Routine0-1
+        .word   Routine1-1
+        .word   Routine2-1
+
+        .ds 125*2           ; the next 125 "routines"
+
+; the second 128 (possible) routines
+
+routAddr3b:
+        .word   Routine128-1
+        .word   Routine129-1
+        .word   Routine130-1
+
+; this certainly works but is beginning to look a little sloppy
+
+; --------------------
+; Attempt #4
+; --------------------
+
+; more than 128 routines, using split address tables
+
+        .org    $1000
+
+MainLoop4:
+        .ds 16              ; "fake" main loop code
+        jsr Dispatch4       ; call dispatch routine
+        jmp MainLoop4       ; continue main loop
+
+Dispatch4:
+        tax                 ; move routine number to an index register
+        lda routAddr4hi,x   ; load the high byte of the routine address
+        pha                 ; save it on stack
+        lda routAddr4lo,x   ; load the low byte of the routine address
+        pha                 ; save it on stack
+        rts                 ; "jump" to it
+
+; the low bytes of the routine addresses
+
+routAddr4lo:
+        .byte   <(Routine0-1)
+        .byte   <(Routine1-1)
+        .byte   <(Routine2-1)
+
+        .ds 125             ; the next 125 "routines"
+
+; the high bytes of the routine addresses
+
+routAddr4hi:
+        .byte   >(Routine0-1)
+        .byte   >(Routine1-1)
+        .byte   >(Routine2-1)
+
+; neater (and less overall code)
+; This can of course be used with fewer than 128 routines, where it saves
+; one byte and two cycles because the "asl" is eliminated.
+; But table maintenance is noticeably harder, so it might not be worth it.
+; However, split table maintenance can be considerably simplified using a
+; segmented memory model - see "demo106b.a"
+
+; -------------------------------
+
+        .end

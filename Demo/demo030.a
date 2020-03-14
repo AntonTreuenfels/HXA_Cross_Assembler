@@ -1,0 +1,477 @@
+; Hobby Cross-Assembler Demo 030
+; Macro Instruction Set\8080
+; ok: 8080\8085 instruction set
+
+; by Anton Treuenfels
+
+; first created: 03/30/05
+; last revised:  06/03/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .listoff    includes
+        .liston     stats
+
+        .include "i8080.a"  ; 8080 macro implementation
+
+        .org    $1000       ; required psop
+
+; -------------------------------
+; 8080 instructions
+; -------------------------------
+
+; backward references
+
+bakbyt  .equ    34H
+bakwrd  .equ    5678H
+
+; a simple test of all legal instructions using legal address modes
+; - no complicated expressions
+
+        ACI 12H
+        ACI bakbyt
+        ACI fwdbyt
+
+        ADC A
+        ADC B
+        ADC C
+        ADC D
+        ADC E
+        ADC H
+        ADC L
+        ADC M
+
+        ADD A
+        ADD B
+        ADD C
+        ADD D
+        ADD E
+        ADD H
+        ADD L
+        ADD M
+
+        ADI 12H
+        ADI bakbyt
+        ADI fwdbyt
+
+        ANA A
+        ANA B
+        ANA C
+        ANA D
+        ANA E
+        ANA H
+        ANA L
+        ANA M
+
+        ANI 12H
+        ANI bakbyt
+        ANI fwdbyt
+
+        CALL 1234H
+        CALL bakwrd
+        CALL fwdwrd
+
+        CC 1234H
+        CC bakwrd
+        CC fwdwrd
+
+        CM 1234H
+        CM bakwrd
+        CM fwdwrd
+
+        CMA
+
+        CMC
+
+        CMP A
+        CMP B
+        CMP C
+        CMP D
+        CMP E
+        CMP H
+        CMP L
+        CMP M
+
+        CNC 1234H
+        CNC bakwrd
+        CNC fwdwrd
+
+        CNZ 1234H
+        CNZ bakwrd
+        CNZ fwdwrd
+
+        CP 1234H
+        CP bakwrd
+        CP fwdwrd
+
+        CPE 1234H
+        CPE bakwrd
+        CPE fwdwrd
+
+        CPI 12H
+        CPI bakbyt
+        CPI fwdbyt
+
+        CPO 1234H
+        CPO bakwrd
+        CPO fwdwrd
+
+        CZ 1234H
+        CZ bakwrd
+        CZ fwdwrd
+
+        DAA
+
+        DAD B
+        DAD D
+        DAD H
+        DAD SP
+
+        DCR A
+        DCR B
+        DCR C
+        DCR D
+        DCR E
+        DCR H
+        DCR L
+        DCR M
+
+        DCX B
+        DCX D
+        DCX H
+        DCX SP
+
+        DI
+
+        EI
+
+        HLT
+
+        IN 12H
+        IN bakbyt
+        IN fwdbyt
+
+        INR A
+        INR B
+        INR C
+        INR D
+        INR E
+        INR H
+        INR L
+        INR M
+
+        INX B
+        INX D
+        INX H
+        INX SP
+
+        JC 1234H
+        JC bakwrd
+        JC fwdwrd
+
+        JM 1234H
+        JM bakwrd
+        JM fwdwrd
+
+        JMP 1234H
+        JMP bakwrd
+        JMP fwdwrd
+
+        JNC 1234H
+        JNC bakwrd
+        JNC fwdwrd
+
+        JNZ 1234H
+        JNZ bakwrd
+        JNZ fwdwrd
+
+        JP 1234H
+        JP bakwrd
+        JP fwdwrd
+
+        JPE 1234H
+        JPE bakwrd
+        JPE fwdwrd
+
+        JPO 1234H
+        JPO bakwrd
+        JPO fwdwrd
+
+        JZ 1234H
+        JZ bakwrd
+        JZ fwdwrd
+
+        LDA 1234H
+        LDA bakwrd
+        LDA fwdwrd
+
+        LDAX B
+        LDAX D
+
+        LHLD 1234H
+        LHLD bakwrd
+        LHLD fwdwrd
+
+        LXI B,1234H
+        LXI D,1234H
+        LXI H,1234H
+        LXI SP,1234H
+        LXI B,bakwrd
+        LXI D,bakwrd
+        LXI H,bakwrd
+        LXI SP,bakwrd
+        LXI B,fwdwrd
+        LXI D,fwdwrd
+        LXI H,fwdwrd
+        LXI SP,fwdwrd
+
+        MOV A,A
+        MOV A,B
+        MOV A,C
+        MOV A,D
+        MOV A,E
+        MOV A,H
+        MOV A,L
+        MOV A,M
+
+        MOV B,A
+        MOV B,B
+        MOV B,C
+        MOV B,D
+        MOV B,E
+        MOV B,H
+        MOV B,L
+        MOV B,M
+
+        MOV C,A
+        MOV C,B
+        MOV C,C
+        MOV C,D
+        MOV C,E
+        MOV C,H
+        MOV C,L
+        MOV C,M
+
+        MOV D,A
+        MOV D,B
+        MOV D,C
+        MOV D,D
+        MOV D,E
+        MOV D,H
+        MOV D,L
+        MOV D,M
+
+        MOV E,A
+        MOV E,B
+        MOV E,C
+        MOV E,D
+        MOV E,E
+        MOV E,H
+        MOV E,L
+        MOV E,M
+
+        MOV H,A
+        MOV H,B
+        MOV H,C
+        MOV H,D
+        MOV H,E
+        MOV H,H
+        MOV H,L
+        MOV H,M
+
+        MOV L,A
+        MOV L,B
+        MOV L,C
+        MOV L,D
+        MOV L,E
+        MOV L,H
+        MOV L,L
+        MOV L,M
+
+        MOV M,A
+        MOV M,B
+        MOV M,C
+        MOV M,D
+        MOV M,E
+        MOV M,H
+        MOV M,L
+
+        MVI A,12H
+        MVI B,12H
+        MVI C,12H
+        MVI D,12H
+        MVI E,12H
+        MVI H,12H
+        MVI L,12H
+        MVI M,12H
+        MVI A,bakbyt
+        MVI B,bakbyt
+        MVI C,bakbyt
+        MVI D,bakbyt
+        MVI E,bakbyt
+        MVI H,bakbyt
+        MVI L,bakbyt
+        MVI M,bakbyt
+        MVI A,fwdbyt
+        MVI B,fwdbyt
+        MVI C,fwdbyt
+        MVI D,fwdbyt
+        MVI E,fwdbyt
+        MVI H,fwdbyt
+        MVI L,fwdbyt
+        MVI M,fwdbyt
+
+        NOP
+
+        ORA A
+        ORA B
+        ORA C
+        ORA D
+        ORA E
+        ORA H
+        ORA L
+        ORA M
+
+        ORI 12H
+        ORI bakbyt
+        ORI fwdbyt
+
+        OUT 12H
+        OUT bakbyt
+        OUT fwdbyt
+
+        PCHL
+
+        POP B
+        POP D
+        POP H
+        POP PSW
+
+        PUSH B
+        PUSH D
+        PUSH H
+        PUSH PSW
+
+        RAL
+
+        RAR
+
+        RC
+
+        RET
+
+        RLC
+
+        RM
+
+        RNC
+
+        RNZ
+
+        RP
+
+        RPE
+
+        RPO
+
+        RRC
+
+        RST 0
+        RST 1
+        RST 2
+        RST 3
+        RST 4
+        RST 5
+        RST 6
+        RST 7
+
+        RST 00H
+        RST 08H
+        RST 10H
+        RST 18H
+        RST 20H
+        RST 28H
+        RST 30H
+        RST 38H
+
+        RZ
+
+        SBB A
+        SBB B
+        SBB C
+        SBB D
+        SBB E
+        SBB H
+        SBB L
+        SBB M
+
+        SBI 12H
+        SBI bakbyt
+        SBI fwdbyt
+
+        SHLD 1234H
+        SHLD bakwrd
+        SHLD fwdwrd
+
+        SPHL
+
+        STA 1234H
+        STA bakwrd
+        STA fwdwrd
+
+        STAX B
+        STAX D
+
+        STC
+
+        SUB A
+        SUB B
+        SUB C
+        SUB D
+        SUB E
+        SUB H
+        SUB L
+        SUB M
+
+        SUI 12H
+        SUI bakbyt
+        SUI fwdbyt
+
+        XCHG
+
+        XRA A
+        XRA B
+        XRA C
+        XRA D
+        XRA E
+        XRA H
+        XRA L
+        XRA M
+
+        XRI 12H
+        XRI bakbyt
+        XRI fwdbyt
+
+        XTHL
+
+; -------------------------------
+; 8085 instructions
+; -------------------------------
+
+        RIM
+
+        SIM
+
+; -------------------------------
+
+; forward references
+
+fwdbyt  .equ    56H
+fwdwrd  .equ    9ABCH
+
+        .end

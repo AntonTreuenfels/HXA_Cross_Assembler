@@ -1,0 +1,1147 @@
+; Hobby Cross-Assembler Demo 117d
+; 6502\Structured Programming Macro Tests
+; ok: FOR..NEXT, FOR_X..NEXT_X, FOR_Y..NEXT_Y
+
+; by Anton Treuenfels
+
+; first created: 08/03/13
+; last revision: 08/05/13
+
+; -------------------------------
+
+        .listfile               ; make a listing
+        .errfile                ; record any errors
+
+        .listoff includes       ; don't show
+
+; -------------------------------
+
+        .cpu    6502            ; minimum required cpu
+
+; -------------------------------
+
+;        .include "demo115.a"    ; the "full" macro versions
+        .include "demo115b.a"   ; the "compact" macro versions
+
+; -------------------------------
+
+myZpgNdx = $80                  ; a random index variable
+myAbsNdx = $C000                ; a random index variable
+
+        ; --------------------------------
+        ; FOR..NEXT
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR myZpgNdx, 1, TO, 1000
+        .fill   8
+        NEXT myZpgNdx
+        rts
+
+        .org    $4000
+
+        FOR myAbsNdx, 2, TO, 2000
+        .fill   8
+        NEXT                    ; should compare to "myAbsNdx"
+        rts
+
+        ; --------------------------------
+        ; FOR..FOR..NEXT..NEXT
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR myAbsNdx, 3, TO, 3000
+        .fill 8
+        FOR myZpgNdx, 4, TO, 4000
+        .fill 8
+        NEXT                    ; should compare to "myZpgNdx"
+        NEXT                    ; should compare to "myAbsNdx"
+        rts
+
+        ; --------------------------------
+        ; FOR_X..ACCUM, UP_TO..NEXT_X
+        ; --------------------------------
+
+        ; exhaustive test of all possibilities
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..ACCUM, DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X ACCUM, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..X_REG, UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..X_REG, DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X X_REG, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..Y_REG, UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..Y_REG, DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X Y_REG, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(number), UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(num), DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X 10, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..#(num), UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..#(num), DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X #10, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(zpg), UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(zpg), DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myZpgNdx, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(abs), UP_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, UP_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_X..(abs), DOWN_TO..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, 127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, #127
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, 0
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, ZERO
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, POS_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, -1
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, myAbsNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, #myZpgNdx
+        .fill 4
+        NEXT_X
+
+        .org    $4000
+
+        FOR_X myAbsNdx, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_Y..NEXT_Y
+        ; --------------------------------
+
+        ; partial test exercising multiple paths in each test, relying
+        ; on code duplication from "FOR_X..NEXT_X" to cover missing parts
+
+        .org    $4000
+
+        FOR_Y ACCUM, UP_TO, 127
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y ACCUM, UP_TO, #127
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y X_REG, DOWN_TO, 0
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y X_REG, DOWN_TO, ZERO
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y Y_REG, UP_TO, POS_NRs
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y Y_REG, UP_TO, -1
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y 10, DOWN_TO, NEG_NRs
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y #10, DOWN_TO, myZpgNdx
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y myZpgNdx, UP_TO, myAbsNdx
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y #myZpgNdx, UP_TO, #myZpgNdx
+        .fill 4
+        NEXT_Y
+
+        .org    $4000
+
+        FOR_Y myAbsNdx, DOWN_TO, #myAbsNdx
+        .fill 4
+        NEXT_Y
+
+        ; --------------------------------
+        ; FOR_X..FOR_Y..NEXT_Y..NEXT_X
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_X #0, UP_TO, #192
+        .fill 4
+        FOR_Y #$FF, DOWN_TO, ZERO
+        .fill 4
+        NEXT_Y
+        NEXT_X
+
+        ; --------------------------------
+        ; FOR_Y..FOR_X..NEXT_X..NEXT_Y
+        ; --------------------------------
+
+        .org    $4000
+
+        FOR_Y myZpgNdx, UP_TO, 128
+        .fill 4
+        FOR_X myAbsNdx, DOWN_TO, NEG_NRS
+        .fill 4
+        NEXT_X
+        NEXT_Y
+
+; -------------------------------
+
+        .end
+

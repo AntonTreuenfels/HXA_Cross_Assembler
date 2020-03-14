@@ -1,0 +1,210 @@
+; Hobby Cross-Assembler Demo 005
+; String Macros\String Macros
+; ok: building on the STRING pseudo op
+
+; by Anton Treuenfels
+
+; first created: 03/19/07
+; last revised:  02/21/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .if ver() < $0163
+        .fatal  "HXA version 0.163 or higher required"
+        .endif
+
+; -------------------------------
+; conventional macro definitions
+; -------------------------------
+
+; a null-terminated string
+; - a C-style string
+
+    .macro  STRZ, ?text
+    .str    ?text
+    .byte   $00
+    .endm
+
+; test it
+
+    STRZ    "Hello, World!"
+
+    STRZ    "abcdefgh"
+
+; a string with preceeding length byte
+; - a Pascal-style string
+
+        .macro  PSTR, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; test it
+
+    PSTR    "Hello, World!"
+
+    PSTR    "abcdefgh"
+
+; un-define them for the next demos
+
+    .undef  STRZ
+    .undef  PSTR
+
+; -------------------------------
+; macros with variable label arguments
+; - defined to accept any legal string expression
+; -------------------------------
+
+hello$  = "Hello, "
+
+; -------------------------------
+
+; a null-terminated string
+; - a C-style string
+
+    .macro  STRZ, ]text$
+    .str    ]text$
+    .byte   $00
+    .endm
+
+; test it
+
+    STRZ    "Hello, World!"
+
+    STRZ    hello$ "Big World!"
+
+; -------------------------------
+
+; a null-terminated string
+; - a C-style string
+; - an alternate method
+
+    .undef  STRZ
+
+    .macro  STRZ, ]text$
+    .str    ]text$ "\$00"
+    .endm
+
+; test it
+
+    STRZ    "Hello, World!"
+
+    STRZ    hello$ "Big World!"
+
+; note that the terminal character(s) can be anything useful
+; - newline, newline+carriage return, etc.
+; - although the name of the macro might be different :)
+
+; -------------------------------
+
+; a string with preceeding length byte (or word or long...)
+; - a Pascal-style string
+
+    .macro  PSTR, ]text$
+    .byte   :+ - (* + 1)
+    .str    ]text$
+ +  .endm
+
+; test it
+
+    PSTR    "Hello, World!"
+
+    PSTR    hello$ "Big World!"
+
+; -------------------------------
+
+; a string with preceeding length byte (or word or long...)
+; - a Pascal-style string
+; - an alternate method
+
+    .undef  PSTR
+
+    .macro  PSTR, ]text$
+    .byte   len(]text$)
+    .string ]text$
+    .endm
+
+; test it
+
+    PSTR    "Hello, World!"
+
+    PSTR    hello$ "Big World!"
+
+; -------------------------------
+
+; a string whose last character has the high bit set
+; - DCS = Dextral Character Set
+
+    .macro  DCS, ]text$
+    .str    mid$(]text$,1,len(]text$)-1)
+    .byte   ord(]text$,-1) | $80
+    .endm
+
+; test it
+
+    DCS     "Hello, World!"
+
+    DCS     hello$ "Big World!"
+
+; -------------------------------
+
+; a string whose every character has the high bit set
+
+    .macro  SETHI, ]text$
+]ndx    = 1
+    .repeat len(]text$)
+    .byte  ord(]text$,]ndx) | $80
+]ndx    = ]ndx+1
+    .endr
+    .endm
+
+; test it
+
+    SETHI   "Hello, World!"
+
+    SETHI   hello$ "Big World!"
+
+; a string whose every character has the high bit set
+; - builds new string first to minimize code stores
+; - an alternate method
+
+    .undef SETHI
+
+    .macro  SETHI, ]text$
+]ndx    = 1
+]temp$  = ""
+    .repeat len(]text$)
+]temp$  =   ]temp$ chr$(ord(]text$,]ndx)|$80)
+]ndx    = ]ndx+1
+    .endr
+    .str    ]temp$
+    .endm
+
+; test it
+
+    SETHI   "Hello, World!"
+
+    SETHI   hello$ "Big World!"
+
+; a string whose every character has the high bit set
+; - an alternate method (most efficient)
+
+    .xlate  "\\0x20-\0x7f=\0xa0-\0xff"
+
+    .str    "Hello, World!"
+
+    .str    hello$ "Big World!"
+
+; -------------------------------
+
+        .end

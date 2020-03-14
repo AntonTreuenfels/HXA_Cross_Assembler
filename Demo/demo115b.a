@@ -1,0 +1,842 @@
+; Hobby Cross-Assembler Demo 115b
+; 6502\Structured Programming Macros
+; GWilson's Structured Programming Macros (nested macros; minimal comments)
+
+; by Anton Treuenfels
+
+; first created: 04/13/13
+; last revision: 08/05/13
+
+; - reference: http://wilsonminesco.com/StructureMacros/index.html
+
+; - fully commented, non-nested versions of these macros can be
+; found in "demo115.a" (greatly expanded versions)
+
+; -------------------------------
+
+        .readonce           ; prevent multiple inclusion
+
+        .if !label(__HXA65__) || ver() < $0200
+        .fatal  "HXA65 version 0.200 or higher required"
+        .endif
+
+        .if !cpu$()
+        .cpu    6502        ; minimum required cpu
+        .endif
+
+; -------------------------------
+; "housekeeping"
+; -------------------------------
+
+]DYNCNT     = 999       ; incremented for each new label
+]DYNLBL$    = ""        ; multipurpose, often the current dynamic label name
+	
+; -------------------------------
+; common code sequences
+; -------------------------------
+
+; make new label, write a conditional test with it, push it on stack
+
+            .macro  make.test.push, ?ins
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks "?ins " ]DYNLBL$  ; use it to create test
+            .pushs ]DYNLBL$             ; push it on stack
+            .endm
+
+; make a new label, write it to mark this spot, push it on stack
+
+            .macro  make.mark.push
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .putbacks ]DYNLBL$          ; use it as branch target
+            .pushs ]DYNLBL$             ; push it on stack
+            .endm
+
+; pop the top label from stack and write a branch to it
+
+            .macro  pop.jump
+            .if cpu$() == "6502"
+            .putbacks "JMP " pop$() ; 6502 cpu uses JMP instruction...
+            .else
+            .putbacks "BRA " pop$() ; ...all others use BRA instruction
+            .endif
+            .endm
+
+; test any bit of memory byte
+; - ]DYNLBL$ already set by caller
+
+            .macro test.anybit, ?addr, ?bit_number
+            .if ?bit_number == 7
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+            .if ]DYNLBL$ == "IS_HIGH"
+            make.test.push BPL
+            .else
+            make.test.push BMI                
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr                   ; set overflow flag to bit 6 value
+            .if ]DYNLBL$ == "IS_HIGH"
+            make.test.push BVC
+            .else
+            make.test.push BVS
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number)     ; set test bit (5 -> 0)
+            BIT ?addr                   ; set zero flag to A AND ?addr
+            .if ]DYNLBL$ == "IS_HIGH"
+            make.test.push BEQ
+            .else
+            make.test.push BNE               
+            .endif
+
+            .endif
+            .endm
+
+;----------------
+
+; write ending test for NEXT_X or NEXT_Y
+
+            .macro next_xy, ?ins
+            .putbacks pop$()            ; "DExy" or "INxy"
+
+]DYNLBL$    = pop$()                	; recover ending condition
+
+            .if ]DYNLBL$ ~ /^(0|ZERO)$/
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            .elseif ]DYNLBL$ == "POS_NRS"
+            .putbacks "BMI " pop$()     ; write conditional branch-to-FOR_X
+
+            .elseif ]DYNLBL$ ~ /^(-1|NEG_NRS)$/
+            .putbacks "BPL " pop$()     ; write conditional branch-to-FOR_X
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            .putbacks "?ins #" ]DYNLBL$
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            .else
+            .putbacks "?ins " ]DYNLBL$   ; compare
+            .putbacks "BNE " pop$()     ; write conditional branch-to-FOR_X
+
+            .endif
+            .endm
+ ;----------------
+
+; test for ZERO flag set (the first IF_xx macro)
+
+IF_EQ:      MACRO
+            make.test.push BNE
+            ENDM
+ ;----------------
+
+; terminate IF_xx structure
+
+END_IF:     MACRO
+            .putbacks pop$()    ; pop and write target label
+            ENDM
+ ;----------------
+
+; start ELSE (false) branch in IF_xx structure
+
+ELSE_:      MACRO                       ; don't forget the "_" in "ELSE_" !
+]DYNCNT     = ]DYNCNT+1                 ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)        ; make it into a string
+            .if cpu$() == "6502"        ; write branch-around-FALSE
+            .putbacks "JMP " ]DYNLBL$   ; 6502 cpu uses JMP instruction...
+            .else                       ; <- "ELSE_" avoids this conflict !
+            .putbacks "BRA " ]DYNLBL$   ; ...all others use BRA instruction
+            .endif
+            .putbacks pop$()            ; write branch-around-TRUE target
+            .pushs ]DYNLBL$             ; push branch-around-FALSE label
+            ENDM
+ ;----------------
+
+; all the remaining original IF_xx macros:
+
+; test for ZERO flag set
+
+IF_ZERO:    MACRO                       ; same as IF_EQ
+            make.test.push BNE
+            ENDM
+ ;----------------
+
+; test for ZERO flag NOT set
+
+IF_NEQ:     MACRO
+            make.test.push BEQ
+            ENDM
+ ;----------------
+
+IF_NOT_ZERO: MACRO                      ; same as IF_NEQ
+            make.test.push BEQ
+             ENDM
+ ;----------------
+
+; test for SIGN flag set
+
+IF_MINUS:   MACRO
+            make.test.push BPL
+            ENDM
+ ;----------------
+
+IF_NEG:     MACRO                       ; same as IF_MINUS
+            make.test.push BPL
+            ENDM
+ ;----------------
+
+; test for SIGN flag NOT set
+
+IF_PLUS     MACRO
+            make.test.push BMI
+            ENDM
+ ;----------------
+
+; test for CARRY flag set
+
+IF_C_SET:   MACRO
+            make.test.push BCC
+            ENDM
+ ;----------------
+
+IF_GE:      MACRO                       ; same as IF_C_SET
+            make.test.push BCC
+            ENDM
+ ;----------------
+
+; test for CARRY flag NOT set
+
+IF_C_CLR:   MACRO
+            make.test.push BCS
+            ENDM
+ ;----------------
+
+IF_LT:      MACRO                       ; same as IF_C_CLEAR
+            make.test.push BCS
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag set
+
+IF_V_SET:   MACRO
+            make.test.push BVC
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag NOT set
+
+IF_V_CLR:   MACRO
+            make.test.push BVS
+            ENDM
+
+; -------------------------------
+
+; start a loop structure
+
+BEGIN:      MACRO
+            make.mark.push
+            ENDM   
+ ;----------------
+
+; end a loop structure with an unconditional branch to loop start
+
+AGAIN:      MACRO
+            pop.jump
+            ENDM
+
+; -------------------------------
+
+; loop until ZERO flag set
+
+UNTIL_EQ:   MACRO
+            .putbacks "BNE " pop$()
+            ENDM
+ ;----------------
+
+; all the remaining original UNTIL_xx macros:
+
+UNTIL_ZERO: MACRO                   ; same as UNTIL_EQ
+            .putbacks "BNE " pop$()
+            ENDM
+ ;----------------
+
+; loop until ZERO flag NOT set
+
+UNTIL_NEQ:  MACRO
+            .putbacks "BEQ " pop$()
+            ENDM
+ ;----------------
+
+UNTIL_NOT_ZERO: MACRO               ; same as UNTIL_EQ
+            .putbacks "BEQ " pop$()
+            ENDM
+ ;----------------
+
+; loop until SIGN flag set
+
+UNTIL_MINUS:  MACRO
+            .putbacks "BPL " pop$()
+            ENDM
+ ;----------------
+
+UNTIL_NEG:  MACRO                   ; same as UNTIL_MINUS
+            .putbacks "BPL " pop$()
+            ENDM
+;----------------
+
+; loop until SIGN flag NOT set
+
+UNTIL_PLUS: MACRO
+            .putbacks "BMI " pop$()
+            ENDM
+ ;----------------
+
+; loop until CARRY flag set
+
+UNTIL_C_SET:  MACRO
+            .putbacks "BCC " pop$()
+            ENDM
+ ;----------------
+
+UNTIL_GE:   MACRO                   ; same as UNTIL_C_SET
+            .putbacks "BCC " pop$()
+            ENDM
+ ;----------------
+
+; loop until CARRY flag NOT set
+
+UNTIL_C_CLR:  MACRO
+            .putbacks "BCS " pop$()
+            ENDM
+ ;----------------
+
+UNTIL_LT:   MACRO                   ; same as UNTIL_C_CLR
+            .putbacks "BCS " pop$()
+            ENDM
+ ;----------------
+
+; loop until OVERFLOW flag set
+
+UNTIL_V_SET:  MACRO
+            .putbacks "BVC " pop$()
+            ENDM
+ ;----------------
+
+; loop until OVERFLOW flag NOT set
+
+UNTIL_V_CLR:  MACRO
+            .putbacks "BVS " pop$()
+            ENDM
+
+; -------------------------------
+
+; test for ZERO flag set (the first WHILE_xx macro)
+
+WHILE_EQ:   MACRO
+            make.test.push BNE
+            ENDM
+; -------------------------------
+
+; end a loop that is exited by a WHILE_xx structure
+
+REPEAT_:    MACRO                   ; don't forget the "_" in "REPEAT_" !
+]DYNLBL$    = pop$()                ; pop branch-around-TRUE label
+            pop.jump
+            .putbacks ]DYNLBL$      ; write target of branch-around-TRUE
+            ENDM
+ ;----------------
+
+; all the remaining original WHILE_xx macros:
+
+; test for ZERO flag set
+
+WHILE_ZERO: MACRO                       ; same as WHILE_EQ
+            make.test.push BNE
+            ENDM
+ ;----------------
+
+; test for ZERO flag NOT set
+
+WHILE_NEQ:  MACRO
+            make.test.push BEQ
+            ENDM
+ ;----------------
+
+WHILE_NOT_ZERO: MACRO                   ; same as WHILE_NEQ
+            make.test.push BEQ
+             ENDM
+ ;----------------
+
+; test for SIGN flag set
+
+WHILE_MINUS:   MACRO
+            make.test.push BPL
+            ENDM
+ ;----------------
+
+WHILE_NEG:  MACRO                       ; same as WHILE_MINUS
+            make.test.push BPL
+            ENDM
+ ;----------------
+
+; test for SIGN flag NOT set
+
+WHILE_PLUS  MACRO
+            make.test.push BMI
+            ENDM
+ ;----------------
+
+; test for CARRY flag set
+
+WHILE_C_SET:   MACRO
+            make.test.push BCC
+            ENDM
+ ;----------------
+
+WHILE_GE:   MACRO                       ; same as WHILE_C_SET
+            make.test.push BCC
+            ENDM
+ ;----------------
+
+; test for CARRY flag NOT set
+
+WHILE_C_CLR:   MACRO
+            make.test.push BCS
+            ENDM
+ ;----------------
+
+WHILE_LT:   MACRO                       ; same as WHILE_C_CLEAR
+            make.test.push BCS
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag set
+
+WHILE_V_SET:   MACRO
+            make.test.push BVC
+            ENDM
+ ;----------------
+
+; test for OVERFLOW flag NOT set
+
+WHILE_V_CLR:   MACRO
+            make.test.push BVS
+            ENDM
+
+; -------------------------------
+
+; begin a CASE structure
+
+CASE:	    MACRO ?register
+]DYNLBL$    = toupper$("?register") ; which comparison instruction to use ?
+            .if ]DYNLBL$ == "ACCUM"
+            .pushs "CMP"
+            .elseif ]DYNLBL$ == "X_REG"
+            .pushs "CPX"
+            .elseif ]DYNLBL$ == "Y_REG"
+            .pushs "CPY"
+            .else
+            .fatal "CASE: ?register"
+            .endif
+]DYNCNT     = ]DYNCNT+1             ; next label number
+]DYNLBL$    = "__" str$(]DYNCNT)   	; make it into a string
+            .pushs ]DYNLBL$         ; push it on stack
+            ENDM
+ ;----------------
+
+; begin a CASE branch
+
+CASE_OF:     MACRO ?value
+]DYNLBL$    = "?value"                    ; "stringify" the argument
+            .if ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            .putbacks peek$(2) " #?value"
+            .else
+            .putbacks peek$(2) " ?value"
+            .endif
+            make.test.push BNE
+            ENDM
+ ;----------------
+
+; end a CASE branch
+
+END_OF:	    MACRO
+            .putbacks "JMP " peek$(2)	; write branch-to-END_CASE
+            .putbacks pop$()            ; write branch-to-END-OF target label
+            ENDM
+
+ ;----------------
+
+; end a CASE structure
+
+END_CASE:   MACRO
+            .putbacks pop$()            ; write branch-to-END_CASE target
+]DYNLBL$    = pop$()                    ; discard compare instruction
+            ENDM
+; -------------------------------
+
+; begin a FOR..NEXT structure
+
+FOR:        MACRO ?varname, ?start, ?dummy, ?end
+            LDA #<(?start)
+            STA ?varname
+            LDA #>(?start)
+            STA 1+?varname
+
+            make.mark.push          ; make, mark and save this location
+            .pushs "(?end)"         ; save ending value
+            .pushs "?varname"       ; save index variable name
+            ENDM
+ ;----------------
+
+NEXT:       MACRO ?varname=@
+]DYNLBL$    = pop$()                ; pop index variable name
+            .if "?varname" != "@"   ; if variable name supplied...
+]DYNLBL$    = "?varname"            ; ...use it instead
+            .endif
+
+            .putbacks "INC " ]DYNLBL$
+            BNE :+
+            .putbacks "INC 1+" ]DYNLBL$
+ +
+            .putbacks "LDA " ]DYNLBL$
+            .putbacks "CMP #<" peek$(1)
+            .putbacks "BNE " peek$(2)
+
+            .putbacks "LDA 1+" ]DYNLBL$
+            .putbacks "CMP #>" pop$()
+            .putbacks "BNE " pop$()
+            ENDM
+ ;----------------
+
+; test most significant bit of memory byte
+
+IF_FLAG_VAR:  MACRO ?addr, ?condition
+]DYNLBL$     = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_SET" && ]DYNLBL$ != "IS_CLR"
+            .fatal "IF_FLAG_VAR: ?condition"
+            .endif
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_SET"
+            make.test.push BPL
+            .else
+            make.test.push BMI
+            .endif
+
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+
+IF_BIT:     MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "IF_BIT: ?condition"
+            .endif
+            test.anybit ?addr, ?bit_number
+            ENDM
+ ;----------------
+
+IF_MEM_BYTE_NEG:  MACRO ?addr
+            BIT ?addr                   ; set sign flag to bit 7 value
+            make.test.push BPL
+            ENDM
+ ;----------------
+
+IF_MEM_BYTE_POS:  MACRO ?addr
+            BIT ?addr                   ; set sign flag to bit 7 value
+            make.test.push BMI
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+; - exactly the same as IF_BIT, except for error message
+
+WHILE_BIT:  MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "WHILE_BIT: ?condition"
+            .endif
+            test.anybit ?addr, ?bit_number
+            ENDM
+ ;----------------
+
+; test any bit of memory byte
+
+UNTIL_BIT:  MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "UNTIL_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr                   ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BPL " pop$()     ; write conditional backward branch
+            .else
+            .putbacks "BMI " pop$()     ; write conditional backward branch
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr           ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BVC " pop$()     ; write conditional backward branch
+            .else
+            .putbacks "BVS " pop$()     ; write conditional backward branch
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number)     ; set test bit (5 -> 0)
+            BIT ?addr                   ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            .putbacks "BEQ " pop$()     ; write conditional branch-to-BEGIN
+            .else
+            .putbacks "BNE " pop$()     ; write conditional branch-to-BEGIN
+            .endif
+
+            .endif
+            ENDM
+ ;----------------
+
+; begin FOR_X structure
+
+FOR_X:      MACRO ?beg, ?dir, ?end
+
+]DYNLBL$    = toupper$("?beg")
+
+            .if ]DYNLBL$ == "ACCUM"
+            TAX
+
+            .elseif ]DYNLBL$ == "Y_REG"
+            .if cpu$() == "6502"
+            TYA                     ; trashes A...       
+            TAX
+            .else
+            PHY
+            PLX
+            .endif
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            LDX   #?beg
+
+            ; ..take anything but X_REG "as-is"
+
+            .elseif ]DYNLBL$ != "X_REG"
+            LDX   ?beg
+            .endif
+
+            make.mark.push          ; mark this spot and save it
+
+            .pushs toupper$("?end") ; save ending value
+
+]DYNLBL$    = toupper$("?dir")
+
+            .if ]DYNLBL$ == "DOWN_TO"
+            .pushs "DEX"            ; save actual instruction
+            .elseif ]DYNLBL$ == "UP_TO"
+            .pushs "INX"            ; save actual instruction
+            .else
+            .fatal "FOR_X: ?dir"
+            .endif
+            ENDM
+
+ ;----------------
+
+; end a FOR_X loop
+
+NEXT_X:     MACRO
+            next_xy CPX
+            ENDM
+ ;----------------
+
+FOR_Y:      MACRO ?beg, ?dir, ?end
+
+]DYNLBL$    = toupper$("?beg")
+
+            .if ]DYNLBL$ == "ACCUM"
+            TAY
+
+            .elseif ]DYNLBL$ == "X_REG"
+            .if cpu$() == "6502"
+            TXA                     ; trashes A...       
+            TAY
+            .else
+            PHX
+            PLY
+            .endif
+
+            ; decimal, hexadecimal or binary constant under 256 ?
+
+            .elseif ]DYNLBL$ ~ /^[0-9\$%]/ && val(]DYNLBL$) < 256
+            LDY   #?beg
+
+            ; ..take anything but Y_REG "as-is"
+
+            .elseif ]DYNLBL$ != "Y_REG"
+            LDY   ?beg
+            .endif
+
+            make.mark.push          ; mark and save this spot
+
+            .pushs toupper$("?end") ; save ending value
+
+]DYNLBL$    = toupper$("?dir")
+
+            .if ]DYNLBL$ == "DOWN_TO"
+            .pushs "DEY"            ; save actual instruction
+            .elseif ]DYNLBL$ == "UP_TO"
+            .pushs "INY"            ; save actual instruction
+            .else
+            .fatal "FOR_Y: ?dir"
+            .endif
+            ENDM
+ ;----------------
+
+; end a FOR_Y loop
+
+NEXT_Y:     MACRO
+            next_xy CPY
+            ENDM
+ ;----------------
+
+; return if Z-flag set (if zero)
+
+RTS_IF_EQ:  MACRO
+            BNE :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if Z-flag clear (if not zero)
+
+RTS_IF_NE:  MACRO
+            BEQ :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if N-flag set (if negative)
+
+RTS_IF_MINUS:  MACRO
+            BPL :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return if N-flag clear (if postiive)
+
+RTS_IF_PLUS:  MACRO
+            BMI :+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+RTS_IF_FLAG_VAR:  MACRO ?addr, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_SET" && ]DYNLBL$ != "IS_CLR"
+            .fatal "RTS_IF_FLAG_VAR: ?condition"
+            .endif
+
+            BIT ?addr           ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_SET"
+            BPL :+                      ; opposite sense test
+            .else
+            BMI :+                      ; opposite sense test
+            .endif
+            RTS
+ +
+            ENDM
+ ;----------------
+
+; return on condition of any bit of memory byte
+
+RTS_IF_BIT: MACRO ?addr, ?bit_number, ?condition
+]DYNLBL$    = toupper$("?condition")
+            .if ]DYNLBL$ != "IS_HIGH" && ]DYNLBL$ != "IS_LOW"
+            .fatal "RTS_IF_BIT: ?condition"
+            .endif
+
+            .if ?bit_number == 7
+
+            BIT ?addr               ; set sign flag to bit 7 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BPL :+
+            .else
+            BMI :+
+            .endif
+
+            .elseif ?bit_number == 6
+
+            BIT ?addr               ; set overflow flag to bit 6 value
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BVC :+
+            .else
+            BVS :+
+            .endif
+
+            .else
+
+            LDA #1 << (?bit_number) ; set test bit (5 -> 0)
+            BIT ?addr               ; set zero flag to A AND ?addr
+
+            .if ]DYNLBL$ == "IS_HIGH"
+            BEQ :+
+            .else
+            BNE :+
+            .endif
+
+            .endif                   ; end of possible bits to test
+
+            RTS
+ +
+            ENDM
+ ;----------------
+
+RTS_IF_MEM_LOC: MACRO ?addr, ?condition
+]DYNLBL$    = toupper$("?condition")
+
+            .if ]DYNLBL$ == "IS_POS"
+            BIT ?addr
+            BMI :+
+
+            .elseif ]DYNLBL$ == "IS_NEG"
+            BIT ?addr
+            BPL :+
+
+            .elseif ]DYNLBL$ == "IS_0"
+            LDY ?addr
+            BNE :+
+
+            .elseif ]DYNLBL$ == "IS_NON_0"
+            LDY ?addr
+            BEQ :+
+
+            .else
+            .fatal "RTS_IF_MEM_LOC: ?condition"
+            .endif
+
+            RTS
+ +
+            ENDM
+ ;----------------

@@ -1,0 +1,486 @@
+; Hobby Cross-Assembler Processor Instruction Set
+; Macro Implementation
+; Processor: 8080/8085
+
+; by Anton Treuenfels
+
+; first created: 03/29/05
+; last revision: 06/03/07
+
+;-----------------------------------------------
+
+; inspired by: "8080.INC" by Stephen R Davis
+; - a source file which defines macros to implement 8080 instructions
+; for MASM (Microsoft Assembler)
+
+;-----------------------------------------------
+
+        .if ver() < $0150
+        .fatal  "HXA version 0.150 or higher required"
+        .endif
+
+;-----------------------------------------------
+
+; variable labels are used to:
+; - reduce macro substitution
+; - increase expression cache efficiency
+
+;-----------------------------------------------
+
+        .cpu    "T_16_L"    ; 16-bit little-endian
+
+; reserved label names - macro expansion can change their values!!
+
+]num    .equ 0              ; interrupt (?) number
+]opc    .equ 0              ; opcode value
+
+]reg$   .equ ""             ; register name
+]reg1$  .equ ""             ; register name
+]reg2$  .equ ""             ; register name
+
+; 8080 registers
+
+A       .equ    7
+B       .equ    0
+C       .equ    1
+D       .equ    2
+E       .equ    3
+H       .equ    4
+L       .equ    5
+M       .equ    6           ; HL register pair
+
+SP      .equ    6           ; stack pointer
+PSW     .equ    6           ; processor status word
+
+;-----------------------------------------------
+; Error Macros
+;-----------------------------------------------
+
+        .macro  err_badreg
+        .error "Bad register name"
+        .endm
+
+        .macro  err_badrst
+        .error  "Bad RST value"
+        .endm
+
+;-----------------------------------------------
+; Helper Macros
+;-----------------------------------------------
+
+        .macro  chk_sto_A, ]opc, ]reg$
+        .if ]reg$ ~ /^[ABCDEHLM]$/
+        .byte   ]opc+val(]reg$)
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  chk_sto_B, ]opc, ]reg$
+        .if ]reg$ ~ /^[BDH]|SP$/
+        .byte   ]opc+val(]reg$)*8
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  chk_sto_C, ]opc, ]reg$
+        .if ]reg$ ~ /^[ABCDEHLM]$/
+        .byte   ]opc+val(]reg$)*8
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  chk_sto_D, ]opc, ]reg$
+        .if ]reg$ ~ /^[BD]$/
+        .byte   ]opc+val(]reg$)*8
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  chk_sto_E, ]opc, ]reg$
+        .if ]reg$ ~ /^[BDH]|PSW$/
+        .byte   ]opc+val(]reg$)*8
+        .else
+        err_badreg
+        .endif
+        .endm
+
+;-----------------------------------------------
+; 8080 Instruction Set in Alphabetical Order
+;-----------------------------------------------
+
+        .macro  ACI, ?imm
+        .byte   0CEH, ?imm
+        .endm
+
+        .macro  ADC, ?reg
+        chk_sto_A 088H, "?reg"
+        .endm
+
+        .macro  ADD, ?reg
+        chk_sto_A 080H, "?reg"
+        .endm
+
+        .macro  ADI, ?imm
+        .byte   0C6H, ?imm
+        .endm
+
+        .macro  ANA, ?reg
+        chk_sto_A 0A0H, "?reg"
+        .endm
+
+        .macro  ANI, ?imm
+        .byte   0E6H, ?imm
+        .endm
+
+        .macro  CALL, ?addr
+        .byte   0CDH
+        .uword  ?addr
+        .endm
+
+        .macro  CC, ?addr
+        .byte   0DCH
+        .uword  ?addr
+        .endm
+
+        .macro  CM, ?addr
+        .byte   0FCH
+        .uword  ?addr
+        .endm
+
+        .macro  CMA
+        .byte   02FH
+        .endm
+
+        .macro  CMC
+        .byte   03FH
+        .endm
+
+        .macro  CMP, ?reg
+        chk_sto_A 0B8H, "?reg"
+        .endm
+
+        .macro  CNC, ?addr
+        .byte   0D4H
+        .uword  ?addr
+        .endm
+
+        .macro  CNZ, ?addr
+        .byte   0C4H
+        .uword  ?addr
+        .endm
+
+        .macro  CP, ?addr
+        .byte   0F4H
+        .uword  ?addr
+        .endm
+
+        .macro  CPE, ?addr
+        .byte   0ECH
+        .uword  ?addr
+        .endm
+
+        .macro  CPI, ?imm
+        .byte   0FEH, ?imm
+        .endm
+
+        .macro  CPO, ?addr
+        .byte   0E4H
+        .uword  ?addr
+        .endm
+
+        .macro  CZ, ?addr
+        .byte   0CCH
+        .uword  ?addr
+        .endm
+
+        .macro  DAA
+        .byte   027H
+        .endm
+
+        .macro  DAD, ?reg
+        chk_sto_B 009H, "?reg"
+        .endm
+
+        .macro  DCR, ?reg
+        chk_sto_C 005H, "?reg"
+        .endm
+
+        .macro  DCX, ?reg
+        chk_sto_B 00BH, "?reg"
+        .endm
+
+        .macro  DI
+        .byte   0F3H
+        .endm
+
+        .macro  EI
+        .byte   0FBH
+        .endm
+
+        .macro  HLT
+        .byte   076H
+        .endm
+
+        .macro  IN, ?port
+        .byte   0DBH
+        .ubyte  ?port
+        .endm
+
+        .macro  INR, ?reg
+        chk_sto_C 004H, "?reg"
+        .endm
+
+        .macro  INX, ?reg
+        chk_sto_B 003H, "?reg"
+        .endm
+
+        .macro  JC, ?addr
+        .byte   0DAH
+        .uword  ?addr
+        .endm
+
+        .macro  JM, ?addr
+        .byte   0FAH
+        .uword  ?addr
+        .endm
+
+        .macro  JMP, ?addr
+        .byte   0C3H
+        .uword  ?addr
+        .endm
+
+        .macro  JNC, ?addr
+        .byte   0D2H
+        .uword  ?addr
+        .endm
+
+        .macro  JNZ, ?addr
+        .byte   0C2H
+        .uword  ?addr
+        .endm
+
+        .macro  JP, ?addr
+        .byte   0F2H
+        .uword  ?addr
+        .endm
+
+        .macro  JPE, ?addr
+        .byte   0EAH
+        .uword  ?addr
+        .endm
+
+        .macro  JPO, ?addr
+        .byte   0E2H
+        .uword  ?addr
+        .endm
+
+        .macro  JZ, ?addr
+        .byte   0CAH
+        .uword  ?addr
+        .endm
+
+        .macro  LDA, ?addr
+        .byte   03AH
+        .uword  ?addr
+        .endm
+
+        .macro  LDAX, ?reg
+        chk_sto_D 00AH, "?reg"
+        .endm
+        
+        .macro  LHLD, ?addr
+        .byte   02AH
+        .uword  ?addr
+        .endm
+
+        .macro  LXI, ?reg, ?imm
+]reg$   .equ "?reg"
+        .if ]reg$ ~ /^[BDH]|SP$/
+        .byte  001H+val(]reg$)*8
+        .word  ?imm
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  MOV, ?reg1, ?reg2
+]reg1$  .equ "?reg1"
+]reg2$  .equ "?reg2"
+        .if ]reg1$ ]reg2$ ~ /^[ABCDEHL][ABCDEHLM]$|^M[ABCDEHL]$/
+        .byte 040H+val(]reg1$)*8+val(]reg2$)
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  MVI, ?reg, ?imm
+]reg$   .equ "?reg"
+        .if ]reg$ ~ /^[ABCDEHLM]$/
+        .byte   006H+val(]reg$)*8, ?imm
+        .else
+        err_badreg
+        .endif
+        .endm
+
+        .macro  NOP
+        .byte   000H
+        .endm
+
+        .macro  ORA, ?reg
+        chk_sto_A 0B0H, "?reg"
+        .endm
+
+        .macro  ORI, ?imm
+        .byte   0F6H, ?imm
+        .endm
+
+        .macro  OUT, ?port
+        .byte   0D3H
+        .ubyte  ?port
+        .endm
+
+        .macro  PCHL
+        .byte   0E9H
+        .endm
+
+        .macro  POP, ?reg
+        chk_sto_E 0C1H, "?reg"
+        .endm
+
+        .macro  PUSH, ?reg
+        chk_sto_E 0C5H, "?reg"
+        .endm
+
+        .macro  RAL
+        .byte   017H
+        .endm
+
+        .macro  RAR
+        .byte   01FH
+        .endm
+
+        .macro  RC
+        .byte   0D8H
+        .endm
+
+        .macro  RET
+        .byte   0C9H
+        .endm
+
+        .macro  RLC
+        .byte   007H
+        .endm
+
+        .macro  RM
+        .byte   0F8H
+        .endm
+
+        .macro  RNC
+        .byte   0D0H
+        .endm
+
+        .macro  RNZ
+        .byte   0C0H
+        .endm
+
+        .macro  RP
+        .byte   0F0H
+        .endm
+
+        .macro  RPE
+        .byte   0E8H
+        .endm
+
+        .macro  RPO
+        .byte   0E0H
+        .endm
+
+        .macro  RRC
+        .byte   00FH
+        .endm
+
+        .macro  RST, ]num
+        .if (]num & 038H) == ]num
+        .byte   0C7H+]num
+        .elseif (]num & 007H) == ]num
+        .byte   0C7H+(]num << 3)
+        .else
+        err_badrst
+        .endif
+        .endm
+
+        .macro  RZ
+        .byte   0C8H
+        .endm
+
+        .macro  SBB, ?reg
+        chk_sto_A 098H, "?reg"
+        .endm
+
+        .macro  SBI, ?imm
+        .byte   0DEH, ?imm
+        .endm
+
+        .macro  SHLD, ?addr
+        .byte   022H
+        .uword  ?addr
+        .endm
+
+        .macro  SPHL
+        .byte   0F9H
+        .endm
+
+        .macro  STA, ?addr
+        .byte   032H
+        .uword  ?addr
+        .endm
+
+        .macro  STAX, ?reg
+        chk_sto_D 002H, "?reg"
+        .endm
+
+        .macro  STC
+        .byte   037H
+        .endm
+
+        .macro  SUB, ?reg
+        chk_sto_A 090H, "?reg"
+        .endm
+
+        .macro  SUI, ?imm
+        .byte   0D6H, ?imm
+        .endm
+
+        .macro  XCHG
+        .byte   0EBH
+        .endm
+
+        .macro  XRA, ?reg
+        chk_sto_A 0A8H, "?reg"
+        .endm
+
+        .macro  XRI, ?imm
+        .byte   0EEH, ?imm
+        .endm
+
+        .macro  XTHL
+        .byte   0E3H
+        .endm
+
+;-----------------------------------------------
+; 8085 Additional Instructions in Alphabetical Order
+;-----------------------------------------------
+
+        .macro  RIM
+        .byte   020H
+        .endm
+
+        .macro  SIM
+        .byte   030H
+        .endm
+
+;-----------------------------------------------

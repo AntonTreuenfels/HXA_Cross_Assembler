@@ -1,0 +1,1004 @@
+; Hobby Cross-Assembler Demo 100c
+; 6502\Word Macros
+; fully-developed MOVE and general macros
+
+; by Anton Treuenfels
+
+; first created: 07/20/04
+; last revision: 02/25/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston stats
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; define the 16-bit macros:
+
+; MOVE - copy word from one location to another
+; ZERO - store $0000 to location
+; PUSH - push word onto stack
+; PULL - pull word from stack
+; INCW - add one to word
+; DECW - subtract one from word
+; ADDB - add byte to word (clear carry flag first)
+; ADCB - add byte to word (use current carry)
+; SUBB - subtract byte from word (set carry flag first)
+; SBCB - subtract byte from word (use current carry)
+; ADDW - add word to word (clear carry flag first)
+; ADCW - add word to word (use current carry)
+; SUBW - subtract word from word (set carry flag first)
+; SBCW - subtract word from word (use current carry)
+; CMPW - compare words
+
+; -------------------------------
+
+; note that while every macro defined here generates legal code,
+; some of the arithmetic expansions are of limited practical use.
+; However their inclusion is essentially "free" due to the way
+; the macros are constructed, so it doesn't hurt to have them
+
+; it desired, the macros defined here can be isolated in their
+; own file and then "INCLUDED" wherever desired
+
+; -------------------------------------------------
+; the "MOVE" macro is optimized for speed, not size
+; -------------------------------------------------
+
+; ------------------------
+; helper macros for "MOVE"
+; ------------------------
+
+; move from indirect source
+
+    .macro  MVINDS, ?src, ?dst
+    lda ?src,y
+    .if "?dst" == "_XY"         ; (zp),y -> _XY
+    tax
+    iny
+    lda ?src,y
+    tay
+    .elseif "?dst" ~ /^\(.+\)$/ ; (zp),y -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src,y
+    sta ?dst,y
+    .else                       ; (zp),y -> ab|zp
+    sta ?dst
+    iny
+    lda ?src,y
+    sta 1+?dst
+    .endif
+    .endm
+
+; move from immediate source
+
+    .macro  MVIMMS, ?src, ?dst
+    .if "?dst" == "_XY"         ; imm -> _XY
+    ldx ?src
+    ldy ?src >> 8
+    .else
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; imm -> (zp),y
+    sta ?dst,y
+    iny
+    lda ?src >> 8
+    sta ?dst,y
+    .else                       ; imm -> ab|zp
+    sta ?dst
+    lda ?src >> 8
+    sta 1+?dst
+    .endif
+    .endif
+    .endm
+
+; move from specified memory address source
+
+    .macro  MVMEMS, ?src, ?dst
+    .if "?dst" == "_XY"         ; ab|zp -> _XY
+    ldx ?src
+    ldy 1+?src
+    .else
+    lda ?src
+    .if "?dst" ~ /^\(.+\)$/     ; ab|zp -> (zp),y
+    sta ?dst,y
+    iny
+    lda 1+?src
+    sta ?dst,y
+    .else                       ; ab|zp -> ab|zp
+    sta ?dst
+    lda 1+?src
+    sta 1+?dst
+    .endif
+    .endif
+    .endm
+
+; ---------------
+; "MOVE"
+; ---------------
+
+; move word
+
+    .macro  MOVE, ?src, ?dst
+    .if "?src" == "_XY"
+    stx ?dst
+    sty 1+?dst
+    .elseif "?src" ~ /^\(.+\)$/
+    MVINDS ?src, ?dst
+    .elseif "?src" ~ /^#/
+    MVIMMS  ?src, ?dst
+    .else
+    MVMEMS  ?src, ?dst
+    .endif
+    .endm
+
+; ------------------------------------------------------
+; the remaining macros are optimized for size, not speed
+; ------------------------------------------------------
+
+;-------------------------------
+; hi/lo byte helper macros
+; ------------------------------
+
+; load low byte
+
+    .macro  LOADLO, ?src
+    .if "?src" == "_XY"         ; _XY
+    txa
+    .elseif "?src" ~ /^\(.+\)$/ ; (zp),y
+    lda ?src,y
+    .else                       ; ab|imm|zp
+    lda ?src
+    .endif
+    .endm
+
+; store low byte
+
+    .macro  STORLO, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    tax
+    .elseif "?dst" ~ /^\(.+\)$/ ; (zp),y
+    sta ?dst,y
+    .else                       ; ab|zp
+    sta ?dst
+    .endif
+    .endm
+
+; load hi byte
+
+    .macro  LOADHI, ?src
+    .if "?src" == "_XY"         ; _XY
+    tya
+    .elseif "?src" ~ /^\(.+\)$/ ; (zp),y
+    lda ?src,y
+    .elseif "?src" ~ /^#/       ; imm
+    lda ?src >> 8
+    .else                       ; ab|zp
+    lda 1+?src
+    .endif
+    .endm
+
+; store hi byte
+
+    .macro  STORHI, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    tay
+    .elseif "?dst" ~ /^\(.+\)$/ ; (zp),y
+    sta ?dst,y
+    .else                       ; ab|zp
+    sta 1+?dst
+    .endif
+    .endm
+
+; add low byte
+
+    .macro  ADDLO, ?src
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y
+    adc ?src,y
+    .else                       ; ab|imm|zp
+    adc ?src
+    .endif
+    .endm
+
+; subtract low byte
+
+    .macro  SUBLO, ?src
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y
+    sbc ?src,y
+    .else                       ; ab|imm|zp
+    sbc ?src
+    .endif
+    .endm
+
+; add high byte
+
+    .macro  ADDHI, ?src
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y
+    adc ?src,y
+    .elseif "?src" ~ /^#/       ; imm
+    adc ?src >> 8
+    .else                       ; ab|zp
+    adc 1+?src
+    .endif
+    .endm
+
+; subtract high byte
+
+    .macro  SUBHI, ?src
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y
+    sbc ?src,y
+    .elseif "?src" ~ /^#/       ; imm
+    sbc ?src >> 8
+    .else                       ; ab|zp
+    sbc 1+?src
+    .endif
+    .endm
+
+; compare low byte
+
+    .macro  CMPLO, ?src
+    .if "?src" ~ /^\(.+\)$/     ; (zp),y
+    cmp ?src,y
+    .else                       ; ab|imm|zp
+    cmp ?src
+    .endif
+    .endm
+
+; increment low byte
+
+    .macro  INCLO, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    inx
+    .else                       ; ab|zp
+    inc ?dst
+    .endif
+    .endm
+
+; decrement low byte
+
+    .macro  DECLO, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    dex
+    .else
+    dec ?dst                    ; ab|zp
+    .endif
+    .endm
+
+; increment high byte
+
+    .macro  INCHI, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    iny
+    .else                       ; ab|zp
+    inc 1+?dst
+    .endif
+    .endm
+
+; decrement high byte
+
+    .macro  DECHI, ?dst
+    .if "?dst" == "_XY"         ; _XY
+    dey
+    .else                       ; ab|zp
+    dec 1+?dst
+    .endif
+    .endm
+
+; increment Y-register if any indirect arguments
+
+    .macro  INCIND, ?arg1, ?arg2=NO, ?arg3=NO
+    .if "?arg1" ~ /^\(.+\)$/
+    iny
+    .elseif "?arg2" ~ /^\(.+\)$/
+    iny
+    .elseif "?arg3" ~ /^\(.+\)$/
+    iny
+    .endif
+    .endm
+
+; decrement Y-register if any indirect arguments
+
+    .macro  DECIND, ?arg1, ?arg2=NO, ?arg3=NO
+    .if "?arg1" ~ /^\(.+\)$/
+    dey
+    .elseif "?arg2" ~ /^\(.+\)$/
+    dey
+    .elseif "?arg3" ~ /^\(.+\)$/
+    dey
+    .endif
+    .endm
+
+; ---------------
+; "ZERO"
+; ---------------
+
+; zero (clear) word
+
+    .macro  ZERO, ?dst
+    .if "?dst" == "_XY"         ; $00 -> _XY
+    ldx #$00
+    ldy #$00
+    .else                       ; $00 -> ab|zp|(zp),y
+    lda #$00
+    STORLO  ?dst
+    INCIND  ?dst
+    STORHI  ?dst
+    .endif
+    .endm
+
+; ---------------
+; "PUSH"
+; ---------------
+
+; push word onto stack          ; ab|imm|zp|(zp),y|_XY -> stack
+
+    .macro  PUSH, ?src
+    LOADHI  ?src
+    pha
+    DECIND  ?src
+    LOADLO  ?src
+    pha
+    .endm
+
+; ---------------
+; "PULL"
+; ---------------
+
+; pull word from stack
+
+    .macro  PULL, ?dst          ; stack -> ab|zp|(zp),y|_XY
+    pla
+    STORLO  ?dst
+    INCIND  ?dst
+    pla
+    STORHI  ?dst
+    .endm
+
+; ---------------
+; "INCW"
+; ---------------
+
+; increment word
+
+    .macro INCW, ?dst           ; ab|zp|_XY += 1
+    INCLO   ?dst
+    bne :+
+    INCHI   ?dst
+ +  .endm
+
+; ---------------
+; "DECW"
+; ---------------
+
+; decrement word
+
+    .macro  DECW, ?dst          ; ab|zp|_XY -= 1
+    LOADLO  ?dst
+    bne :+
+    DECHI   ?dst
+ +  DECLO   ?dst
+    .endm
+
+; ----------------
+; "ADDB"/"ADCB"
+; ----------------
+
+; add byte to word
+
+    .macro  ADDB, ?word, ?byte  ; don't know state of carry flag
+    clc
+    .macro  ADCB, ?word, ?byte  ; do know state of carry flag
+    LOADLO  ?word
+    ADDLO   ?byte
+    STORLO  ?word
+    bcc :+
+    INCHI   ?word
+ +  .endm
+    .endm
+
+; ----------------
+; "SUBB"/"SBCB"
+; ----------------
+
+; subtract byte from word
+
+    .macro  SUBB, ?word, ?byte  ; don't know state of carry flag
+    sec
+    .macro  SBCB, ?word, ?byte  ; do know state of carry flag
+    LOADLO  ?word
+    SUBLO   ?byte
+    STORLO  ?word
+    bcs :+
+    DECHI   ?word
+ +  .endm
+    .endm
+
+; ----------------
+; "ADDW"/"ADCW"
+; ----------------
+
+; add word to word
+
+    .macro  ADDW, ?op1, ?op2, ?result   ; don't know state of carry flag
+    clc
+    .macro  ADCW, ?op1, ?op2, ?result   ; do know state of carry flag
+    LOADLO  ?op1
+    ADDLO   ?op2
+    STORLO  ?result
+    INCIND  ?op1, ?op2, ?result
+    LOADHI  ?op1
+    ADDHI   ?op2
+    STORHI  ?result
+    .endm
+    .endm
+
+; ----------------
+; "SUBW"/"SBCW"
+; ----------------
+
+; subtract word from word
+
+    .macro  SUBW, ?op1, ?op2, ?result   ; don't know state of carry flag
+    sec
+    .macro  SBCW, ?op1, ?op2, ?result   ; do know state of carry flag
+    LOADLO  ?op1
+    SUBLO   ?op2
+    STORLO  ?result
+    INCIND  ?op1, ?op2, ?result
+    LOADHI  ?op1
+    SUBHI   ?op2
+    STORHI  ?result
+    .endm
+    .endm
+
+; ----------------
+; "CMPW"
+; ----------------
+
+; compare words
+
+    .macro  CMPW, ?op1, ?op2
+    .if "?op1" == "_XY" && "?op2" !~ /^\(.+\)$/
+    cpx ?op2
+    .else
+    LOADLO  ?op1
+    CMPLO   ?op2
+    .endif
+    INCIND  ?op1, ?op2
+    LOADHI  ?op1
+    SUBHI   ?op2
+    .endm
+
+; -------------------------------
+
+; test the macros
+
+; -------------------------------
+
+; ---------------
+; "MOVE" - 18 forms
+; ---------------
+
+    MOVE    $80, $C0        ; zp -> zp
+    MOVE    $80, $C000      ; zp -> ab
+    MOVE    $80, ($C0)      ; zp -> (zp),y
+    MOVE    $80, _XY        ; zp -> _XY
+    MOVE    $8000, $C0      ; ab -> zp
+    MOVE    $8000, $C000    ; ab -> ab
+    MOVE    $8000, ($C0)    ; ab -> (zp),y
+    MOVE    $8000, _XY      ; ab -> _XY
+    MOVE    #$AA55, $C0     ; imm -> zp
+    MOVE    #$AA55, $C000   ; imm -> ab
+    MOVE    #$AA55, ($C0)   ; imm -> (zp),y
+    MOVE    #$AA55, _XY     ; imm -> _XY
+    MOVE    ($80), $C0      ; (zp),y -> zp
+    MOVE    ($80), $C000    ; (zp),y -> ab
+    MOVE    ($80), ($C0)    ; (zp),y -> (zp),y
+    MOVE    ($80), _XY      ; (zp),y -> _XY
+    MOVE    _XY, $80        ; _XY -> zp
+    MOVE    _XY, $8000      ; _XY -> ab
+
+; ---------------
+; "ZERO" - 4 forms
+; ---------------
+
+    ZERO    $80             ; $00 -> zp
+    ZERO    $8000           ; $00 -> ab
+    ZERO    ($80)           ; $00 -> (zp),y
+    ZERO    _XY             ; $00 -> _XY
+
+; ---------------
+; "PUSH" - 5 forms
+; ---------------
+
+    PUSH    $80             ; zp -> stack
+    PUSH    $8000           ; ab -> stack
+    PUSH    #$AA55          ; imm -> stack
+    PUSH    ($80)           ; (zp),y -> stack
+    PUSH    _XY             ; _XY -> stack
+
+; ---------------
+; "PULL" - 4 forms
+; ---------------
+
+    PULL    $80             ; stack -> zp
+    PULL    $8000           ; stack -> ab
+    PULL    ($80)           ; stack -> (zp),y
+    PULL    _XY             ; stack -> _XY
+
+; ---------------
+; "INCW" - 3 forms
+; ---------------
+
+    INCW    $80             ; zp += 1
+    INCW    $8000           ; ab += 1
+    INCW    _XY             ; _XY += 1
+
+; ---------------
+; "DECW" - 3 forms
+; ---------------
+
+    DECW    $80             ; zp -= 1
+    DECW    $8000           ; ab -= 1
+    DECW    _XY             ; _XY -= 1
+
+; ---------------
+; "ADDB" - 12 forms
+; ---------------
+
+    ADDB    $80, $C0        ; zp += zp
+    ADDB    $80, $C000      ; zp += ab
+    ADDB    $80, ($C0)      ; zp += (zp),y
+    ADDB    $80, #$55       ; zp += imm
+    ADDB    $8000, $C0      ; ab += zp
+    ADDB    $8000, $C000    ; ab += ab
+    ADDB    $8000, ($C0)    ; ab += (zp),y
+    ADDB    $8000, #$55     ; ab += imm
+    ADDB    _XY, $C0        ; _XY += zp
+    ADDB    _XY, $C000      ; _XY += ab
+    ADDB    _XY, ($C0)      ; _XY += (zp),y
+    ADDB    _XY, #$55       ; _XY += imm
+
+; ---------------
+; "ADCB" - 12 forms
+; ---------------
+
+    ADCB    $80, $C0        ; zp += zp
+    ADCB    $80, $C000      ; zp += ab
+    ADCB    $80, ($C0)      ; zp += (zp),y
+    ADCB    $80, #$55       ; zp += imm
+    ADCB    $8000, $C0      ; ab += zp
+    ADCB    $8000, $C000    ; ab += ab
+    ADCB    $8000, ($C0)    ; ab += (zp),y
+    ADCB    $8000, #$55     ; ab += imm
+    ADCB    _XY, $C0        ; _XY += zp
+    ADCB    _XY, $C000      ; _XY += ab
+    ADCB    _XY, ($C0)      ; _XY += (zp),y
+    ADCB    _XY, #$55       ; _XY += imm
+
+; ---------------
+; "SUBB" - 12 forms
+; ---------------
+
+    SUBB    $80, $C0        ; zp -= zp
+    SUBB    $80, $C000      ; zp -= ab
+    SUBB    $80, ($C0)      ; zp -= (zp),y
+    SUBB    $80, #$55       ; zp -= imm
+    SUBB    $8000, $C0      ; ab -= zp
+    SUBB    $8000, $C000    ; ab -= ab
+    SUBB    $8000, ($C0)    ; ab -= (zp),y
+    SUBB    $8000, #$55     ; ab -= imm
+    SUBB    _XY, $C0        ; _XY -= zp
+    SUBB    _XY, $C000      ; _XY -= ab
+    SUBB    _XY, ($C0)      ; _XY -= (zp),y
+    SUBB    _XY, #$55       ; _XY -= imm
+
+; ---------------
+; "SBCB" - 12 forms
+; ---------------
+
+    SBCB    $80, $C0        ; zp -= zp
+    SBCB    $80, $C000      ; zp -= ab
+    SBCB    $80, ($C0)      ; zp -= (zp),y
+    SBCB    $80, #$55       ; zp -= imm
+    SBCB    $8000, $C0      ; ab -= zp
+    SBCB    $8000, $C000    ; ab -= ab
+    SBCB    $8000, ($C0)    ; ab -= (zp),y
+    SBCB    $8000, #$55     ; ab -= imm
+    SBCB    _XY, $C0        ; _XY -= zp
+    SBCB    _XY, $C000      ; _XY -= ab
+    SBCB    _XY, ($C0)      ; _XY -= (zp),y
+    SBCB    _XY, #$55       ; _XY -= imm
+
+; ---------------
+; "ADDW" - 80 forms
+; ---------------
+
+    ADDW    $80, $C0, $E0           ; zp + zp -> zp
+    ADDW    $80, $C0, $E000         ; zp + zp -> ab
+    ADDW    $80, $C0, ($E0)         ; zp + zp -> (zp),y
+    ADDW    $80, $C0, _XY           ; zp + zp -> _XY
+    ADDW    $80, $C000, $E0         ; zp + ab -> zp
+    ADDW    $80, $C000, $E000       ; zp + ab -> ab
+    ADDW    $80, $C000, ($E0)       ; zp + ab -> (zp),y
+    ADDW    $80, $C000, _XY         ; zp + ab -> _XY
+    ADDW    $80, ($C0), $E0         ; zp + (zp),y -> zp
+    ADDW    $80, ($C0), $E000       ; zp + (zp),y -> ab
+    ADDW    $80, ($C0), ($E0)       ; zp + (zp),y -> (zp),y
+    ADDW    $80, ($C0), _XY         ; zp + (zp),y -> _XY
+    ADDW    $80, #$AA55, $E0        ; zp + imm -> zp
+    ADDW    $80, #$AA55, $E000      ; zp + imm -> ab
+    ADDW    $80, #$AA55, ($E0)      ; zp + imm -> (zp),y
+    ADDW    $80, #$AA55, _XY        ; zp + imm -> _XY
+
+    ADDW    $8000, $C0, $E0         ; ab + zp -> zp
+    ADDW    $8000, $C0, $E000       ; ab + zp -> ab
+    ADDW    $8000, $C0, ($E0)       ; ab + zp -> (zp),y
+    ADDW    $8000, $C0, _XY         ; ab + zp -> _XY
+    ADDW    $8000, $C000, $E0       ; ab + ab -> zp
+    ADDW    $8000, $C000, $E000     ; ab + ab -> ab
+    ADDW    $8000, $C000, ($E0)     ; ab + ab -> (zp),y
+    ADDW    $8000, $C000, _XY       ; ab + ab -> _XY
+    ADDW    $8000, ($C0), $E0       ; ab + (zp),y -> zp
+    ADDW    $8000, ($C0), $E000     ; ab + (zp),y -> ab
+    ADDW    $8000, ($C0), ($E0)     ; ab + (zp),y -> (zp),y
+    ADDW    $8000, ($C0), _XY       ; ab + (zp),y -> _XY
+    ADDW    $8000, #$AA55, $E0      ; ab + imm -> zp
+    ADDW    $8000, #$AA55, $E000    ; ab + imm -> ab
+    ADDW    $8000, #$AA55, ($E0)    ; ab + imm-> (zp),y
+    ADDW    $8000, #$AA55, _XY      ; ab + imm -> _XY
+
+    ADDW    ($80), $C0, $E0         ; (zp),y + zp -> zp
+    ADDW    ($80), $C0, $E000       ; (zp),y + zp -> ab
+    ADDW    ($80), $C0, ($E0)       ; (zp),y + zp -> (zp),y
+    ADDW    ($80), $C0, _XY         ; (zp),y + zp -> _XY
+    ADDW    ($80), $C000, $E0       ; (zp),y + ab -> zp
+    ADDW    ($80), $C000, $E000     ; (zp),y + ab -> ab
+    ADDW    ($80), $C000, ($E0)     ; (zp),y + ab -> (zp),y
+    ADDW    ($80), $C000, _XY       ; (zp),y + ab -> _XY
+    ADDW    ($80), ($C0), $E0       ; (zp),y + (zp),y -> zp
+    ADDW    ($80), ($C0), $E000     ; (zp),y + (zp),y -> ab
+    ADDW    ($80), ($C0), ($E0)     ; (zp),y + (zp),y -> (zp),y
+    ADDW    ($80), ($C0), _XY       ; (zp),y + (zp),y -> _XY
+    ADDW    ($80), #$AA55, $E0      ; (zp),y + imm -> zp
+    ADDW    ($80), #$AA55, $E000    ; (zp),y + imm -> ab
+    ADDW    ($80), #$AA55, ($E0)    ; (zp),y + imm -> (zp),y
+    ADDW    ($80), #$AA55, _XY      ; (zp),y + imm -> _XY
+
+    ADDW    #$11FF, $C0, $E0        ; imm + zp -> zp
+    ADDW    #$11FF, $C0, $E000      ; imm + zp -> ab
+    ADDW    #$11FF, $C0, ($E0)      ; imm + zp -> (zp),y
+    ADDW    #$11FF, $C0, _XY        ; imm + zp -> _XY
+    ADDW    #$11FF, $C000, $E0      ; imm + ab -> zp
+    ADDW    #$11FF, $C000, $E000    ; imm + ab -> ab
+    ADDW    #$11FF, $C000, ($E0)    ; imm + ab -> (zp),y
+    ADDW    #$11FF, $C000, _XY      ; imm + ab -> _XY
+    ADDW    #$11FF, ($C0), $E0      ; imm + (zp),y -> zp
+    ADDW    #$11FF, ($C0), $E000    ; imm + (zp),y -> ab
+    ADDW    #$11FF, ($C0), ($E0)    ; imm + (zp),y -> (zp),y
+    ADDW    #$11FF, ($C0), _XY      ; imm + (zp),y -> _XY
+    ADDW    #$11FF, #$AA55, $E0     ; imm + imm -> zp
+    ADDW    #$11FF, #$AA55, $E000   ; imm + imm -> ab
+    ADDW    #$11FF, #$AA55, ($E0)   ; imm + imm-> (zp),y
+    ADDW    #$11FF, #$AA55, _XY     ; imm + imm -> _XY
+
+    ADDW    _XY, $C0, $E0           ; _XY + zp -> zp
+    ADDW    _XY, $C0, $E000         ; _XY + zp -> ab
+    ADDW    _XY, $C0, ($E0)         ; _XY + zp -> (zp),y
+    ADDW    _XY, $C0, _XY           ; _XY + zp -> _XY
+    ADDW    _XY, $C000, $E0         ; _XY + ab -> zp
+    ADDW    _XY, $C000, $E000       ; _XY + ab -> ab
+    ADDW    _XY, $C000, ($E0)       ; _XY + ab -> (zp),y
+    ADDW    _XY, $C000, _XY         ; _XY + ab -> _XY
+    ADDW    _XY, ($C0), $E0         ; _XY + (zp),y -> zp
+    ADDW    _XY, ($C0), $E000       ; _XY + (zp),y -> ab
+    ADDW    _XY, ($C0), ($E0)       ; _XY + (zp),y -> (zp),y
+    ADDW    _XY, ($C0), _XY         ; _XY + (zp),y -> _XY
+    ADDW    _XY, #$AA55, $E0        ; _XY + imm -> zp
+    ADDW    _XY, #$AA55, $E000      ; _XY + imm -> ab
+    ADDW    _XY, #$AA55, ($E0)      ; _XY + imm -> (zp),y
+    ADDW    _XY, #$AA55, _XY        ; _XY + imm -> _XY
+
+; ---------------
+; "ADCW" - 80 forms
+; ---------------
+
+    ADCW    $80, $C0, $E0           ; zp + zp -> zp
+    ADCW    $80, $C0, $E000         ; zp + zp -> ab
+    ADCW    $80, $C0, ($E0)         ; zp + zp -> (zp),y
+    ADCW    $80, $C0, _XY           ; zp + zp -> _XY
+    ADCW    $80, $C000, $E0         ; zp + ab -> zp
+    ADCW    $80, $C000, $E000       ; zp + ab -> ab
+    ADCW    $80, $C000, ($E0)       ; zp + ab -> (zp),y
+    ADCW    $80, $C000, _XY         ; zp + ab -> _XY
+    ADCW    $80, ($C0), $E0         ; zp + (zp),y -> zp
+    ADCW    $80, ($C0), $E000       ; zp + (zp),y -> ab
+    ADCW    $80, ($C0), ($E0)       ; zp + (zp),y -> (zp),y
+    ADCW    $80, ($C0), _XY         ; zp + (zp),y -> _XY
+    ADCW    $80, #$AA55, $E0        ; zp + imm -> zp
+    ADCW    $80, #$AA55, $E000      ; zp + imm -> ab
+    ADCW    $80, #$AA55, ($E0)      ; zp + imm -> (zp),y
+    ADCW    $80, #$AA55, _XY        ; zp + imm -> _XY
+
+    ADCW    $8000, $C0, $E0         ; ab + zp -> zp
+    ADCW    $8000, $C0, $E000       ; ab + zp -> ab
+    ADCW    $8000, $C0, ($E0)       ; ab + zp -> (zp),y
+    ADCW    $8000, $C0, _XY         ; ab + zp -> _XY
+    ADCW    $8000, $C000, $E0       ; ab + ab -> zp
+    ADCW    $8000, $C000, $E000     ; ab + ab -> ab
+    ADCW    $8000, $C000, ($E0)     ; ab + ab -> (zp),y
+    ADCW    $8000, $C000, _XY       ; ab + ab -> _XY
+    ADCW    $8000, ($C0), $E0       ; ab + (zp),y -> zp
+    ADCW    $8000, ($C0), $E000     ; ab + (zp),y -> ab
+    ADCW    $8000, ($C0), ($E0)     ; ab + (zp),y -> (zp),y
+    ADCW    $8000, ($C0), _XY       ; ab + (zp),y -> _XY
+    ADCW    $8000, #$AA55, $E0      ; ab + imm -> zp
+    ADCW    $8000, #$AA55, $E000    ; ab + imm -> ab
+    ADCW    $8000, #$AA55, ($E0)    ; ab + imm-> (zp),y
+    ADCW    $8000, #$AA55, _XY      ; ab + imm -> _XY
+
+    ADCW    ($80), $C0, $E0         ; (zp),y + zp -> zp
+    ADCW    ($80), $C0, $E000       ; (zp),y + zp -> ab
+    ADCW    ($80), $C0, ($E0)       ; (zp),y + zp -> (zp),y
+    ADCW    ($80), $C0, _XY         ; (zp),y + zp -> _XY
+    ADCW    ($80), $C000, $E0       ; (zp),y + ab -> zp
+    ADCW    ($80), $C000, $E000     ; (zp),y + ab -> ab
+    ADCW    ($80), $C000, ($E0)     ; (zp),y + ab -> (zp),y
+    ADCW    ($80), $C000, _XY       ; (zp),y + ab -> _XY
+    ADCW    ($80), ($C0), $E0       ; (zp),y + (zp),y -> zp
+    ADCW    ($80), ($C0), $E000     ; (zp),y + (zp),y -> ab
+    ADCW    ($80), ($C0), ($E0)     ; (zp),y + (zp),y -> (zp),y
+    ADCW    ($80), ($C0), _XY       ; (zp),y + (zp),y -> _XY
+    ADCW    ($80), #$AA55, $E0      ; (zp),y + imm -> zp
+    ADCW    ($80), #$AA55, $E000    ; (zp),y + imm -> ab
+    ADCW    ($80), #$AA55, ($E0)    ; (zp),y + imm -> (zp),y
+    ADCW    ($80), #$AA55, _XY      ; (zp),y + imm -> _XY
+
+    ADCW    #$11FF, $C0, $E0        ; imm + zp -> zp
+    ADCW    #$11FF, $C0, $E000      ; imm + zp -> ab
+    ADCW    #$11FF, $C0, ($E0)      ; imm + zp -> (zp),y
+    ADCW    #$11FF, $C0, _XY        ; imm + zp -> _XY
+    ADCW    #$11FF, $C000, $E0      ; imm + ab -> zp
+    ADCW    #$11FF, $C000, $E000    ; imm + ab -> ab
+    ADCW    #$11FF, $C000, ($E0)    ; imm + ab -> (zp),y
+    ADCW    #$11FF, $C000, _XY      ; imm + ab -> _XY
+    ADCW    #$11FF, ($C0), $E0      ; imm + (zp),y -> zp
+    ADCW    #$11FF, ($C0), $E000    ; imm + (zp),y -> ab
+    ADCW    #$11FF, ($C0), ($E0)    ; imm + (zp),y -> (zp),y
+    ADCW    #$11FF, ($C0), _XY      ; imm + (zp),y -> _XY
+    ADCW    #$11FF, #$AA55, $E0     ; imm + imm -> zp
+    ADCW    #$11FF, #$AA55, $E000   ; imm + imm -> ab
+    ADCW    #$11FF, #$AA55, ($E0)   ; imm + imm-> (zp),y
+    ADCW    #$11FF, #$AA55, _XY     ; imm + imm -> _XY
+
+    ADCW    _XY, $C0, $E0           ; _XY + zp -> zp
+    ADCW    _XY, $C0, $E000         ; _XY + zp -> ab
+    ADCW    _XY, $C0, ($E0)         ; _XY + zp -> (zp),y
+    ADCW    _XY, $C0, _XY           ; _XY + zp -> _XY
+    ADCW    _XY, $C000, $E0         ; _XY + ab -> zp
+    ADCW    _XY, $C000, $E000       ; _XY + ab -> ab
+    ADCW    _XY, $C000, ($E0)       ; _XY + ab -> (zp),y
+    ADCW    _XY, $C000, _XY         ; _XY + ab -> _XY
+    ADCW    _XY, ($C0), $E0         ; _XY + (zp),y -> zp
+    ADCW    _XY, ($C0), $E000       ; _XY + (zp),y -> ab
+    ADCW    _XY, ($C0), ($E0)       ; _XY + (zp),y -> (zp),y
+    ADCW    _XY, ($C0), _XY         ; _XY + (zp),y -> _XY
+    ADCW    _XY, #$AA55, $E0        ; _XY + imm -> zp
+    ADCW    _XY, #$AA55, $E000      ; _XY + imm -> ab
+    ADCW    _XY, #$AA55, ($E0)      ; _XY + imm -> (zp),y
+    ADCW    _XY, #$AA55, _XY        ; _XY + imm -> _XY
+
+; ---------------
+; "SUBW" - 80 forms
+; ---------------
+
+    SUBW    $80, $C0, $E0           ; zp - zp -> zp
+    SUBW    $80, $C0, $E000         ; zp - zp -> ab
+    SUBW    $80, $C0, ($E0)         ; zp - zp -> (zp),y
+    SUBW    $80, $C0, _XY           ; zp - zp -> _XY
+    SUBW    $80, $C000, $E0         ; zp - ab -> zp
+    SUBW    $80, $C000, $E000       ; zp - ab -> ab
+    SUBW    $80, $C000, ($E0)       ; zp - ab -> (zp),y
+    SUBW    $80, $C000, _XY         ; zp - ab -> _XY
+    SUBW    $80, ($C0), $E0         ; zp - (zp),y -> zp
+    SUBW    $80, ($C0), $E000       ; zp - (zp),y -> ab
+    SUBW    $80, ($C0), ($E0)       ; zp - (zp),y -> (zp),y
+    SUBW    $80, ($C0), _XY         ; zp - (zp),y -> _XY
+    SUBW    $80, #$AA55, $E0        ; zp - imm -> zp
+    SUBW    $80, #$AA55, $E000      ; zp - imm -> ab
+    SUBW    $80, #$AA55, ($E0)      ; zp - imm -> (zp),y
+    SUBW    $80, #$AA55, _XY        ; zp - imm -> _XY
+
+    SUBW    $8000, $C0, $E0         ; ab - zp -> zp
+    SUBW    $8000, $C0, $E000       ; ab - zp -> ab
+    SUBW    $8000, $C0, ($E0)       ; ab - zp -> (zp),y
+    SUBW    $8000, $C0, _XY         ; ab - zp -> _XY
+    SUBW    $8000, $C000, $E0       ; ab - ab -> zp
+    SUBW    $8000, $C000, $E000     ; ab - ab -> ab
+    SUBW    $8000, $C000, ($E0)     ; ab - ab -> (zp),y
+    SUBW    $8000, $C000, _XY       ; ab - ab -> _XY
+    SUBW    $8000, ($C0), $E0       ; ab - (zp),y -> zp
+    SUBW    $8000, ($C0), $E000     ; ab - (zp),y -> ab
+    SUBW    $8000, ($C0), ($E0)     ; ab - (zp),y -> (zp),y
+    SUBW    $8000, ($C0), _XY       ; ab - (zp),y -> _XY
+    SUBW    $8000, #$AA55, $E0      ; ab - imm -> zp
+    SUBW    $8000, #$AA55, $E000    ; ab - imm -> ab
+    SUBW    $8000, #$AA55, ($E0)    ; ab - imm-> (zp),y
+    SUBW    $8000, #$AA55, _XY      ; ab - imm -> _XY
+
+    SUBW    ($80), $C0, $E0         ; (zp),y - zp -> zp
+    SUBW    ($80), $C0, $E000       ; (zp),y - zp -> ab
+    SUBW    ($80), $C0, ($E0)       ; (zp),y - zp -> (zp),y
+    SUBW    ($80), $C0, _XY         ; (zp),y - zp -> _XY
+    SUBW    ($80), $C000, $E0       ; (zp),y - ab -> zp
+    SUBW    ($80), $C000, $E000     ; (zp),y - ab -> ab
+    SUBW    ($80), $C000, ($E0)     ; (zp),y - ab -> (zp),y
+    SUBW    ($80), $C000, _XY       ; (zp),y - ab -> _XY
+    SUBW    ($80), ($C0), $E0       ; (zp),y - (zp),y -> zp
+    SUBW    ($80), ($C0), $E000     ; (zp),y - (zp),y -> ab
+    SUBW    ($80), ($C0), ($E0)     ; (zp),y - (zp),y -> (zp),y
+    SUBW    ($80), ($C0), _XY       ; (zp),y - (zp),y -> _XY
+    SUBW    ($80), #$AA55, $E0      ; (zp),y - imm -> zp
+    SUBW    ($80), #$AA55, $E000    ; (zp),y - imm -> ab
+    SUBW    ($80), #$AA55, ($E0)    ; (zp),y - imm -> (zp),y
+    SUBW    ($80), #$AA55, _XY      ; (zp),y - imm -> _XY
+
+    SUBW    #$11FF, $C0, $E0        ; imm - zp -> zp
+    SUBW    #$11FF, $C0, $E000      ; imm - zp -> ab
+    SUBW    #$11FF, $C0, ($E0)      ; imm - zp -> (zp),y
+    SUBW    #$11FF, $C0, _XY        ; imm - zp -> _XY
+    SUBW    #$11FF, $C000, $E0      ; imm - ab -> zp
+    SUBW    #$11FF, $C000, $E000    ; imm - ab -> ab
+    SUBW    #$11FF, $C000, ($E0)    ; imm - ab -> (zp),y
+    SUBW    #$11FF, $C000, _XY      ; imm - ab -> _XY
+    SUBW    #$11FF, ($C0), $E0      ; imm - (zp),y -> zp
+    SUBW    #$11FF, ($C0), $E000    ; imm - (zp),y -> ab
+    SUBW    #$11FF, ($C0), ($E0)    ; imm - (zp),y -> (zp),y
+    SUBW    #$11FF, ($C0), _XY      ; imm - (zp),y -> _XY
+    SUBW    #$11FF, #$AA55, $E0     ; imm - imm -> zp
+    SUBW    #$11FF, #$AA55, $E000   ; imm - imm -> ab
+    SUBW    #$11FF, #$AA55, ($E0)   ; imm - imm-> (zp),y
+    SUBW    #$11FF, #$AA55, _XY     ; imm - imm -> _XY
+
+    SUBW    _XY, $C0, $E0           ; _XY - zp -> zp
+    SUBW    _XY, $C0, $E000         ; _XY - zp -> ab
+    SUBW    _XY, $C0, ($E0)         ; _XY - zp -> (zp),y
+    SUBW    _XY, $C0, _XY           ; _XY - zp -> _XY
+    SUBW    _XY, $C000, $E0         ; _XY - ab -> zp
+    SUBW    _XY, $C000, $E000       ; _XY - ab -> ab
+    SUBW    _XY, $C000, ($E0)       ; _XY - ab -> (zp),y
+    SUBW    _XY, $C000, _XY         ; _XY - ab -> _XY
+    SUBW    _XY, ($C0), $E0         ; _XY - (zp),y -> zp
+    SUBW    _XY, ($C0), $E000       ; _XY - (zp),y -> ab
+    SUBW    _XY, ($C0), ($E0)       ; _XY - (zp),y -> (zp),y
+    SUBW    _XY, ($C0), _XY         ; _XY - (zp),y -> _XY
+    SUBW    _XY, #$AA55, $E0        ; _XY - imm -> zp
+    SUBW    _XY, #$AA55, $E000      ; _XY - imm -> ab
+    SUBW    _XY, #$AA55, ($E0)      ; _XY - imm -> (zp),y
+    SUBW    _XY, #$AA55, _XY        ; _XY - imm -> _XY
+
+; ---------------
+; "SBCW" - 80 forms
+; ---------------
+
+    SBCW    $80, $C0, $E0           ; zp - zp -> zp
+    SBCW    $80, $C0, $E000         ; zp - zp -> ab
+    SBCW    $80, $C0, ($E0)         ; zp - zp -> (zp),y
+    SBCW    $80, $C0, _XY           ; zp - zp -> _XY
+    SBCW    $80, $C000, $E0         ; zp - ab -> zp
+    SBCW    $80, $C000, $E000       ; zp - ab -> ab
+    SBCW    $80, $C000, ($E0)       ; zp - ab -> (zp),y
+    SBCW    $80, $C000, _XY         ; zp - ab -> _XY
+    SBCW    $80, ($C0), $E0         ; zp - (zp),y -> zp
+    SBCW    $80, ($C0), $E000       ; zp - (zp),y -> ab
+    SBCW    $80, ($C0), ($E0)       ; zp - (zp),y -> (zp),y
+    SBCW    $80, ($C0), _XY         ; zp - (zp),y -> _XY
+    SBCW    $80, #$AA55, $E0        ; zp - imm -> zp
+    SBCW    $80, #$AA55, $E000      ; zp - imm -> ab
+    SBCW    $80, #$AA55, ($E0)      ; zp - imm -> (zp),y
+    SBCW    $80, #$AA55, _XY        ; zp - imm -> _XY
+
+    SBCW    $8000, $C0, $E0         ; ab - zp -> zp
+    SBCW    $8000, $C0, $E000       ; ab - zp -> ab
+    SBCW    $8000, $C0, ($E0)       ; ab - zp -> (zp),y
+    SBCW    $8000, $C0, _XY         ; ab - zp -> _XY
+    SBCW    $8000, $C000, $E0       ; ab - ab -> zp
+    SBCW    $8000, $C000, $E000     ; ab - ab -> ab
+    SBCW    $8000, $C000, ($E0)     ; ab - ab -> (zp),y
+    SBCW    $8000, $C000, _XY       ; ab - ab -> _XY
+    SBCW    $8000, ($C0), $E0       ; ab - (zp),y -> zp
+    SBCW    $8000, ($C0), $E000     ; ab - (zp),y -> ab
+    SBCW    $8000, ($C0), ($E0)     ; ab - (zp),y -> (zp),y
+    SBCW    $8000, ($C0), _XY       ; ab - (zp),y -> _XY
+    SBCW    $8000, #$AA55, $E0      ; ab - imm -> zp
+    SBCW    $8000, #$AA55, $E000    ; ab - imm -> ab
+    SBCW    $8000, #$AA55, ($E0)    ; ab - imm-> (zp),y
+    SBCW    $8000, #$AA55, _XY      ; ab - imm -> _XY
+
+    SBCW    ($80), $C0, $E0         ; (zp),y - zp -> zp
+    SBCW    ($80), $C0, $E000       ; (zp),y - zp -> ab
+    SBCW    ($80), $C0, ($E0)       ; (zp),y - zp -> (zp),y
+    SBCW    ($80), $C0, _XY         ; (zp),y - zp -> _XY
+    SBCW    ($80), $C000, $E0       ; (zp),y - ab -> zp
+    SBCW    ($80), $C000, $E000     ; (zp),y - ab -> ab
+    SBCW    ($80), $C000, ($E0)     ; (zp),y - ab -> (zp),y
+    SBCW    ($80), $C000, _XY       ; (zp),y - ab -> _XY
+    SBCW    ($80), ($C0), $E0       ; (zp),y - (zp),y -> zp
+    SBCW    ($80), ($C0), $E000     ; (zp),y - (zp),y -> ab
+    SBCW    ($80), ($C0), ($E0)     ; (zp),y - (zp),y -> (zp),y
+    SBCW    ($80), ($C0), _XY       ; (zp),y - (zp),y -> _XY
+    SBCW    ($80), #$AA55, $E0      ; (zp),y - imm -> zp
+    SBCW    ($80), #$AA55, $E000    ; (zp),y - imm -> ab
+    SBCW    ($80), #$AA55, ($E0)    ; (zp),y - imm -> (zp),y
+    SBCW    ($80), #$AA55, _XY      ; (zp),y - imm -> _XY
+
+    SBCW    #$11FF, $C0, $E0        ; imm - zp -> zp
+    SBCW    #$11FF, $C0, $E000      ; imm - zp -> ab
+    SBCW    #$11FF, $C0, ($E0)      ; imm - zp -> (zp),y
+    SBCW    #$11FF, $C0, _XY        ; imm - zp -> _XY
+    SBCW    #$11FF, $C000, $E0      ; imm - ab -> zp
+    SBCW    #$11FF, $C000, $E000    ; imm - ab -> ab
+    SBCW    #$11FF, $C000, ($E0)    ; imm - ab -> (zp),y
+    SBCW    #$11FF, $C000, _XY      ; imm - ab -> _XY
+    SBCW    #$11FF, ($C0), $E0      ; imm - (zp),y -> zp
+    SBCW    #$11FF, ($C0), $E000    ; imm - (zp),y -> ab
+    SBCW    #$11FF, ($C0), ($E0)    ; imm - (zp),y -> (zp),y
+    SBCW    #$11FF, ($C0), _XY      ; imm - (zp),y -> _XY
+    SBCW    #$11FF, #$AA55, $E0     ; imm - imm -> zp
+    SBCW    #$11FF, #$AA55, $E000   ; imm - imm -> ab
+    SBCW    #$11FF, #$AA55, ($E0)   ; imm - imm-> (zp),y
+    SBCW    #$11FF, #$AA55, _XY     ; imm - imm -> _XY
+
+    SBCW    _XY, $C0, $E0           ; _XY - zp -> zp
+    SBCW    _XY, $C0, $E000         ; _XY - zp -> ab
+    SBCW    _XY, $C0, ($E0)         ; _XY - zp -> (zp),y
+    SBCW    _XY, $C0, _XY           ; _XY - zp -> _XY
+    SBCW    _XY, $C000, $E0         ; _XY - ab -> zp
+    SBCW    _XY, $C000, $E000       ; _XY - ab -> ab
+    SBCW    _XY, $C000, ($E0)       ; _XY - ab -> (zp),y
+    SBCW    _XY, $C000, _XY         ; _XY - ab -> _XY
+    SBCW    _XY, ($C0), $E0         ; _XY - (zp),y -> zp
+    SBCW    _XY, ($C0), $E000       ; _XY - (zp),y -> ab
+    SBCW    _XY, ($C0), ($E0)       ; _XY - (zp),y -> (zp),y
+    SBCW    _XY, ($C0), _XY         ; _XY - (zp),y -> _XY
+    SBCW    _XY, #$AA55, $E0        ; _XY - imm -> zp
+    SBCW    _XY, #$AA55, $E000      ; _XY - imm -> ab
+    SBCW    _XY, #$AA55, ($E0)      ; _XY - imm -> (zp),y
+    SBCW    _XY, #$AA55, _XY        ; _XY - imm -> _XY
+
+; ---------------
+; "CMPW" - 20 forms
+; ---------------
+
+    CMPW    $80, $C0        ; zp - zp -> c_flag
+    CMPW    $80, $C000      ; zp - ab -> c_flag
+    CMPW    $80, ($C0)      ; zp - (zp),y -> c_flag
+    CMPW    $80, #$AA55     ; zp - imm -> c_flag
+    CMPW    $8000, $C0      ; ab - zp -> c_flag
+    CMPW    $8000, $C000    ; ab - ab -> c_flag
+    CMPW    $8000, ($C0)    ; ab - (zp),y -> c_flag
+    CMPW    $8000, #$AA55   ; ab - imm -> c_flag
+    CMPW    ($80), $C0      ; (zp),y - zp -> c_flag
+    CMPW    ($80), $C000    ; (zp),y - ab -> c_flag
+    CMPW    ($80), ($C0)    ; (zp),y - (zp),y -> c_flag
+    CMPW    ($80), #$AA55   ; (zp),y - imm -> c_flag
+    CMPW    #$11FF, $C0     ; imm - zp -> c_flag
+    CMPW    #$11FF, $C000   ; imm - ab -> c_flag
+    CMPW    #$11FF, ($C0)   ; imm - (zp),y -> c_flag
+    CMPW    #$11FF, #$AA55  ; imm - imm -> c_flag
+    CMPW    _XY, $C0        ; _XY - zp -> c_flag
+    CMPW    _XY, $C000      ; _XY - ab -> c_flag
+    CMPW    _XY, ($C0)      ; _XY - (zp),y -> c_flag
+    CMPW    _XY, #$AA55     ; _XY - imm -> c_flag
+
+; -------------------------------
+
+        .end

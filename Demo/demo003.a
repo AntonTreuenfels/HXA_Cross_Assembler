@@ -1,0 +1,113 @@
+; Hobby Cross-Assembler Demo 003
+; Uninitialized Storage\Using DS
+; ok: allocate uninitialized storage
+
+; by Anton Treuenfels
+
+; first created: 04/29/04
+; last revised:  09/27/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; required psop - but not here w/ segments
+
+; -------------------------------
+
+; we often want to define locations in memory for use as variables.
+; A straightforward way to do this is direct assignment:
+
+myVar1  .equ    $2000
+myVar2  .equ    $2002
+myVar3  .equ    $2004
+
+; This works but has several drawbacks:
+; - it is not easy to tell what the size of the variables are
+; (particularly the last one in the group)
+; - it is not as easy as it could be to allocate consecutive variables
+; - it is not easy to move a block of variables to another location if
+; desired
+
+; the "DS" pseudo op resolves most of these difficulties:
+
+;         .org    $2000
+; myVarA  .ds     2
+; myVarB  .ds     2
+; myVarC  .ds     4
+
+; we can easily tell the size of each variable, we can easily allocate
+; consecutive variables, and the whole block is easy to move if need be
+
+; -------------------------------
+
+; let's go a little further. Suppose we want to allocate all our
+; variables consecutively in a block outside our code block, but we
+; want to declare those variables close to where they are first used
+; (so we know what the heck they're for when we're reading the source).
+
+; we can use segments to do this:
+
+; a segment for code
+; - first segment must be absolute in any case
+
+        .segment    CODEBLOCK
+        .org    $1000
+        .ends
+
+; a segment for variables
+; - absolute so we can easily check if label values are correct,
+; but in practice could be made relative to place directly after CODEBLOCK
+
+        .segment    VARBLOCK
+        .org    $8000
+        .ends
+
+; we start our (for demo purposes dummy) code:
+
+        .segment CODEBLOCK
+        .repeat 8
+        .byte   $00
+        .endr
+        .ends
+
+; now we allocate storage for a subroutine's variables:
+
+        .segment VARBLOCK
+sub1Var1 ds  2
+sub1Var2 ds  2
+        .ends
+
+; now we're going to code a subroutine:
+        
+        .segment CODEBLOCK
+SubRoutine1:
+        .repeat 8
+        .byte   $01
+        .endr
+        .ends
+
+; and we'll do it again to show how the contents of the variable block
+; (as shown in the symbol table and segment map) and the code block
+; (as shown in the object listing and segment map) really are consecutive
+; despite their intermixing in the source code:
+
+        .segment VARBLOCK
+sub2Var1 ds  2
+sub2Var2 ds  2
+        .ends
+
+        .segment CODEBLOCK
+SubRoutine2:
+        .repeat 8
+        .byte   $02
+        .endr
+        .ends
+
+; -------------------------------
+
+        .end

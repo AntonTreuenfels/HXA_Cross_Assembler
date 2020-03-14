@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Error Demo 002e
+; Code Alignment\ALIGN Macro
+; error: alignments on boundaries outside (arbitrary) range
+
+; by Anton Treuenfels
+
+; first created: 02/22/04
+; last revised:  02/22/04
+
+; warning(s): 0
+
+; error(s): 9
+; - boundary out of range
+
+; fatal:
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; pad output to specific byte alignment
+; - no point if less than two, and we'll set upper limit to 256 'cause we can
+; - actual pad byte value is arbitrary (and could be another argument
+; if so desired)
+
+        .macro  ALIGN, ?boundary
+        .if (?boundary > 1) && (?boundary <= 256)
+]FROM   .=  * % ?boundary
+        .if ]FROM                   ; FALSE if on the boundary right now
+        .repeat ?boundary - ]FROM   ; bytes to go to reach boundary
+        .byte   $aa                 ; - arbitrary -
+        .endr
+        .endif
+        .else
+        .error "ALIGN boundary out of range (?boundary)"
+        .endif
+        .endm
+
+; -------------------------------
+
+; boundaries out of range
+
+        ALIGN   0
+        ALIGN   1
+        ALIGN   -1
+        ALIGN   257
+        ALIGN   -256
+        ALIGN   1000
+        ALIGN   -999
+
+        ALIGN   400 - 50
+        ALIGN   100 - 200
+
+; -------------------------------
+
+        .end

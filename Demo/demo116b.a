@@ -1,0 +1,183 @@
+; Hobby Cross-Assembler Demo 116b
+; 6502\Structured Programming Examples
+; ok: GWilson's Structured Programming Examples (INCLUDES demo115b.a)
+
+; by Anton Treuenfels
+
+; first created: 04/13/13
+; last revision: 09/10/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+;       .liston  macros     ; uncomment this to list full macro expansions
+        .listoff includes   ; comment this out to list macro file
+
+; -------------------------------
+
+        .cpu 65C02
+
+; -------------------------------
+
+        .include    "demo115b.a" ; the structure macros
+
+; -------------------------------
+; Macro Examples
+; -------------------------------
+
+;                         +--------------------------+
+;                         |  IF_xx...ELSE_...END_IF  |
+;                         +--------------------------+
+;                         +--------------------------+
+;                         |      BEGIN...AGAIN       |
+;                         |      BEGIN...UNTIL       |
+;                         |  BEGIN...WHILE...REPEAT  |
+;                         +--------------------------+
+
+; copied with minor modifications from GWilson's structured macros page
+; - reference: http://wilsonminesco.com/StructureMacros/index.html
+
+	 ORG $80
+
+FROM:    DS   2           ; "DS" in HXA is like "BLKB" in the 2500AD assembler.
+TO:      DS   2           ; It stands for "DeFine Storage", and in this case
+SIZE:    DS   2           ; allots two bytes for each ZP variable here.
+	
+;         +-----------------------+
+;         |   ORIGINAL VERSION    |
+;         +-----------------------+
+
+        ORG  $8000
+
+MOVEDOWN: LDY  #0
+          LDX  SIZE+1
+          BEQ  MD2
+ MD1:     LDA  (FROM),Y    ; Move a page at a time.
+          STA  (TO),Y
+          INY
+          BNE  MD1
+          INC  FROM+1
+          INC  TO+1
+          DEX
+          BNE  MD1
+ MD2:     LDX  SIZE
+          BEQ  MD4
+ MD3:     LDA  (FROM),Y    ; Move the remaining bytes
+          STA  (TO),Y
+          INY
+          DEX
+          BNE  MD3
+ MD4:     RTS
+ ;----------------
+
+;         +-------------------------+
+;         |   STRUCTURED VERSION    |
+;         +-------------------------+
+
+
+        ORG  $8000
+
+MOVEDOWN_STRUC:
+   LDY  #0
+   LDX  1+SIZE             ; get the number of full pages to move
+   IF_NOT_ZERO             ; if there is at least one...
+      BEGIN                ; ...do this loop for each full page
+         BEGIN             ; ...do this loop for each byte on each page
+            LDA  (FROM),Y
+            STA  (TO),Y
+            INY
+         UNTIL_ZERO        ; looping stops when full page is done
+         INC  FROM+1       ; next source page
+         INC  TO+1         ; next destination page
+         DEX               ; count down full pages
+      UNTIL_ZERO           ; looping stops when all full pages are done
+   END_IF                  ; this END_IF marks control transfer point of
+                           ; a failed IF_NOT_ZERO full page count test
+
+   LDX  SIZE               ; get the remaining number of bytes to move
+   IF_NOT_ZERO             ; if there is at least one...
+      BEGIN                ; ...do this loop for each remaining byte
+         LDA  (FROM),Y
+         STA  (TO),Y
+         INY
+         DEX               ; count down remaining bytes
+      UNTIL_ZERO           ; looping stops when all bytes are done
+   END_IF                  ; this END_IF marks the control transfer point of
+                           ; a failed IF_NOT_ZERO partial page count test
+   RTS                     ; ...which is also the subroutine exit point
+ ;----------------
+
+; GWilson's hex-to-decimal routine
+; reference: http://6502.org/source/integers/hex2dec.htm
+
+          ORG  $80
+
+HTD_IN:   DS  1   	; Input and output variables.  DS is Define Storage.
+HTD_OUT:  DS  2   	; Output is low-byte-first.
+
+
+          ORG  $1000
+
+TABLE:    WORD  1, 2, 4, 8, 16H, 32H, 64H, 128H  ; WORD is define WORD, Low byte first.
+
+;         +-----------------------+
+;         |   ORIGINAL VERSION    |
+;         +-----------------------+
+
+        ORG  $9000
+
+HTD:    SED              ; Output gets added up in decimal.
+        STZ  HTD_OUT     ; Inititalize output word as 0.
+        STZ  HTD_OUT+1   ; (NMOS 6502 will need LDA#0, STA ...)
+
+        LDX  #0EH        ; $E is 14 for 2x7 bits.  (0-7 is 8 positions.)
+ loop:  ASL  HTD_IN      ; Look at next high bit.  If it's 0,
+        BCC  htd1        ; don't add anything to the output for this bit.
+        LDA  HTD_OUT     ; Otherwise get the running output sum
+        CLC
+        ADC  TABLE,X     ; and add the appropriate value for this bit
+        STA  HTD_OUT     ; from the table, and store the new sum.
+        LDA  HTD_OUT+1   ; After low byte, do high byte.
+        ADC  TABLE+1,X
+        STA  HTD_OUT+1
+
+ htd1:  DEX              ; Go down to next bit value to loop again.
+        DEX
+        BPL  loop        ; If still not done, go back for another loop.
+
+        CLD
+        RTS
+ ;----------------
+
+;         +-------------------------+
+;         |   STRUCTURED VERSION    |
+;         +-------------------------+
+
+     ORG  $9000
+
+HTD_STRUC:
+     SED                   ; Output gets added up in decimal.
+     STZ  HTD_OUT          ; Inititalize output word as 0.
+     STZ  HTD_OUT+1   	   ; (NMOS 6502 will need LDA#0, STA ...)
+
+     LDX  #0EH             ; $E is 14 for 2x7 bits.  (0-7 is 8 positions.)
+     BEGIN
+        ASL  HTD_IN        ; Look at next high bit.  If it's 0,
+        IF_C_SET           ; don't add anything to the output for this bit.
+           LDA  HTD_OUT    ; Otherwise get the running output sum
+           CLC
+           ADC  TABLE,X    ; and add the appropriate value for this bit
+           STA  HTD_OUT    ; from the table, and store the new sum.
+           LDA  HTD_OUT+1  ; After low byte, do high byte.
+           ADC  TABLE+1,X
+           STA  HTD_OUT+1
+        END_IF
+        DEX                ; Go down to next bit value to loop again.
+        DEX
+     UNTIL_NEG             ; If still not done, go back for another loop.
+
+     CLD
+     RTS
+

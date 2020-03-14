@@ -1,0 +1,354 @@
+; Hobby Cross-Assembler Demo 110
+; 6502\Sort Routines
+; ok: five sort routines for a 256 element array of 8-bit values
+
+; by Anton Treuenfels
+
+; first created: 11/09/04
+; last revised:  08/14/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; these routines are probably best viewed as illustrations of the
+; principles that make the various sorts work.
+; They can be used as guides to creating more competent routines
+; that handle larger arrays and different data types
+
+; code and data addresses
+; - suitable for free RAM block of C64 (adjust as necessary)
+
+asmadr  = $C000             ; assembly address
+
+array   = $C800             ; array to be sorted
+
+; start of some consecutive free space on zero page
+; - for use as variables during sort
+; - suitable for VIC20 / C64 / C128 (adjust as necessary)
+
+varspc  = $FB
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+
+; -------------------------------
+; Bubble Sort
+; -------------------------------
+
+; for ( i = 255; i > 0; i-- ) {
+;     for ( j = 0; j < i; j++ ) {
+;         if ( array[j] > array[j+1] ) {
+;             temp = array[ j ]
+;             array[ j ] = array[ j + 1 ]
+;             array[ j + 1 ] = temp
+;         }
+;     }
+; }
+
+        .org    varspc
+]i      .ds     1          ; ]i <- i
+
+        .org    asmadr
+
+BubbleSort:
+        ldx #255
+        stx ]i              ; ]i <- i
+@nexti  ldx #0              ; X <- j
+@nextj  lda array+1,x       ; array[j+1]
+        cmp array,x         ; array[j]
+        bcs :+              ; b: array[j] <= array[j+1]
+        ldy array,x         ; temp = array[j]
+        sta array,x         ; array[j] = array[j+1]
+        tya
+        sta array+1,x       ; array[j+1] = temp
+ +      inx
+        cpx ]i              ; j < i ?
+        bcc @nextj          ; b: yes
+        dec ]i              ; i > 0 ?
+        bne @nexti          ; b: yes
+        rts
+
+; -------------------------------
+; Exchange Sort
+; -------------------------------
+
+; for ( i = 0; i < 255; i++ ) {
+;    for ( j = i + 1; j < 256; j++ ) {
+;        if ( array[j] < array[i] ) {
+;            temp = array[ j ]
+;            array[ j ] = array[ i ]
+;            array[ i ] = temp
+;        }
+;     }
+; }
+
+        .org    asmadr
+
+ExchangeSort:
+        ldy #0              ; Y <- i
+@nexti  tya
+        tax
+        inx                 ; X <- j
+@nextj  lda array,x         ; array[j]
+        cmp array,y         ; array[i]
+        bcs :+              ; b: array[j] >= array[i]
+        pha                 ; temp = array[j]
+        lda array,y
+        sta array,x         ; array[j] = array[i]
+        pla                 
+        sta array,y         ; array[i] = temp
+ +      inx                 ; j < 256 ?
+        bne @nextj          ; b: yes
+        iny
+        cpy #255            ; i < 255 ?
+        bcc @nexti          ; b: yes
+        rts
+
+; -------------------------------
+; Selection Sort
+; -------------------------------
+
+; for ( i = 0; i < 255; i++ ) {
+;     min = i
+;     for ( j = i + 1; j < 256; j++ ) {
+;         if ( array[j] < array[min] )
+;             min = j
+;     }
+;     temp = array[ min ]
+;     array[ min ] = array[ i ]
+;     array[ i ] = temp
+; }
+
+        .org    varspc
+]i      .ds     1           ; ]i <- i
+
+        .org    asmadr
+
+SelectSort:
+        ldy #0              ; Y <- i
+@nexti  sty ]i              ; ]i <- i
+@getmin tya
+        tax                 ; X <- min
+        lda array,x         ; A <- array[min]
+@nextj  iny                 ; Y <- j
+        beq @swap           ; b: j = 256
+        cmp array,y
+        bcc @nextj          ; b: array[j] > array[min]
+        bne @getmin         ; b: array[j] < array[min]
+        beq @nextj          ; b: array[j] = array[min] (forced)
+
+@swap   pha                 ; temp = array[min] (already in A)
+        ldy ]i              ; Y <- i
+        lda array,y
+        sta array,x         ; array[min] = array[i]
+        pla
+        sta array,y         ; array[i] = temp
+        iny
+        cpy #255            ; i < 255 ?
+        bcc @nexti          ; b: yes
+        rts
+
+; ------------------------------------
+; Insertion Sort (w/ guard element)
+; ------------------------------------
+
+; for ( i = 1; i < 256; i++ ) {
+;     array[ -1 ] = array[ i ]
+;     for ( j = i; array[j-1] > array[-1]; j-- )
+;         array[ j ] = array[ j-1 ]
+;     array[ j ] = array[ -1 ]
+; }
+
+InsertSortA:
+        ldy #1              ; Y <- i
+@nexti  lda array,y         ; array[i]
+        sta array-1         ; array-1 <- array[-1]
+        tya
+        tax                 ; X <- j
+@nextj  lda array-1         ; array[-1]
+        cmp array-1,x       ; array[j-1]
+        bcs :+              ; b: array[j-1] <= array[-1]
+        lda array-1,x       ; array[j-1]
+ +      sta array,x         ; array[j] = array[j-1] | array[-1]
+        dex
+        bcc @nextj          ; b: array[j-1] > array[-1]
+        iny                 ; i < 256 ?
+        bne @nexti          ; b: yes
+        rts
+
+; for ( i = 1; i < 256; i++ ) {
+;       j = i
+;       temp = array[ i ]
+;       while ( j > 0 && array[j-1] > temp ) {
+;           array[ j ] = array[ j-1 ]
+;           --j
+;       }
+;       array[ j ] = temp
+; }
+
+; ------------------------------------
+; Insertion Sort (w/o guard element)
+; ------------------------------------
+
+        .org    varspc
+]temp   .ds     1       ; ]temp <- temp
+
+        .org    asmadr
+
+InsertSortB:
+        ldy #1          ; Y <- i
+@nexti  tya
+        tax             ; X <- j (must be > 0)
+        lda array,y
+        sta ]temp       ; ]temp <- array[i]
+@nextj  lda array-1,x
+        cmp ]temp
+        bcc :+          ; b: array[ j-1 ] < temp
+        beq :+          ; b: array[ j-1 ] = temp
+        sta array,x     ; array[ j ] = array[ j-1 ]
+        dex             ; j > 0 ?
+        bne @nextj      ; b: yes
+ +      lda ]temp
+        sta array,x     ; array[ j ] = temp
+        iny             ; i < 256 ?
+        bne @nexti      ; b: yes
+        rts
+
+; -------------------------------
+; Quick Sort
+; -------------------------------
+
+; a recursive version
+; - based on an algorithm found in "Programming Pearls" by Jon Bentley
+
+; QSort(lo, hi) {
+;   if ( lo < hi ) {
+;       partval = array[ lo ]
+;       partndx = lo
+;       for ( i = lo + 1; i <= hi; i++ ) {
+;           if ( array[i] < partval )
+;              swap( i, ++partndx )        
+;       }
+;       swap( lo, partndx )
+;       Qsort( lo, partndx - 1 )
+;       QSort( partndx + 1, hi )
+;   }
+; }
+
+; an interative version:
+
+; QSort(lo, hi) {
+;   do {
+;       if ( lo < hi ) {
+;           partval = array[ lo ]
+;           partndx = lo
+;           for ( i = lo + 1; i <= hi; i++ )
+;               if ( array[i] < partval )
+;                  swap( i, ++partndx )        
+;           }
+;           swap( lo, partndx )
+;           push( lo, partndx - 1 )
+;           push( partndx + 1, hi )
+;       }
+;   } while ( pop() )
+; }
+
+
+; quick sort variables
+
+        .org    varspc
+
+]lo          .ds 1          ; lo index of interval to sort
+]hi          .ds 1          ; hi index of interval to sort
+]part_val    .ds 1          ; value to partition interval on
+]stack_ptr   .ds 1          ; recursion "stack" pointer
+
+; a lot of stack space can be used
+; - for example, if the array is already sorted
+; - there are methods to avoid this (longer code; not presented here)
+
+        .org    $C900       ; suitable for C64 free RAM block
+
+]lo_stack    .ds 256        ; lo indices stack
+]hi_stack    .ds 256        ; hi indices stack
+
+        .org    asmadr
+
+Swap:
+        lda array,x
+        pha
+        lda array,y
+        sta array,x
+        pla
+        sta array,y
+        rts
+
+Quicksort:
+        ldy #255            ; first interval is 0..255
+        sty ]hi_stack
+        iny                 ; = 0 by wraparound
+        sty ]lo_stack
+        iny                 ; = 1 = "fake" next free stack entry
+
+@qpop:
+        dey                 ; next used stack entry
+        lda ]hi_stack,y     ; pop top entry
+        sta ]hi             ; ]hi <- high end of next interval
+        lda ]lo_stack,y
+        sta ]lo             ; ]lo <- low end of next interval
+
+        cmp ]hi
+        bcs @nextinterval   ; b: lo >= hi
+
+        sty ]stack_ptr      ; next free stack entry
+
+        ; partition interval
+        ; - everything smaller than the partition value will end up
+        ; on its "left", everything greater or equal on its "right"
+
+        tay                 ; Y <- i
+        tax                 ; X <- partndx <- lo
+        lda array,x         ; array[ lo ]
+        sta ]part_val       ; ]part_val <- partval 
+@nexti  iny                 ; ++i
+        lda array,y         ; array[i]
+        cmp ]part_val
+        bcs :+              ; b: array[i] >= partval
+        inx                 ; ++partndx
+        jsr swap            ; swap(i, partndx)
+ +      cpy ]hi             ; i <= hi ?
+        bcc @nexti          ; b: i < hi
+        beq @nexti          ; b: i = hi
+
+        ldy ]lo
+        jsr swap            ; swap(lo, partndx)
+
+        tya                 ; A <- lo
+        ldy ]stack_ptr      ; next free stack entry
+        sta ]lo_stack,y     ; push( lo, partndx-1 )
+        dex
+        txa                 ; A <- partndx - 1
+        sta ]hi_stack,y
+
+        clc
+        adc #2              ; A <- partndx + 1
+        iny                 ; next free stack entry
+        sta ]lo_stack,y     ; push( partndx+1, hi )
+        lda ]hi             ; A <- hi
+        sta ]hi_stack,y
+
+        iny                 ; next free stack entry
+
+@nextinterval
+        tya                 ; is stack empty ?
+        bne @qpop           ; b: no
+        rts
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,71 @@
+; Hobby Cross-Assembler Demo 001
+; Code Movement\Code Movement
+; ok: assembly/load address doesn't match execution address
+
+; by Anton Treuenfels
+
+; first created: 04/29/04
+; last revised:  02/09/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; we may wish to create a piece of code which, after being loaded,
+; is moved to another address for actual execution. The moved piece
+; of code may be the entire "real" program (the code actually
+; executing at the load address having the sole purpose of initializing
+; the "real" code) or merely a helper of some sort for the "real"
+; program (most of which remains at the load address). Either way,
+; the problem is to determine the location and size of the code to move.
+
+; the best way to do this is to use SEGMENTS
+
+; we start with some code presumably executed immediately
+; after first being loaded (just dummy for demo purposes):
+
+        .segment    MOVER
+
+        .org    $1000       ; an absolute origin segment
+
+        ; while this does nothing, it shows that we can access
+        ; this data inside this segment, where presumably
+        ; an actual move routine would use it
+
+        .word   SEGOFF(MOVED)
+        .word   SEGLEN(MOVED)
+        .word   SEGBEG(MOVED)
+
+        .endsegment
+
+; now we switch over to the segment to be moved:        
+
+        .segment    MOVED
+
+        .org    $2000       ; an absolute origin segment
+
+        .repeat 8
+        .byte   $a5         ; just dummy...
+        .endr
+
+        .endsegment
+
+; the result of the assembly will be one physical block containing
+; all the assembled code. However the object listing will show
+; non-consecutive changes to the program counter that reflect
+; the different assembly addresses of the two blocks within
+; the assembled code
+
+; this technique can of course be extended to any number of segments
+
+; -------------------------------
+
+        .end

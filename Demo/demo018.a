@@ -1,0 +1,195 @@
+; Hobby Cross-Assembler Demo 018
+; Bit Position\Most Significant Bit
+; ok: find position of most significant magnitude bit of signed integer
+
+; by Anton Treuenfels
+
+; first created: 05/19/07
+; last revised:  05/20/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; integer format:
+; bit 00-30: magnitude
+; bit    31: sign
+
+; strategy: a binary search
+
+; note we strip sign bit but do not negate negative integers
+; - if we did we'd find most significant bit of absolute integer value
+; - also the greatest magnitude negative value is interpreted as zero
+; - ]INT != 0, ]MSB = 1->31 (not 0->30); otherwise ]MSB = -1 (arbitrary)
+; - subtract one from ]MSB if 0->30 is better
+; - because we know ]INT is non-zero when we enter the loop, we can
+; start our upper bound at the known highest possible position (instead
+; of one past that, which we would use if we had to check for the
+; "not found" case after the loop)
+
+        .macro  MSBPOS, ?expr
+]INT    =   (?expr) & $7FFFFFFF
+
+        .if ]INT
+]LSB    = 0
+]MSB    = 31
+
+        .while ]LSB+1 != ]MSB
+]MID    = (]LSB + ]MSB) / 2
+        .if ]INT & ($7FFFFFF << ]MID)
+]LSB    = ]MID
+        .else
+]MSB    = ]MID
+        .endif
+        .endw
+
+        .else
+]MSB    =   $FF
+        .endif
+
+        .endm
+
+; -------------------------------
+
+        ; test it
+
+        .starttimer method1
+
+        .long   0
+        MSBPOS  0
+        .byte   ]MSB
+
+        .long   -1
+        MSBPOS  -1
+        .byte   ]MSB
+
+        .long   $80000000
+        MSBPOS  $80000000
+        .byte   ]MSB
+
+]VAL    = 1
+        .repeat  31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = ]VAL << 1
+        .endr
+
+]VAL    = 1 << 30
+        .repeat  31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = ]VAL >> 1
+        .endr
+
+]VAL    = 1
+        .repeat 31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = (]VAL << 1) + 1
+        .endr
+
+]VAL    = 1 << 30
+        .repeat 31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = (]VAL >> 1) + 1
+        .endr
+
+        .showtimer method1
+
+; -------------------------------
+
+        .if ver() < $0150
+        .fatal "This version does not support the ternary operator"
+        .endif
+
+; -------------------------------
+
+; what we'll try to do is unroll the binary search to see if we can make
+; it faster
+; - ]INT != 0, ]MSB = 0->30 (not 1->31); otherwise ]MSB = -1 (arbitrary)
+; - add one to ]MSB if 1->31 is better
+
+        .undef MSBPOS
+
+        .macro MSBPOS, ?expr
+]INT    =   (?expr) & $7FFFFFFF
+
+        .if ]INT
+]MSB    = (]INT & $7FFF0000) ? 16 : 0
+]MSB    = (]INT & ($7FFFFFFF << ]MSB)) ? ]MSB + 8 : ]MSB - 8
+]MSB    = (]INT & ($7FFFFFFF << ]MSB)) ? ]MSB + 4 : ]MSB - 4
+]MSB    = (]INT & ($7FFFFFFF << ]MSB)) ? ]MSB + 2 : ]MSB - 2
+]MSB    = (]INT & ($7FFFFFFF << ]MSB)) ? ]MSB + 1 : ]MSB - 1
+        .else
+]MSB    = $FF
+        .endif
+        .endm
+        
+; -------------------------------
+
+        ; test it (paste & copy is so handy!)
+
+        .starttimer method2
+
+        .long   0
+        MSBPOS  0
+        .byte   ]MSB
+
+        .long   -1
+        MSBPOS  -1
+        .byte   ]MSB
+
+        .long   $80000000
+        MSBPOS  $80000000
+        .byte   ]MSB
+
+]VAL    = 1
+        .repeat  31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = ]VAL << 1
+        .endr
+
+]VAL    = 1 << 30
+        .repeat  31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = ]VAL >> 1
+        .endr
+
+]VAL    = 1
+        .repeat 31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = (]VAL << 1) + 1
+        .endr
+
+]VAL    = 1 << 30
+        .repeat 31
+        .long   ]VAL
+        MSBPOS  ]VAL
+        .byte   ]MSB
+]VAL    = (]VAL >> 1) + 1
+        .endr
+
+        .showtimer method2
+
+; -------------------------------
+
+        .end

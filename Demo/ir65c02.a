@@ -1,0 +1,217 @@
+; Hobby Cross-Assembler Processor Instruction Set
+; Macro Implementation
+; Processor: R65C02
+
+; by Anton Treuenfels
+
+; first created: 08/16/07
+; last revision: 03/24/12
+
+;-----------------------------------------------
+
+        .if ver() < $0180
+        .fatal  "HXA version 0.180 or higher required"
+        .endif
+
+; ----------------------------
+
+; this file implements the same instruction set for the R65C02 as
+; the HXA65 assembler, including extended instruction variants defined
+; by Western Design Center (portable) and HXA65 (not portable)
+
+; "forced address modes" (normally zero page modes to absolute and
+; vice versa) are NOT supported, however additional macros having
+; the same effect are not difficult to define
+; (eg., LDAA could be defined to "Load Absolute Always")
+
+; variable labels are used to:
+; - reduce macro substitution
+; - increase expression cache efficiency
+
+; ----------------------------
+
+        .if !cpu$()         ; cpu not defined yet ?
+
+        .cpu    "T_16_L"    ; 16-bit little-endian
+
+        .endif
+
+; ----------------------------
+
+; the R65C02 instruction set is a superset of the 65C02
+
+        .if !defined(ADC)   ; 65c02 instructions defined yet ?
+
+        .include    "i65c02.a"
+
+        .endif
+
+; ----------------------------
+
+; reserved label names - macro expansion can change their values!!
+
+]opc    .equ    0
+]adr$   .equ    ""
+]bra$   .equ    ""
+
+; ----------------------------
+; Helper Macros
+; ----------------------------
+
+        ; "zero page test relative"
+
+        .macro  _zptr, ]opc, ]adr$, ]bra$
+        .if ]adr$ ~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        badmode
+        .elseif ]bra$ ~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        badmode
+        .else
+        .ubyte  ]opc, val(]adr$)
+        .rbyte  val(]bra$)
+        .endif
+        .endm
+
+        ; "set/reset memory bit"
+
+        .macro _membit, ]opc, ]adr$
+        .if ]adr$ !~ /^[AXY@]$|^#|^\([^\)]*\)$/i
+        .ubyte ]opc, val(]adr$)
+        .else
+        badmode
+        .endif
+        .endm
+
+; ----------------------------
+; Processor Instruction Macros
+; - just the additional R65C02 instructions
+; ----------------------------
+
+        .macro BBR0, ?adr=@, ?bra=@
+        _zptr $0F, "?adr", "?bra"
+        .endm
+
+        .macro BBR1, ?adr=@, ?bra=@
+        _zptr $1F, "?adr", "?bra"
+        .endm
+
+        .macro BBR2, ?adr=@, ?bra=@
+        _zptr $2F, "?adr", "?bra"
+        .endm
+
+        .macro BBR3, ?adr=@, ?bra=@
+        _zptr $3F, "?adr", "?bra"
+        .endm
+
+        .macro BBR4, ?adr=@, ?bra=@
+        _zptr $4F, "?adr", "?bra"
+        .endm
+
+        .macro BBR5, ?adr=@, ?bra=@
+        _zptr $5F, "?adr", "?bra"
+        .endm
+
+        .macro BBR6, ?adr=@, ?bra=@
+        _zptr $6F, "?adr", "?bra"
+        .endm
+
+        .macro BBR7, ?adr=@, ?bra=@
+        _zptr $7F, "?adr", "?bra"
+        .endm
+
+        .macro BBS0, ?adr=@, ?bra=@
+        _zptr $8F, "?adr", "?bra"
+        .endm
+
+        .macro BBS1, ?adr=@, ?bra=@
+        _zptr $9F, "?adr", "?bra"
+        .endm
+
+        .macro BBS2, ?adr=@, ?bra=@
+        _zptr $AF, "?adr", "?bra"
+        .endm
+
+        .macro BBS3, ?adr=@, ?bra=@
+        _zptr $BF, "?adr", "?bra"
+        .endm
+
+        .macro BBS4, ?adr=@, ?bra=@
+        _zptr $CF, "?adr", "?bra"
+        .endm
+
+        .macro BBS5, ?adr=@, ?bra=@
+        _zptr $DF, "?adr", "?bra"
+        .endm
+
+        .macro BBS6, ?adr=@, ?bra=@
+        _zptr $EF, "?adr", "?bra"
+        .endm
+
+        .macro BBS7, ?adr=@, ?bra=@
+        _zptr $FF, "?adr", "?bra"
+        .endm
+
+        .macro  RMB0, ?adr=@
+        _membit $07, "?adr"
+        .endm
+
+        .macro  RMB1, ?adr=@
+        _membit $17, "?adr"
+        .endm
+
+        .macro  RMB2, ?adr=@
+        _membit $27, "?adr"
+        .endm
+
+        .macro  RMB3, ?adr=@
+        _membit $37, "?adr"
+        .endm
+
+        .macro  RMB4, ?adr=@
+        _membit $47, "?adr"
+        .endm
+
+        .macro  RMB5, ?adr=@
+        _membit $57, "?adr"
+        .endm
+
+        .macro  RMB6, ?adr=@
+        _membit $67, "?adr"
+        .endm
+
+        .macro  RMB7, ?adr=@
+        _membit $77, "?adr"
+        .endm
+
+        .macro  SMB0, ?adr=@
+        _membit $87, "?adr"
+        .endm
+
+        .macro  SMB1, ?adr=@
+        _membit $97, "?adr"
+        .endm
+
+        .macro  SMB2, ?adr=@
+        _membit $A7, "?adr"
+        .endm
+
+        .macro  SMB3, ?adr=@
+        _membit $B7, "?adr"
+        .endm
+
+        .macro  SMB4, ?adr=@
+        _membit $C7, "?adr"
+        .endm
+
+        .macro  SMB5, ?adr=@
+        _membit $D7, "?adr"
+        .endm
+
+        .macro  SMB6, ?adr=@
+        _membit $E7, "?adr"
+        .endm
+
+        .macro  SMB7, ?adr=@
+        _membit $F7, "?adr"
+        .endm
+
+; ----------------------------

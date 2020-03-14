@@ -1,0 +1,138 @@
+; Hobby Cross-Assembler Demo 022
+; Type Conversion\DEC Macros
+; ok: convert an integer to a fixed length ASCII decimal
+
+; by Anton Treuenfels
+
+; first created: 07/24/04
+; last revised:  11/22/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .if ver() < $0151
+        .fatal  "HXA version 0.151 or higher required"
+        .endif
+
+; -------------------------------
+
+; create a fixed-length positive ASCII decimal
+
+        .macro FIXED_POS
+
+]val$   = str$( ]val )
+]diff   = len(]val$) - ]len
+
+        .if ]diff > 0       ; too long (truncate) ?
+]val$   = mid$( ]val$, ]diff+1 )
+
+        .elseif ]diff < 0   ; too short (works for up to 32 digits) ?
+        .str mid$( "00000000000000000000000000000000", ]diff )
+        .endif
+
+        .str ]val$
+
+        .endm
+
+; create a fixed-length negative ASCII decimal
+
+        .macro FIXED_NEG
+
+]val$   = str$( -]val )
+]diff   = len(]val$) - ]len + 1
+
+        .if ]diff > 0       ; too long (truncate) ?
+]val$   = mid$( ]val$, ]diff+1 )
+
+        .elseif ]diff < 0   ; too short (works for up to 32 digits) ?
+]val$   = mid$( "00000000000000000000000000000000", ]diff ) ]val$
+        .endif
+
+        .str "-" ]val$
+
+        .endm
+
+; create a fixed-length ASCII decimal number
+; - works for all but minimum negative value
+; - works up to 32 characters in decimal number (can be easily adjusted)
+
+        .macro  DEC_FIXED, ]val, ]len=10
+
+        .if ]val >= 0
+        FIXED_POS
+        .else
+        FIXED_NEG
+        .endif
+
+        .endm
+
+; -------------------------------
+
+; a test macro (to save a lot of typing!). The ".word" pseudo ops are just
+; to make the listing easier to read, since we're not showing expansions
+
+        .macro  TEST_DEC, ]expr
+        .long   0
+        .byte   10
+        .long   ]expr
+        DEC_FIXED   ]expr
+]len    =   1
+        .repeat 16
+        .long   0
+        .byte   ]len
+        .long   ]expr
+        DEC_FIXED   ]expr, ]len
+]len    .equ    ]len + 1
+        .endr
+        .endm
+
+; test it
+
+        .echo testing DEC_FIXED
+
+        .starttimer DF_1
+
+        TEST_DEC    0
+
+        TEST_DEC    1
+
+        TEST_DEC    2
+
+        TEST_DEC    3
+
+        TEST_DEC    4
+
+        TEST_DEC    5
+
+        TEST_DEC    10
+
+        TEST_DEC    100
+
+        TEST_DEC    1000
+
+        TEST_DEC    1000000
+
+        TEST_DEC    1000000000
+
+        TEST_DEC    2147483647
+
+        TEST_DEC    -1
+
+        TEST_DEC    -10
+
+        TEST_DEC    -1234
+
+        .showtimer  DF_1
+
+; -------------------------------
+
+        .end
