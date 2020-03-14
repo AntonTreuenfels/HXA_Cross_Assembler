@@ -1,0 +1,24 @@
+; Hobby Cross-Assembler Test 257
+; File Inclusion\Include File as Last Line of Root File
+; ok: file inclusion; no END psop in any file
+
+; by Anton Treuenfels
+
+; first created: 05/01/11
+; last revised:  05/01/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; the test itself (just a handy file to use)
+
+        .include    "ihexdata.a"

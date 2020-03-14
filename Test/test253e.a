@@ -1,0 +1,78 @@
+; Hobby Cross-Assembler Error Test 253e
+; File Inclusion\Read Exclusion
+; warn: circular inclusion (stacked inclusions)
+
+; by Anton Treuenfels
+
+; first created: 09/21/07
+; last revised:  09/09/13
+
+; warning(s): 1
+; - circular inclusion
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxdepth   128
+
+; -------------------------------
+
+; we can get by with only one test file by using self-inclusion
+; (probably not a trick of much use in any other context!)
+
+        .if !defined(INCTEST)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; how many times to include self
+; - each inclusion generates one byte
+
+ENDADR  =   * + 128
+
+        .macro  INCTEST
+        .byte   *
+        .endmacro
+
+; -------------------------------
+
+        .else
+        .readonce                   ; warning - circular inclusion
+
+; -------------------------------
+
+        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; here we go...
+
+        INCTEST
+
+        .if         * < ENDADR
+        .echo       "Entering..."
+        .include    "test253e.a"
+        .echo       "...leaving"
+        .endif
+
+; if we use the "END" psop at the end of this file, it will be executed
+; the first time the conditional block is completed. That's not what we
+; want, though, since the block has to complete about 127 more times
+; before the include stack is completely unwound. Fortunately "END" is
+; not a required psop because its effects happen automatically at the
+; end of source anyway.
+
+; of course the above applies only if READONCE doesn't apply
+
+;       .end
+

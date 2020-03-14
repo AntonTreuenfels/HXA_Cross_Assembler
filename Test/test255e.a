@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Test 255e
+; File Inclusion\Early Read Termination
+; warn: "END" psop in include files (w/ + w/o start address)
+
+; by Anton Treuenfels
+
+; first created: 07/04/09
+; last revised:  07/04/09
+
+; warning(s): 3
+; - odd psop
+; - token ignored
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "T_16_L"    ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+    ; this is actually the "success" test (only warnings issued)
+
+        .echo "In 255E.A"
+
+        .include "test255.a"
+
+        .echo "In 255E.A"
+
+        .include "test255b.a"
+
+        .echo "In 255E.A"
+
+; -------------------------------
+
+        .end                ; reading stops here (as does pass one)
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+

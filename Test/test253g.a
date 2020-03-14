@@ -1,0 +1,41 @@
+; Hobby Cross-Assembler Error Test 253g
+; File Inclusion\Read Exclusion
+; warn: previous inclusion
+
+; by Anton Treuenfels
+
+; first created: 09/09/13
+; last revised:  09/09/13
+
+; warning(s): 1
+; - previous inclusion
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; include another file (which works as expected)
+
+        .include    "test253.a"
+
+; now prevent this one from being read again
+
+        .readonce
+
+; -------------------------------
+
+        .end
+
+

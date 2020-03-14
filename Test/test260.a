@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Test 260
+; Binary File Inclusion\Binary Inclusion
+; ok: binary file inclusion
+
+; by Anton Treuenfels
+
+; first created: 09/13/07
+; last revised:  03/26/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .objfile
+        .hexfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+incfile$    =   "incdat.bin"
+
+        ; default inclusion is whole file...
+
+        .incbin incfile$
+
+        ; ...but we can take just start...
+
+        .incbin incfile$, 256
+
+        ; ...or middle...
+
+        .incbin incfile$, 512, 256
+
+        ; ...or end...
+
+        .incbin incfile$, 256, 512+256
+
+        ; ...or more than remains (takes just what remains)...
+
+        .incbin incfile$, 256, 1020
+
+        ; ...or start past end of file (takes nothing)
+
+        .incbin incfile$, 256, 1025
+
+; -------------------------------
+
+        .end

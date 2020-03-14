@@ -1,0 +1,85 @@
+; Hobby Cross-Assembler Error Test 253f
+; File Inclusion\Read Exclusion
+; warning: circular inclusion (no stacked inclusions)
+
+; by Anton Treuenfels
+
+; first created: 09/24/07
+; last revised:  09/09/13
+
+; warning(s): 1
+; - circular inclusion
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxdepth   128
+
+; -------------------------------
+
+; this test is meant to show that it is not possible to guarantee
+; that a file has not been previously read simply by examining the
+; currently unclosed include files
+; - the idea is that (by self inclusion) this file is read twice,
+; but at the time "READONCE" is executed there are no unclosed inclusions
+
+; -------------------------------
+
+; we can get by with only one test file by using self-inclusion
+; (probably not a trick of much use in any other context!)
+
+        .if !defined(INCTEST)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; how many times to include self
+; - each inclusion generates one byte
+
+ENDADR  =   * + 128
+
+        .macro  INCTEST
+        .byte   *
+        .endmacro
+
+; -------------------------------
+
+; here we go...
+
+        INCTEST
+
+        .if         * < ENDADR
+        .echo       "Entering..."
+        .include    "test253f.a"
+        .echo       "...leaving"
+        .endif
+
+; -------------------------------
+
+        .readonce               ; executed after inclusion but at base level
+
+; -------------------------------
+
+        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; if we use the "END" psop at the end of this file, it will be executed
+; when the include file is completely read. That's not what we want, though.
+; We want reading to return to the orignal file (ie., itself, but not yet
+; at the end when the return happens). Fortunately "END" is not required
+; because its effects happen automatically at the end of all source anyway
+
+; of course the above applies only if READONCE doesn't apply
+
+;       .end

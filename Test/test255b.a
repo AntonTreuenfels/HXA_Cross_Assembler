@@ -1,0 +1,55 @@
+; Hobby Cross-Assembler Test 255b
+; File Inclusion\Early Read Termination
+; ok: "END" psop (w/ start address)
+
+; by Anton Treuenfels
+
+; first created: 07/04/09
+; last revised:  07/04/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+         .cpu    "T_16_L"    ; required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; this file is complete in itself (should assemble without error),
+; but is designed to be "INCLUDED" to test the behavior of the
+; "END" pseudo op within included files
+
+; -------------------------------
+
+        .echo   "In 255B.A"
+
+; -------------------------------
+
+    ; null if defined here, but non-null if defined by
+    ; an "INCLUDING" file
+
+        .if !defined(ENDINMACRO)
+        .macro ENDINMACRO
+        .endm
+        .endif
+
+    ; execute the macro
+
+        ENDINMACRO
+
+; -------------------------------
+
+        ; expression will evaluated if this is root file, otherwise not
+
+        .end    $1234 + $5678   ; reading stops here
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+

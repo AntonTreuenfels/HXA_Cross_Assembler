@@ -1,0 +1,33 @@
+; Hobby Cross-Assembler Test 260b
+; Binary File Inclusion\Binary Inclusion
+; ok: binary inclusion data file generator (run first)
+
+; by Anton Treuenfels
+
+; first created: 09/13/07
+; last revised:  03/26/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .objfile "incdat.bin"   ; we need the binary
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+]val    = 0
+
+        .repeat 256
+        .byte ]val, ]val, ]val, ]val
+]val    = ]val + 1
+        .endr
+
+; -------------------------------
+
+        .end

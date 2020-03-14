@@ -1,0 +1,62 @@
+; Hobby Cross-Assembler Test 255i
+; File Inclusion\Early Read Termination
+; warn\error\fatal: "END" psop in "IF" block (w/ start address)
+
+; by Anton Treuenfels
+
+; first created: 07/05/09
+; last revised:  07/05/09
+
+; warning(s): 2
+; - odd psop
+; - token ignored
+
+; error(s): 2
+; - unmatched block
+
+; fatal: 1
+; - unclosed block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "T_16_L"    ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        ; this is the test
+        ; - the IF block is topmost on the block stack when "END" executed
+
+        .macro ENDINMACRO
+        .if 1
+        .end $1234 + $5678
+        .endif
+        .endm
+
+        .echo "In 255I.A"
+
+        .include "test255b.a"   ; fatal error when "END" reached
+
+; -------------------------------
+
+        .echo "In 255F.A"
+
+        .include "test255b.a"
+
+        .echo "In 255F.A"
+
+; -------------------------------
+
+        .end                ; reading stops here (as does pass one)
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+

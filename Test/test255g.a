@@ -1,0 +1,59 @@
+; Hobby Cross-Assembler Test 255g
+; File Inclusion\Early Read Termination
+; warn\error\fatal: "END" psop in macro expansion (w/ start address)
+
+; by Anton Treuenfels
+
+; first created: 07/04/09
+; last revised:  07/04/09
+
+; warning(s): 2
+; - odd psop
+; - token ignored
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 1
+; - unclosed block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+* no code generating psops or instructions
+
+*        .cpu    "T_16_L"    ; un-required psop
+*        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+        ; this is the test
+
+        .macro ENDINMACRO
+        .end $1234 + $5678
+        .endm
+
+        .echo "In 255G.A"
+
+        .include "test255b.a"   ; fatal error when "END" reached
+
+; -------------------------------
+
+        .echo "In 255F.A"
+
+        .include "test255b.a"
+
+        .echo "In 255F.A"
+
+; -------------------------------
+
+        .end                ; reading stops here (as does pass one)
+
+; -------------------------------
+
+        .fatal  "This is not fine!"
+

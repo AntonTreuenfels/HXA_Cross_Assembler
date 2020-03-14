@@ -1,0 +1,45 @@
+; Hobby Cross-Assembler Error Test 260f
+; Binary File Inclusion\Binary Inclusion
+; warn: odd argument values
+
+; by Anton Treuenfels
+
+; first created: 09/13/07
+; last revised:  05/28/11
+
+; warning(s): 5
+; - odd value
+
+; error(s): 0
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+incfile$    .equ    "incdat.bin"       ; previously created
+
+; odd values default to:
+; - count -> take whole file
+; - start -> start from beginning
+
+        .incbin incfile$, -100          ; odd value
+
+        .incbin incfile$, -100, 512     ; odd value
+
+        .incbin incfile$, 256, -200     ; odd value
+
+        .incbin incfile$, -100, -200    ; odd value
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Test 252
+; File Inclusion\Default Output File Names
+; ok: default output file names set within include file
+
+; by Anton Treuenfels
+
+; first created: 04/13/06
+; last revised:  04/13/06
+
+; "TEST252.A" and "TEST252B.A" are actually identical files (to make the
+; test easy to write) with different names (which is the point of the
+; test - the output files should be "TEST252.xxx" even though the "--FILE"
+; pseudo ops are executed within the "TEST252B.A" file)
+
+; no errors to detect
+
+        .if defined( INCTEST )      ; not defined the first time encountered
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .else
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .macro  INCTEST     ; flag: within include file
+        .endmacro
+
+        .byte   $00         ; just a little something to look at
+
+        .include    "test252b.a" ; the actual test
+
+        .byte   $01         ; again, just something to look at
+
+; -------------------------------
+
+        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; prevent "END" from pre-maturely terminating test
+
+;       .end

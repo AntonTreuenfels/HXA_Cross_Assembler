@@ -1,0 +1,76 @@
+; Hobby Cross-Assembler Error Test 251e
+; File Inclusion\File Label Scoping
+; error: global labels
+
+; by Anton Treuenfels
+
+; first created: 04/02/04
+; last revised:  05/21/11
+
+; warning(s): 7
+; - odd label
+
+; error(s): 7
+; - duplicate name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .liston     autos
+
+; -------------------------------
+
+; we can get by with only one test file by using self-inclusion
+; (probably not a trick of much use in any other context!)
+
+        .if !defined(INCTEST)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; how many times to include self
+; - each inclusion generates one byte
+
+ENDADR  =   * + 8
+
+        .macro  INCTEST
+        .byte   *
+        .endmacro
+
+; -------------------------------
+
+        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; here we go...
+
+        INCTEST
+
+currpc              ; should complain loudly (different value each time)
+
+        .if         * < ENDADR
+        .echo       "Entering..."
+        .include    "test251e.a"
+        .echo       "...leaving"
+        .endif
+
+equate .equ 1234    ; no complaints (same value each time)
+
+; if we use the "END" psop at the end of this file, it will be executed
+; the first time the conditional block is completed. That's not what we
+; want, though, since the block has to complete about 7 more times
+; before the include stack is completely unwound. Fortunately "END" is
+; not a required psop because its effects happen automatically at the
+; end of source anyway.
+
+;       .end
+
