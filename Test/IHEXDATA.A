@@ -1,0 +1,52 @@
+; Hobby Cross-Assembler Hexadecimal Output File Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: 16-, 20-, 24- and 32-bit
+
+; by Anton Treuenfels
+
+; first created: 12/03/09
+; last revised:  06/25/11
+
+; -------------------------------
+
+        .if cpu$() ~ /_16_/
+        .org    $C000
+maxaddr    =   $FFFF        ; for "start address" tests (illegal)
+
+        .elseif cpu$() ~ /_20_/
+        .org    $DD000
+maxaddr    =   $FFFFF
+
+        .elseif cpu$() ~ /_24_/
+        .org    $EEE000
+maxaddr    =   $FFFFFF
+
+        .elseif cpu$() ~ /_32_/
+        .org    $FFFFF000
+maxaddr    =   $FFFFFFFF
+
+        .else
+        .fatal "Illegal CPU in Hexadecimal Test"
+        .endif
+
+; -------------------------------
+
+; test numeric data
+
+]temp    =   $FFFF0000
+
+        .repeat 64
+        .bit32  ]temp
+]temp    = ]temp - $FFFF
+        .endr
+
+; test string-oriented data
+
+        .string "@ABCDEFGHIHKLMNOPQRSTUVWXYZ",$00
+
+; test legal start address (non-zero least significant byte)
+
+start:  .bit32   start
+
+        .string "Hello, World!"
+

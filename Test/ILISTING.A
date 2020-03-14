@@ -1,0 +1,76 @@
+; Hobby Cross-Assembler Listing Output Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: lines over and under default listing width
+
+; by Anton Treuenfels
+
+; first created: 03/27/10
+; last revised:  04/25/11
+
+; -------------------------------
+
+; default list width is 75 characters
+; - a line longer than that is broken at (in order):
+; - rightmost comma less than list width
+; - rightmost space less than list width
+; - list width
+
+; -------------------------------
+
+; these lines are all under the default limit
+
+; spaces between data bytes
+
+data1:  .byte   $00, $01, $02, $03, $04, $05, $06, $07
+
+; one space between data bytes
+
+data2:  .byte   $00,$01,$02,$03, $04,$05,$06,$07
+
+; no spaces between data bytes
+
+data3:  .byte   $00,$01,$02,$03,$04,$05,$06,$07
+
+; spaces between words
+
+strg1:  .str    "A test string under the limit"
+
+; one space between words
+
+strg2:  .str    "Ateststring underthelimit"
+
+; no spaces between words
+
+strg3:  .str    "Ateststringunderthelimit"
+
+; -------------------------------
+
+; these lines are all over the default limit
+
+; spaces between data bytes
+
+data4:  .byte   $00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $1b, $1c, $1d, $1e, $1f
+
+; one space between data bytes
+
+data5:  .byte   $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1a,$1b,$1c,$1d,$1e,$1f
+
+; no spaces between data bytes
+
+data6:  .byte   $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$1a,$1b,$1c,$1d,$1e,$1f
+
+; spaces between words
+
+strg4:  .str    "A very long string designed strictly to see how the listing routine will react to very long lines"
+
+; one space between words
+
+strg5:  .str    "Averylongstringdesignedstrictlytoseehowthelisting routinewillreacttoverylonglines"
+
+; no spaces between words
+
+strg6:  .str    "Averylongstringdesignedstrictlytoseehowthelistingroutinewillreacttoverylonglines"
+
+; -------------------------------
+
+strg7:  .str    "A very long string designed strictly to exceed the maximum allowed page width and thus forcing any difference between setting the maximum allowed page width and setting the page width to zero becomes apparent to even the most casual of observers"

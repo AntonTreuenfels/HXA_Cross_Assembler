@@ -1,0 +1,52 @@
+; Hobby Cross-Assembler Hexadecimal Narrowed Output File Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: 16-, 20-, 24- and 32-bit
+
+; by Anton Treuenfels
+
+; first created: 12/03/09
+; last revised:  02/05/11
+
+; -------------------------------
+
+        .if cpu$() ~ /16/
+        .org    $C000
+maxaddr    =   $FFFF        ; for "start address" tests (illegal)
+
+        .elseif cpu$() ~ /20/
+        .org    $0D000
+maxaddr    =   $FFFFF
+
+        .elseif cpu$() ~ /24/
+        .org    $00E000
+maxaddr    =   $FFFFFF
+
+        .elseif cpu$() ~ /32/
+        .org    $0000F000
+maxaddr    =   $FFFFFFFF
+
+        .else
+        .fatal "Illegal CPU in Hexadecimal Test"
+        .endif
+
+; -------------------------------
+
+; test byte-oriented data
+
+]temp    =   $FF00
+
+        .repeat 64
+        .word   ]temp
+]temp    = ]temp - 255
+        .endr
+
+; test string-oriented data
+
+        .string "@ABCDEFGHIHKLMNOPQRSTUVWXYZ",$00
+
+; test legal start address (non-zero least significant byte)
+
+start:  .long   start
+
+        .string "Hello, World!"
+

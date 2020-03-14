@@ -1,0 +1,64 @@
+; Hobby Cross-Assembler Listing Global Label Cross-Reference Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: macro definitions/expansions in an include file
+
+; by Anton Treuenfels
+
+; first created: 04/13/11
+; last revised:  04/16/11
+
+; ----------------------
+
+; largely cribbed from "TEST050.A" and "TEST055.A"
+
+; -------------------------------
+
+        ; these can be repeated (as long as same values)
+
+        .cpu    "T_16_M"    ; required psop
+bak01   .org    $1000       ; required psop (can be labeled)
+
+; -------------------------------
+
+        ; numeric labels
+
+bak03   .word   bak03
+
+bak04                       ; label by itself gets current PC as value
+
+bak04a  .word   bak01       ; "bak04a" has same value as "bak04"
+
+fwd04   .word   bak01a:     ; trailing colon allowed in reference to label
+
+BADH    .word   BADH        ; "BADH" is interpreted as a label
+        .word   0BADH       ; "0BADH" is interpreted as an Intel-style number
+
+b_05    .word   f.03        ; check embedded underscore and period chars
+
+f.03    .word   b_05        ; - legal after first alpha char
+
+b_06_   .word   f.0.2       ; underscore legal as last char...
+
+; ----------------------
+
+        ; string labels
+
+label1                      ; pc (as number)
+label1$                     ; pc (as string)
+
+        .word   label1
+        .string label1$
+
+_label2                     ; pc (as number)
+label_2$                    ; pc (as string)
+
+        .word   _label2
+        .string label_2$
+
+p.label3                    ; pc (as number)
+P.LABEL3$                   ; pc (as string)
+
+        .word   P.LABEL3
+        .string p.label3$
+
+; ----------------------

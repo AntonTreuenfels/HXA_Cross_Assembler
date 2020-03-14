@@ -1,0 +1,158 @@
+; Hobby Cross-Assembler Listing Macro Cross-Reference Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: macro definitions/expansions in an include file
+
+; by Anton Treuenfels
+
+; first created: 04/09/11
+; last revised:  04/09/11
+
+; ----------------------
+
+; largely cribbed from "TEST100.A"
+
+; ----------------------
+; alternate form of definition
+; ----------------------
+
+; define null-terminated string (a C-style string)
+
+STRZ_2  .macro  ?text
+        .str    ?text
+        .byte   0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+PSTR_2  .macro  ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; ----------------------
+
+; test string equality
+
+        .macro  STREQU, ?s1, ?s2
+        .byte   ?s1 == ?s2
+        .endm
+
+; ---------------
+
+@beg    .word   @end        ; no conflict w/ locals inside macro definitions
+
+; we'll test labeling macro expansions using variable labels because
+; using globals would flush the local label table and screw up the
+; test we just started above (plus it's easier to keep re-using names)
+
+]here   = *    
+
+]beg    NO_BODY             ; no code generated
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STRZ    "Hello, World!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STRZ_2  "Hello, again!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    PSTR    "Hello, World!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    PSTR_2  "Hello, again!"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One","One"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One","Two"
+
+        .byte   ]here == ]beg
+
+]here   = *    
+
+]beg    STREQU  "One,Two", "Three"
+
+        .byte   ]here == ]beg
+
+; a few unlabeled expansions to show they work too...
+
+        STREQU  "One", "Two,Three"
+
+        .byte   $ff
+
+        STREQU  "One,Two","One,Two"
+
+        .byte   $ff
+
+        STREQU  "One,Two", "Three,Four"
+
+        .byte   $ff
+
+@end    .word   @beg        ; no locals conflict here, either
+
+; ---------------
+
+; lower case macro names in definition and use
+
+; define null-terminated string (a C-style string)
+
+strz_3  .macro  ?text
+        .str    ?text, 0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+pstr_3  .macro  ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; use them
+
+        strz_3  "Hello, World!"
+
+        pstr_3  "Hello, World!"
+
+; define null-terminated string (a C-style string)
+
+        .macro  strz_4, ?text
+        .str    ?text, 0
+        .endm
+
+; define string with preceeding length byte (a Pascal-style string)
+
+        .macro  pstr_4, ?text
+        .byte   @end - @beg
+@beg    .str    ?text
+@end    .endm
+
+; use them
+
+        strz_4  "Hello, World!"
+
+        pstr_4  "Hello, World!"
+
+; ---------------
+
+        ; un-define to show correct source file location recorded
+
+        .undef  strz_3, pstr_3

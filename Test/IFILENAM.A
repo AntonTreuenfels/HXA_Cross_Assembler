@@ -1,0 +1,22 @@
+; Hobby Cross-Assembler FILE$() Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: correct
+
+; by Anton Treuenfels
+
+; first created: 04/30/11
+; last revised:  04/30/11
+
+; -------------------------------
+
+        ; all we want to see is if the filename is that of this file
+
+ifilenam$   =   FILE$()
+
+        .str    ifilenam$
+
+        .if "IFILENAM.A" != ifilenam$
+        .fatal  "String mis-match two"
+        .endif
+
+; -------------------------------

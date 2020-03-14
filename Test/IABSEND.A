@@ -1,0 +1,184 @@
+; Hobby Cross-Assembler ABSEND and RELEND Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: correct for 16-, 24- and 32-bit processors
+
+; by Anton Treuenfels
+
+; first created: 04/06/11
+; last revised:  08/17/13
+
+; -------------------------------
+
+        ; set max legal program counter value
+
+        .if index( cpu$(), "16" )
+
+maxpc   =   $ffff+1
+
+        .macro  store, ?data
+        .bit16  ?data
+        .endm
+
+        .elseif index( cpu$(), "24" )
+
+maxpc   =   $ffffff+1
+
+        .macro  store, ?data
+        .bit24  ?data
+        .endm
+
+        .elseif index( cpu$(), "32" )
+
+; the real value exceeds 32-bit signed integer range (HXA's limit)
+;       maxpc   =   $ffffffff + 1
+
+maxpc   =   $ffffffff
+
+        .macro  store, ?data
+        .bit32  ?data
+        .endm
+
+        .else
+
+        .fatal  "Unknown cpu: " cpu$()
+
+        .endif
+
+; -------------------------------
+
+; first explicit segment *may* be absolute end
+
+        .segment	abs1
+
+absend1 .absend maxpc/16    ; ABSEND before any data makes segment absolute
+
+        store   *
+
+        .endsegment	abs1
+
+; another segment (relative end common)
+
+        .segment    rel2_1
+
+        .relend             ; relative...
+
+        .common             ;...and common
+
+relcom  .ds 256
+
+        .ends
+
+; another segment (absolute end common)
+
+        .segment    abs2
+
+        .common             ; common...
+
+absend2 .absend maxpc/8     ; ...and absolute
+
+abscom  .ds 256
+
+        .ends
+
+; another segment (relative end)
+
+        .segment    rel3_1
+
+        .relend             ; relative
+
+        store   $
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment (relative end)
+
+        .segment    rel3_2
+
+        .relend             ; relative
+
+        store   *
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment (absolute origin)
+
+        .segment    abs3
+
+absend3 .absorg maxpc/2     ; absolute
+
+        store   $          
+
+        .ends   ABS3
+
+; another segment (relative origin)
+
+        .segment    rel3_3
+
+        .relorg             ; relative
+
+        store   *
+
+        .ends
+
+; another segment (relative end)
+
+        .segment    rel4_1
+
+        .relend             ; relative
+
+        store   *
+
+        .ends
+
+; another segment (relative end)
+
+        .segment    rel4_2
+
+        .relend             ; relative
+
+        store   $
+
+        .ends
+
+; another segment (relative end)
+
+        .segment    rel4_3
+
+        .relend             ; relative
+
+        store   *
+
+        .ends
+
+; last segment *must* be absolute if preceeded by relative end segments
+; - we'll put it at the top of memory
+
+        .segment    abs4
+
+absend4 .absend maxpc       ; absolute (no name conflict)
+
+        store   $
+
+        .ends
+
+; -------------------------------
+
+; show we can re-use segment type designators w/ and w/o labels
+
+        .segment    abs1
+
+abs1_e  .absend     absend1 ; cheap way to set this (hehe)
+
+        .absend     abs1_e
+
+        .ends
+
+        .segment    abs4
+
+        .absend     absend4
+
+abs4_e  .absend     absend4
+
+        .ends
+
+; -------------------------------

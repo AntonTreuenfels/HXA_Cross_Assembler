@@ -1,0 +1,161 @@
+; Hobby Cross-Assembler Hexadecimal Output File Test Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: 16-, 20-, 24- and 32-bit overlapping output blocks
+
+; by Anton Treuenfels
+
+; first created: 03/12/10
+; last revised:  02/05/11
+
+; -------------------------------
+
+        .if cpu$() ~ /16/
+        baseaddr = $C000
+
+        .elseif cpu$() ~ /20/
+        baseaddr = $DD000
+
+        .elseif cpu$() ~ /24/
+        baseaddr = $EEE000
+
+        .elseif cpu$() ~ /32/
+        baseaddr = $FFFF0000
+
+        .else
+        .fatal "Illegal CPU in Hexadecimal Test"
+        .endif
+
+; -------------------------------
+
+; for this test first we establish the existence, type and order
+; of the segments we want
+
+; make first segment absolute
+
+        .segment	abs1
+
+        .org    baseaddr
+
+        .ends
+
+; followed by a relative segment
+
+        .segment    rel1
+
+start       ; start address should be same as start of this segment
+
+        .ends
+
+; an uninitialized absolute segment (not part of output)
+
+        .segment    abs2
+
+        .org    baseaddr + $400
+
+        .nodata
+
+        .ends
+
+; an uninitialized relative segment (not part of output)
+
+        .segment    rel2
+
+        .common
+
+        .ends
+
+; another absolute segment that overlaps first segment ('abs1')
+
+        .segment    abs3
+
+        .org    baseaddr
+
+        .ends
+
+; another relative segment
+
+        .segment    rel3
+
+        .ends
+
+; -------------------------------
+
+; we're going to try to generate an output file consisting of the values
+; $00 -> $7F in sequence even though the source file generates them
+; non-sequentially (compare hexfile to listfile)
+; - we're also trying to show that unintialized segments are not output
+
+repeatcnt   .equ    32
+]loopnum    .equ    0
+
+        .macro store, ]basenum
+        .byte   ]basenum * repeatcnt + ]loopnum
+        .endm
+
+; -------------------------------
+
+        ; generate data or reserve space
+
+        .repeat     repeatcnt
+
+        ; 0 -> repeatcnt - 1
+
+        .segment    abs1
+
+        store   0
+
+        .ends
+
+        ; repeatcnt -> 2 * repeatcnt - 1
+
+        .segment    rel1
+
+        store   1
+
+        .ends
+
+        ; size = repeatcnt
+
+        .segment    abs2
+
+        .ds     1
+
+        .ends
+
+        ; size = repeatcnt
+
+        .segment    rel2
+
+        .ds     repeatcnt - ]loopnum
+
+        .ends
+
+        ; 2 * repeatcnt -> 3 * repeatcnt - 1
+
+        .segment    abs3
+
+        store   2
+
+        .ends
+
+        ; 3 * repeatcnt -> 4 * repeatcnt - 1
+
+        .segment    rel3
+
+        store   3
+
+        .ends
+
+]loopnum =  ]loopnum + 1
+
+; end of repeat block
+
+        .endr
+
+; -------------------------------
+
+        ; show start address in output (match against file format's version)
+
+        .segment    rel3
+        .long   start
+        .ends

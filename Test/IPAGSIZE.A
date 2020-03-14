@@ -1,0 +1,50 @@
+; Hobby Cross-Assembler Listing Output Default Page Size Data
+; an INCLUDE file (for consistency and ease of updating)
+; ok: default page size values exposed for test purposes
+
+; by Anton Treuenfels
+
+; first created: 04/23/11
+; last revised:  04/23/11
+
+; -------------------------------
+
+; these are the default built-in values
+
+pagwid      = 75            ; default page width
+paglen      = 0             ; default page length
+
+topmrg      = 0             ; default top margin
+lftmrg      = 0             ; default left margin
+botmrg      = 0             ; default bottom margin
+rgtmrg      = 0             ; default right margin
+
+linspc      = 1             ; default line spacing
+
+; these are the minimum allowed values users can set
+
+minwid      = 1             ; if non-zero (zero= no right edge)
+minlen      = 1             ; if non-zero (zero= no bottom edge)
+
+mintop      = 0
+minlft      = 0
+minbot      = 0
+minrgt      = 0
+
+minlin      = 1
+
+; these are the maximum allowed values users can set
+
+maxpag      = 255
+
+maxwid      = maxpag
+maxlen      = maxpag
+
+maxtop      = maxpag-1
+maxlft      = maxpag-1
+maxbot      = maxpag-1
+maxrgt      = maxpag-1
+
+maxlin      = maxpag-1
+
+; -------------------------------
