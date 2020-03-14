@@ -1,0 +1,66 @@
+; Hobby Cross-Assembler Test 250f
+; File Inclusion\Inclusion
+; error: unclosed IF conditional in include file
+
+; by Anton Treuenfels
+
+; first created: 09/04/06
+; last revised:  06/28/08
+
+; -------------------------------
+
+; warning(s): 0
+
+; error(s): 1
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; we can get by with only one test file by using self-inclusion
+; (probably not a trick of much use in any other context!)
+
+        .if !defined(INCTEST)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .macro  INCTEST
+        .endmacro
+
+        .include    "test250f.a"
+
+; -------------------------------
+
+; this is our test: the previous IF is now unbalanced
+
+;        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; - the block arrangement at the end of the inclusion looks like this:
+;   if              INCTEST is not defined, so an inclusion happens
+;   include
+;   if              INCTEST is defined, so no further inclusion
+
+; - there are actually two unclosed IFs, but only open blocks up to
+; the INCLUDE are reported (which here consist of one open IF block)
+; - the other is not reported because the first is fatal anyway
+
+; -------------------------------
+
+; we want to check response at end of include file,
+; not end of assembly, so we comment this out
+
+;        .end

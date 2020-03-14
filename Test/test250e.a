@@ -1,0 +1,51 @@
+; Hobby Cross-Assembler Error Test 250e
+; File Inclusion\Inclusion
+; warn\error: malformed "INCLUDE"
+
+; by Anton Treuenfels
+
+; first created: 02/21/04
+; last revised:  05/21/11
+
+; warning(s): 2
+; - label ignored
+; - odd value
+
+; error(s): 5
+; - expecting filename
+; - can't open file
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; bad names
+
+aLabel  .include                    ; label ignored; no name
+
+        .include    ""              ; null name
+
+        .include    "bad@name.a"    ; illegal char in name
+
+; name ok but non-existent files
+
+        .include    "notfound.a"
+
+        .include    "w:\\nopath\\nofile.a"
+
+; -------------------------------
+
+; we also use this file as an include file for "TEST250H.A",
+; and we don't want that test to end inside this file
+
+;        .end

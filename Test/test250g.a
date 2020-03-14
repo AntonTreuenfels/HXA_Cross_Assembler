@@ -1,0 +1,74 @@
+; Hobby Cross-Assembler Test 250g
+; File Inclusion\Inclusion
+; error: file inclusion within block expansion
+
+; by Anton Treuenfels
+
+; first created: 01/10/04
+; last revised:  09/10/06
+
+; -------------------------------
+
+; warning(s): 0
+
+; error(s): 5
+; - can't use within expansion
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; this should never execute because inclusion will not happen !
+
+        .if defined(INCTEST)
+        .fatal "Inclusion happened!"
+        .endif
+
+; -------------------------------
+
+; putting an ".INCLUDE" within a block expansion guarantees
+; that the expansion buffer will be non-empty when the ".INCLUDE"
+; is executed. This in turn means the next line read will come from
+; the buffer and not from the newly-opened include file. This often
+; leads to unexpected results, hence we do not allow it
+
+        .macro  INCTEST
+        .echo   From macro expansion (before inclusion)
+        .include    "test250g.a"
+        .echo   From macro expansion (after inclusion)
+        .endmacro
+
+; here we go...
+
+        INCTEST
+
+; try it with other expansion blocks as well
+
+        .repeat  2
+        .echo   From repeat expansion (before inclusion)
+        .include    "test250g.a"
+        .echo   From repeat expansion (after inclusion)
+        .endrepeat
+
+]count  = 2
+
+        .while  ]count
+        .echo   From while expansion (before inclusion)
+        .include    "test250g.a"
+        .echo   From while expansion (after inclusion)
+]count  =   ]count-1
+        .endwhile
+
+; -------------------------------
+
+       .end

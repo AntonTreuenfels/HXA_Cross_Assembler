@@ -1,0 +1,1811 @@
+; Hobby Cross-Assembler Test 200b
+; Conditional Assembly\IF..ELSEIF..ELSE..ENDIF Blocks
+; ok: IF..ELSEIF..ELSE..ENDIF conditionals (string expressions)
+
+; by Anton Treuenfels
+
+; first created: 06/27/09
+; last revised:  06/27/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ---------------
+
+; - no code generated ! 
+; - so no "CPU" or "ORG" required !
+; - and if no "CPU", no "END" (since it can be labeled, it needs to know PC)
+; - meaningful output goes to error file (via "ECHO")
+
+; ---------------
+
+FALSE$  .equ    ""
+TRUE$   .equ    ".T."
+
+; ---------------
+
+        .echo "*** 2 Tests of IF..ENDIF"
+
+        .echo "Test 01: PASS"
+
+        .if TRUE$
+        .echo "PASS"
+        .endif
+
+        .echo "Test 02: (no output)"
+
+        .if FALSE$
+        .fatal "PASS"
+        .endif
+
+        .echo "*** 2 Tests of IF..ELSE..ENDIF"
+
+        .echo "Test 01: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .else
+        .fatal "PASS2"
+        .endif
+
+        .echo "Test 02: PASS2"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .else
+        .echo "PASS2"
+        .endif
+
+        .echo "*** 4 Tests of IF..ELSEIF..ENDIF"
+
+        .echo "Test 01: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif TRUE$
+        .fatal "PASS2"
+        .endif
+
+        .echo "Test 02: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .endif
+
+        .echo "Test 03: PASS2"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif TRUE$
+        .echo "PASS2"
+        .endif
+
+        .echo "Test 04: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .endif
+
+        .echo "*** 4 Tests of IF..ELSEIF..ELSE..ENDIF"
+
+        .echo "Test 01: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif TRUE$
+        .fatal "PASS2"
+        .else
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test 02: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .else
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test 03: PASS2"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif TRUE$
+        .echo "PASS2"
+        .else
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test 04: PASS3"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .else
+        .echo "PASS3"
+        .endif
+
+        .echo "*** 8 Tests of IF..ELSEIF..ELSEIF..ELSE..ENDIF"
+
+        .echo "Test 01: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif TRUE$
+        .fatal "PASS2"
+        .elseif TRUE$
+        .fatal "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 02: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif TRUE$
+        .fatal "PASS2"
+        .elseif FALSE$
+        .fatal "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 03: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .elseif TRUE$
+        .fatal "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 04: PASS1"
+
+        .if TRUE$
+        .echo "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .elseif FALSE$
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .endif
+
+        .echo "Test 05: PASS2"
+
+        .if FALSE$
+        .echo "PASS1"
+        .elseif TRUE$
+        .echo "PASS2"
+        .elseif TRUE$
+        .fatal "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 06: PASS2"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif TRUE$
+        .echo "PASS2"
+        .elseif FALSE$
+        .fatal "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 07: PASS3"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .elseif TRUE$
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .endif
+
+        .echo "Test 08: PASS4"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .elseif FALSE$
+        .fatal "PASS2"
+        .elseif FALSE$
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .endif
+
+        .echo "*** 4 Tests of IF..IF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .endif
+
+        .echo "Test 02: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .endif
+
+        .echo "Test 03: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test 04: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .endif
+
+        .echo "*** 8 Tests of IF..IF..ENDIF..ELSE..IF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 02: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 03: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 04: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 05: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 06: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 07: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 08: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "*** 16 Tests of IF..IF..ENDIF..ELSEIF..IF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 02: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 03: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 04: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 05: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 06: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 07: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 08: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 09: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 10: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 11: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 12: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 13: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 14: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .endif
+
+        .echo "Test 15: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "Test 16: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .endif
+
+        .echo "*** 32 Tests of IF..IF..ENDIF.."
+        .echo "                ELSEIF..IF..ENDIF"
+        .echo "                ELSE..IF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 02: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 03: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 04: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 05: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 06: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 07: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 08: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 09: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 10: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 11: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 12: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif TRUE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 13: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 14: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 15: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 16: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 17: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 18: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 19: PASS4,6"
+
+        .if FALSE$
+        .echo "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 20: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 21: PASS7,8,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if TRUE$
+        .echo "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 22: PASS7,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 23: PASS7,8,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if TRUE$
+        .echo "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 24: PASS7,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 25: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 26: PASS4,5,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 27: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if TRUE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 28: PASS4,6"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif TRUE$
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .echo "PASS6"
+        .else
+        .fatal "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .fatal "PASS9"
+        .endif
+
+        .echo "Test 29: PASS7,8,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if TRUE$
+        .echo "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 30: PASS7,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 31: PASS7,8,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if TRUE$
+        .echo "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "Test 32: PASS7,9"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .elseif FALSE$
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .endif
+        .fatal "PASS6"
+        .else
+        .echo "PASS7"
+        .if FALSE$
+        .fatal "PASS8"
+        .endif
+        .echo "PASS9"
+        .endif
+
+        .echo "*** 8 Tests of IF..IF..IF..ENDIF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3,4,5"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .if TRUE$
+        .echo "PASS3"
+        .endif
+        .echo "PASS4"
+        .endif
+        .echo "PASS5"
+        .endif
+
+        .echo "Test 02: PASS1,2,4,5"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .if FALSE$
+        .fatal "PASS3"
+        .endif
+        .echo "PASS4"
+        .endif
+        .echo "PASS5"
+        .endif
+
+        .echo "Test 03: PASS1,5"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .if TRUE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .echo "PASS5"
+        .endif
+
+        .echo "Test 04: PASS1,5"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .if FALSE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .echo "PASS5"
+        .endif
+
+        .echo "Test 05: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .if TRUE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .fatal "PASS5"
+        .endif
+
+        .echo "Test 06: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .if FALSE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .fatal "PASS5"
+        .endif
+
+        .echo "Test 07: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .if TRUE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .fatal "PASS5"
+        .endif
+
+        .echo "Test 08: (no output)"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .if FALSE$
+        .fatal "PASS3"
+        .endif
+        .fatal "PASS4"
+        .endif
+        .fatal "PASS5"
+        .endif
+
+        .echo "*** 16 Tests of IF..IF..ENDIF..ELSE..IF..IF..ENDIF..ENDIF..ENDIF"
+
+        .echo "Test 01: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 02: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 03: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 04: PASS1,2,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if TRUE$
+        .echo "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 05: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 06: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if TRUE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 07: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 08: PASS1,3"
+
+        .if TRUE$
+        .echo "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .echo "PASS3"
+        .else
+        .fatal "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .fatal "PASS8"
+        .endif
+
+        .echo "Test 09: PASS4,5,6,7,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .if TRUE$
+        .echo "PASS6"
+        .endif
+        .echo "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 10: PASS4,5,7,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .echo "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 11: PASS4,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 12: PASS4,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if TRUE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 13: PASS4,5,6,7,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .if TRUE$
+        .echo "PASS6"
+        .endif
+        .echo "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 14: PASS4,5,7,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if TRUE$
+        .echo "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .echo "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 15: PASS4,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if TRUE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+        .echo "Test 16: PASS4,8"
+
+        .if FALSE$
+        .fatal "PASS1"
+        .if FALSE$
+        .fatal "PASS2"
+        .endif
+        .fatal "PASS3"
+        .else
+        .echo "PASS4"
+        .if FALSE$
+        .fatal "PASS5"
+        .if FALSE$
+        .fatal "PASS6"
+        .endif
+        .fatal "PASS7"
+        .endif
+        .echo "PASS8"
+        .endif
+
+; ---------------
+
+;       .end

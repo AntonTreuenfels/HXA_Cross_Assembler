@@ -1,0 +1,185 @@
+; Hobby Cross-Assembler Error Test 200f
+; Conditional Assembly\IF..ELSEIF..ELSE..ENDIF Blocks
+; error: unclosed conditional blocks within macros
+
+; by Anton Treuenfels
+
+; first created: 08/09/03
+; last revised:  12/22/07
+
+; warning(s): 0
+
+; error(s): 12
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; unbalanced ENDIF
+
+        .macro  unopened_1
+        .endif
+        .endm
+
+; try it...
+
+        unopened_1                  ; 1 unopened block
+
+; unbalanced ENDIF 
+
+        .macro  unopened_2
+        .endif
+        .endif
+        .endm
+
+; try it...
+
+        unopened_2                  ; 2 unopened blocks
+
+; unbalanced ENDIF 
+
+        .macro  unopened_2a
+        .if 1
+        .endif
+        .endif
+        .endm
+
+; try it...
+
+        unopened_2a                 ; 1 unopened block
+
+; unbalanced ENDIF
+
+        .macro  unopened_2b
+        .endif
+        .if 1
+        .endif
+        .endm
+
+; try it...
+
+        unopened_2b                 ; 1 unopened block
+
+; unbalanced ENDIF
+
+        .macro  unopened_3
+        .endif
+        .endif
+        .endif
+        .endm
+
+; try it...
+
+        unopened_3                  ; 3 unopened blocks
+
+; unbalanced ENDIF
+; aliasing should not affect detection...
+
+        .psalias    endif=myendcond
+
+        .macro  aliased_1
+        .myendcond
+        .endm      
+
+; try it...
+
+        aliased_1
+
+; -------------------------------
+
+; unclosed block(s) NOT detected if "EXIT" used...
+
+        .macro  unclosed_1
+        .if 1
+        .exit
+        .endm
+
+; try it...
+
+        unclosed_1
+
+; aliasing should not affect non-detection...
+
+        .psalias    if=mystartcond
+
+        .macro  aliased_2
+        .mystartcond 1
+        .exit
+        .endm
+
+; try it...
+
+        aliased_2
+
+; unclosed block(s) NOT detected if "EXIT" used...
+
+        .macro  unclosed_2a, ]VAL
+        .if 1
+        .exitif ]VAL == 1
+        .macro  unclosed_2b, ]VAL
+        .if 1
+        .exitif ]VAL == 2
+        .endm
+        .endm
+
+; try it...
+
+        unclosed_2a 1   ; 1 unclosed block before EXIT
+        unclosed_2b 2   ; 1 unclosed block before EXIT
+
+; this variant has to ignore the nested definition boundary as well
+
+        unclosed_2a 2   ; 2 unclosed blocks before EXIT
+
+; unclosed block(s) NOT detected if "EXIT" used...
+
+        .macro  unclosed_3, ]VAL
+        .exitif ]VAL == 1
+        .if 1
+        .exitif ]VAL == 2
+        .if 1
+        .exitif ]VAL == 3
+        .if 1
+        .exitif ]VAL == 4
+        .endm
+
+; try it...
+
+        unclosed_3  1   ; 0 unclosed blocks before EXIT
+        unclosed_3  2   ; 1 unclosed block before EXIT
+        unclosed_3  3   ; 2 unclosed blocks before EXIT
+        unclosed_3  4   ; 3 unclosed blocks before EXIT
+
+; ...but if "EXIT" not used then unclosed block(s) are fatal...
+
+        unclosed_3  0   ; 3 unclosed blocks, no EXIT
+
+; -------------------------------
+
+; aliasing should not affect detection...
+
+        .psalias    endif=myendcond
+
+        .macro  aliased_2
+        .myendcond
+        .endm      
+
+; try it...
+
+        aliased_2
+
+; -------------------------------
+
+        .end

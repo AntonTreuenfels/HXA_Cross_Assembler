@@ -1,0 +1,193 @@
+; Hobby Cross-Assembler Test 210
+; Conditional Assembly\IFDEF and IFNDEF Blocks
+; ok: IFDEF and INDEF conditionals
+
+; by Anton Treuenfels
+
+; first created: 12/26/11
+; last revised:  09/29/12
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; symbol NOT defined
+
+        .echo "*** symbols not defined ***"
+
+        .ifdef _thissymbol_
+        .fatal "_thissymbol_ detected"
+        .endif
+
+        .ifndef _thissymbol_
+        .echo "_thissymbol_ *NOT* detected"
+        .endif
+
+        .ifdef _thatsymbol_
+        .fatal "_thatsymbol_ detected"
+        .else
+        .echo "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .ifndef _othersymbol_
+        .echo   "_othersymbol_ *NOT* detected"
+        .else
+        .fatal   "_othersymbol_ detected"
+        .endif
+
+        ; symbol defined
+
+        .echo " *** defined symbols *** "
+
+_thissymbol_:   .equ    0
+_thatsymbol_:   .equ    1
+_othersymbol_:
+
+        .ifdef _thissymbol_
+        .echo "_thissymbol_ detected"
+        .endif
+
+        .ifndef _thissymbol_
+        .fatal "_thissymbol_ *NOT* detected"
+        .endif
+
+        .ifdef _thatsymbol_
+        .echo "_thatsymbol_ detected"
+        .else
+        .fatal "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .ifndef _othersymbol_
+        .fatal   "_othersymbol_ *NOT* detected"
+        .else
+        .echo   "_othersymbol_ detected"
+        .endif
+
+        ; string expression arguments
+
+        .echo   "*** defined symbols in string expressions ***"
+
+sym1$   .equ    "_thissymbol_"
+]sym2$  .equ    "_thatsymbol_"
+@sym3$  .equ    "other"
+
+        .ifdef sym1$
+        .echo "_thissymbol_ detected"
+        .endif
+
+        .ifndef sym1$
+        .fatal "_thissymbol_ *NOT* detected"
+        .endif
+
+        .ifdef ]sym2$
+        .echo "_thatsymbol_ detected"
+        .else
+        .fatal "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .ifndef "_" @sym3$ "symbol_"
+        .fatal   "_othersymbol_ *NOT* detected"
+        .else
+        .echo   "_othersymbol_ detected"
+        .endif
+
+; -------------------------------
+
+        ; nested blocks
+
+        ; symbol NOT defined
+
+        .echo "*** nested symbols not defined ***"
+
+        .ifdef nested0
+        .fatal "nested0 detected"
+        .else
+        .ifndef nested0
+        .echo "nested0 *NOT* detected"
+        .endif
+        .endif
+
+        .ifndef nested1
+        .echo "nested1 *NOT* detected"
+        .else
+        .ifdef nested1
+        .fatal "nested1 detected"
+        .endif
+        .endif
+
+        .if 0                           ; skip everything
+        .ifdef nested3
+        .fatal "nested3 detected in false branch"
+        .else
+        .ifndef nested3
+        .fatal "nested3 *NOT* detected in false branch"
+        .endif
+        .endif
+        .endif
+
+        .if 1
+        .ifndef nested4
+        .echo "nested4 *NOT* detected"
+        .else
+        .ifdef nested4
+        .fatal "nested4 detected"
+        .endif
+        .endif
+        .endif
+
+        ; symbol defined
+
+        .echo "*** defined nested symbols ***"
+
+nested0 .equ 0
+nested1 .equ 1
+nested3 .equ 3
+nested4 .equ 4
+
+        .ifdef nested0
+        .echo "nested0 detected"
+        .else
+        .ifndef nested0
+        .fatal "nested0 *NOT* detected"
+        .endif
+        .endif
+
+        .ifndef nested1
+        .fatal "nested1 *NOT* detected"
+        .else
+        .ifdef nested1
+        .echo "nested1 detected"
+        .endif
+        .endif
+
+        .if 0                           ; skip everything
+        .ifdef nested3
+        .fatal "nested3 detected in false branch"
+        .else
+        .ifndef nested3
+        .fatal "nested3 *NOT* detected in false branch"
+        .endif
+        .endif
+        .endif
+
+        .if 1
+        .ifndef nested4
+        .fatal "nested4 *NOT* detected"
+        .else
+        .ifdef nested4
+        .echo "nested4 detected"
+        .endif
+        .endif
+        .endif
+
+; -------------------------------
+
+        .end

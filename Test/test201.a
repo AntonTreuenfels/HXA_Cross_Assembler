@@ -1,0 +1,174 @@
+; Hobby Cross-Assembler Test 201
+; Conditional Assembly\Odd Conditional Blocks
+; ok: odd but legal uses of conditional assembly blocks
+
+; by Anton Treuenfels
+
+; first created: 01/31/04
+; last revised:  01/31/04
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ---------------
+
+; - no code generated ! 
+; - so no "CPU" or "ORG" required !
+; - and if no "CPU", no "END" (since it can be labeled, it needs to know PC)
+; - meaningful output goes to error file (via "ECHO")
+
+; ---------------
+
+FALSE   .equ    0
+TRUE    .equ    !FALSE
+
+; ---------------
+
+        .echo "*** 2 Tests of empty conditional bodies"
+
+        .echo "Test01: (no output)"
+
+        .if TRUE
+        .endif
+
+        .echo "Test02: (no output)"
+
+        .if FALSE
+        .endif
+
+        .echo "*** 2 Tests of empty conditional bodies"
+
+        .echo "Test01: (no output)"
+
+        .if TRUE
+        .else
+        .endif
+
+        .echo "Test02: (no output)"
+
+        .if FALSE
+        .else
+        .endif
+
+        .echo "*** 4 Tests of empty conditional bodies"
+
+        .echo "Test01: (no output)"
+
+        .if TRUE
+        .elseif TRUE
+        .endif
+
+        .echo "Test02: (no output)"
+
+        .if FALSE
+        .elseif TRUE
+        .endif
+
+        .echo "Test03: (no output)"
+
+        .if TRUE
+        .elseif FALSE
+        .endif
+
+        .echo "Test04: (no output)"
+
+        .if FALSE
+        .elseif FALSE
+        .endif
+
+        .echo "*** 4 Tests of empty conditional bodies"
+
+        .echo "Test01: (no output)"
+
+        .if TRUE
+        .elseif TRUE
+        .else
+        .endif
+
+        .echo "Test02: (no output)"
+
+        .if FALSE
+        .elseif TRUE
+        .else
+        .endif
+
+        .echo "Test03: (no output)"
+
+        .if TRUE
+        .elseif FALSE
+        .else
+        .endif
+
+        .echo "Test04: (no output)"
+
+        .if FALSE
+        .elseif FALSE
+        .else
+        .endif
+
+        .echo "*** 2 Tests of Multiple ELSE"
+
+        .echo "Test01: PASS1"
+
+        .if TRUE
+        .echo "PASS1"
+        .else
+        .fatal "PASS2"
+        .else
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test02: PASS2"
+
+        .if FALSE
+        .fatal "PASS1"
+        .else
+        .echo "PASS2"
+        .else
+        .fatal "PASS3"
+        .endif
+
+        .echo "*** 4 Tests of ELSEIF after ELSE"
+
+        .echo "Test01: PASS1"
+
+        .if TRUE
+        .echo "PASS1"
+        .else
+        .fatal "PASS2"
+        .elseif TRUE
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test02: PASS1"
+
+        .if TRUE
+        .echo "PASS1"
+        .else
+        .fatal "PASS2"
+        .elseif FALSE
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test03: PASS2"
+
+        .if FALSE
+        .fatal "PASS1"
+        .else
+        .echo "PASS2"
+        .elseif TRUE
+        .fatal "PASS3"
+        .endif
+
+        .echo "Test04: PASS2"
+
+        .if FALSE
+        .fatal "PASS1"
+        .else
+        .echo "PASS2"
+        .elseif FALSE
+        .fatal "PASS3"
+        .endif
+

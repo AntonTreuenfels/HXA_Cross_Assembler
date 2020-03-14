@@ -1,0 +1,158 @@
+; Hobby Cross-Assembler Test 203
+; Conditional Assembly\EXIT Inside Conditional
+; ok: "EXIT" from macros inside nested conditionals
+
+; by Anton Treuenfels
+
+; first created: 01/31/04
+; last revised:  12/04/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston     macros  ; show macro expansions
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; Summary: when a macro, repeat or while block terminates by "EXIT",
+; any open IF blocks at the top of the block stack are popped
+; - this is done to make sure "EXIT" (which is itself unconditional)
+; works properly if invoked inside a conditional block
+
+; macros which just exit
+
+        .macro  Level0
+        .exit
+        .echo   "Not shown L00"
+        .endm
+
+        .macro  Level1
+        .if 1
+        .exit
+        .echo   "Not shown L10"
+        .endif
+        .echo   "Not shown L11"
+        .endm
+
+        .macro  Level2
+        .if 1
+        .if 1
+        .exit
+        .echo   "Not shown L20"
+        .endif
+        .echo   "Not shown L21"
+        .endif
+        .echo   "Not shown L22"
+        .endm
+
+; test them
+
+        Level0
+
+        Level1
+
+        Level2
+
+; now try them inside a simple "IF" block
+
+        .if 1
+        Level0
+        .echo "Shown I1L0"
+        .endif
+
+        .if 1
+        Level1
+        .echo "Shown I1L1"
+        .endif
+
+        .if 1
+        Level2
+        .echo "Shown I1L2"
+        .endif
+
+; now try the same thing from inside a macro call
+
+        .macro  IFL1, ?macname
+        .if 1
+        .onexpand   ?macname
+        .echo "Show M1"
+        .endif
+        .endm
+
+; test them
+
+        IFL1    Level0
+
+        IFL1    Level1
+
+        IFL1    Level2
+
+; now try them inside nested "IF" blocks
+
+        .if 1
+        .if 1
+        Level0
+        .echo "Shown I2L0"
+        .endif
+        .endif
+
+        .if 1
+        .if 1
+        Level1
+        .echo "Shown I2L1"
+        .endif
+        .endif
+
+        .if 1
+        .if 1
+        Level2
+        .echo "Shown I2L2"
+        .endif
+        .endif
+
+; now try the same thing from inside a macro call
+
+        .macro  IFL2, ?macname
+        .if 1
+        .if 1
+        .onexpand   ?macname
+        .echo   "Show M2"
+        .endif
+        .endif
+        .endm
+
+; test them
+
+        IFL2    Level0
+
+        IFL2    Level1
+
+        IFL2    Level2
+
+; -------------------------------
+; labeled
+; -------------------------------
+
+        .macro  LABELED
+        .word   @local1     ; = current address + 2 (when expanded)
+        .if 1
+        .exit
+        .endif
+        .word   unknown     ; doesn't matter - completely skipped
+@local1 .endm
+
+
+; test it
+
+        LABELED
+
+; -------------------------------
+    
+        .end

@@ -1,0 +1,89 @@
+; Hobby Cross-Assembler Error Test 200g
+; Conditional Assembly\IF..ELSEIF..ELSE..ENDIF Blocks
+; error: no forward reference in conditional
+; by Anton Treuenfels
+
+; first created: 07/06/05
+; last revised:  07/06/05
+
+; warning(s): 0
+; - label ignored
+
+; error(s): 5
+; - label not found
+
+; fatal: 0
+
+; ---------------
+
+        .listfile
+        .errfile
+
+; ---------------
+
+; - no code generated ! 
+; - so no "CPU" or "ORG" required !
+; - and if no "CPU", no "END" (since it can be labeled, it needs to know PC)
+
+; ---------------
+
+FALSE   .equ    0
+TRUE    .equ    !FALSE
+
+; ---------------
+
+; no forward reference allowed in conditional expressions
+
+        .if _UnknownLabel
+        .fatal "Rejected expression should cause skip to <ENDIF>!"
+        .endif
+
+; no forward reference allowed in conditional expressions
+
+        .if _UnknownLabel
+        .fatal "Rejected expression should cause skip to second <ENDIF>!"
+        .if TRUE
+        .fatal "Rejected expression should not have processed this branch!"
+        .endif
+        .fatal "Didn't make it to second <ENDIF>!"
+        .endif
+
+; no forward reference allowed in conditional expressions
+
+        .if TRUE
+        .if _UnknownLabel
+        .fatal "Rejected expression should cause skip to first <ENDIF>!"
+        .endif
+        .echo "Made it past first <ENDIF> - OK"
+        .endif
+
+; no forward reference allowed in conditional expressions
+
+        .if _UnknownLabel
+        .fatal "Rejected expression should cause skip to <ENDIF>!"
+        .elseif TRUE
+        .fatal "Rejected expression should not have processed this branch!"
+        .else
+        .fatal "Rejected expression should not have processed this branch!"
+        .endif
+
+; no forward reference allowed in conditional expressions
+
+        .if _UnknownLabel
+        .fatal "Rejected expression should cause skip to second <ENDIF>!"
+        .elseif TRUE
+        .fatal "Rejected expression should not have processed this branch!"
+        .else
+        .fatal "Rejected expression should not have processed this branch!"
+        .if _UnknownLabel
+        .fatal "Rejected expression should not have processed this branch!"
+        .elseif TRUE
+        .fatal "Rejected expression should not have processed this branch!"
+        .else
+        .fatal "Rejected expression should not have processed this branch!"
+        .endif
+        .endif
+
+; ---------------------
+
+       .end

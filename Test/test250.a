@@ -1,0 +1,63 @@
+; Hobby Cross-Assembler Test 250
+; File Inclusion\Inclusion
+; ok: file inclusion; depth = 128
+
+; by Anton Treuenfels
+
+; first created: 01/09/04
+; last revised:  07/24/05
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .maxdepth   128
+
+; -------------------------------
+
+; we can get by with only one test file by using self-inclusion
+; (probably not a trick of much use in any other context!)
+
+        .if !defined(INCTEST)
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; how many times to include self
+; - each inclusion generates one byte
+
+ENDADR  =   * + 128
+
+        .macro  INCTEST
+        .byte   *
+        .endmacro
+
+; -------------------------------
+
+        .endif      ; defined(INCTEST)
+
+; -------------------------------
+
+; here we go...
+
+        INCTEST
+
+        .if         * < ENDADR
+        .echo       "Entering..."
+        .include    "test250.a"
+        .echo       "...leaving"
+        .endif
+
+; if we use the "END" psop at the end of this file, it will be executed
+; the first time the conditional block is completed. That's not what we
+; want, though, since the block has to complete about 127 more times
+; before the include stack is completely unwound. Fortunately "END" is
+; not a required psop because its effects happen automatically at the
+; end of source anyway.
+
+;       .end

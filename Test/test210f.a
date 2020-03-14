@@ -1,0 +1,123 @@
+; Hobby Cross-Assembler Error Test 210f
+; Conditional Assembly\IFDEF and IFNDEF Blocks
+; error: undetected errors
+
+; by Anton Treuenfels
+
+; first created: 01/14/12
+; last revised:  01/14/12
+
+; warning(s): 0
+
+; error(s): 6
+; - blank field
+; - matching block not found
+
+; fatal: 0
+
+; ---------------
+
+        .listfile
+        .errfile
+
+; ---------------
+
+; - no code generated ! 
+; - so no "CPU" or "ORG" required !
+
+; ---------------
+
+    ; a false block should be skipped
+
+    .ifdef  Test1A      ; not defined, hence block not entered
+
+    .fatal  "Test 1A"
+
+    .if     test1b      ; not defined, but not evaluated
+
+    .fatal  "Test 1B"
+
+    .endif
+
+    .ifdef  test1c      ; not defined, but not evaluated
+
+    .fatal  "Test 1C"
+
+    .endif
+
+    .ifndef test1d      ; not defined, but not evaluated
+
+    .fatal  "Test 1D"
+
+    .endif
+
+    .endif
+
+    ; a false block should be skipped
+
+test2a  .equ    $1234
+
+    .ifndef  Test2A     ; defined, hence block not entered
+
+    .fatal  "Test 2A"
+
+    .if     test2b      ; not defined, but not evaluated
+
+    .fatal  "Test 2B"
+
+    .endif
+
+    .ifdef  test2c      ; not defined, but not evaluated
+
+    .fatal  "Test 2C"
+
+    .endif
+
+    .ifndef test2d      ; not defined, but not evaluated
+
+    .fatal  "Test 2D"
+
+    .endif
+
+    .endif
+
+    ; missing conditions are always detected, however
+
+    .ifdef test3a       ; not defined, hence block not entered
+
+    .if                 ; error: missing condition...
+
+    .endif              ; ...so this terminates the "ifdef" block
+
+    .ifdef              ; error: missing condition
+
+    .endif              ; error: unmatched
+
+    .ifndef             ; error: missing condition
+
+    .endif              ; error: unmatched
+
+    .endif              ; error: unmatched
+
+    ; bad types are not detected in a skipped block
+
+    .ifdef test4a       ; not defined, hence block not entered
+
+    .if "abc" * "def"   ; bad expression, but not evaluated
+
+    .endif
+
+    .ifdef 23           ; bad name, but not evaluated
+
+    .endif
+
+    .ifndef 1 + "this"  ; bad name/expression, but not evaluated
+
+    .endif
+
+    .endif
+
+
+; ---------------
+
+       .end

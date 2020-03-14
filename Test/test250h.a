@@ -1,0 +1,45 @@
+; Hobby Cross-Assembler Error Test 250h
+; File Inclusion\Inclusion
+; warn\error: correct filename reported for error
+
+; by Anton Treuenfels
+
+; first created: 04/11/06
+; last revised:  05/21/11
+
+; warning(s): 3
+; - label ignored
+; - odd value
+
+; error(s): 07
+; - expecting filename
+; - can't open file
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; this file has two errors in itself, all the others come from
+; the included file
+; - we bracket the included file's errors within this file's errors
+; so we can check that the file reported for each error is correct
+
+        .include                ; "test250h.a"
+
+        .include "test250e.a"   ; NOT "test250h.a"
+
+        .include ""             ; "test250h.a"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,47 @@
+; Hobby Cross-Assembler Error Test 200h
+; Conditional Assembly\IF..ELSEIF..ELSE..ENDIF Blocks
+; error: crossed macro/if blocks
+
+; by Anton Treuenfels
+
+; first created: 12/22/07
+; last revised:  12/22/07
+
+; warning(s): 0
+
+; error(s): 4
+; - unmatched block
+
+; fatal: 1
+; - bad nested block
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+;        .cpu    "T_16_L"    ; un-required psop
+;        .org    $1000       ; un-required psop
+
+; -------------------------------
+
+; block structures can nest, but can't cross
+
+        .macro  _CrossBlock
+        .if 1
+        .echo   "Some code here"
+        .endm                       ; <- macro definition ends here
+        .else                       ; <- no match (IF is within definition)
+        .echo   "Other code here"
+        .endm                       ; <- no match (not defining or expanding)
+        .endif                      ; <- no match (IF is within definition)
+
+; try to expand the little monster
+
+        _CrossBlock
+
+; -------------------------------
+
+        .end

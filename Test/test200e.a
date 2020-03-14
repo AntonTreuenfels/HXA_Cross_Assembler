@@ -1,0 +1,98 @@
+; Hobby Cross-Assembler Error Test 200e
+; Conditional Assembly\IF..ELSEIF..ELSE..ENDIF Blocks
+; warning\error: malformed conditionals
+
+; by Anton Treuenfels
+
+; first created: 05/02/03
+; last revised:  06/29/08
+
+; warning(s): 7
+; - label ignored
+; - expression ignored
+; - odd use
+
+; error(s): 8
+; - <ELSEIF> without <IF>
+; - <ELSE> without <IF>
+; - <ENDIF> without <IF>
+; - expecting expression
+; - open block structure at source end
+
+; fatal: 0
+
+; ---------------
+
+        .listfile
+        .errfile
+
+; ---------------
+
+; - no code generated ! 
+; - so no "CPU" or "ORG" required !
+; - and if no "CPU", no "END" (since it can be labeled, it needs to know PC)
+
+; ---------------
+
+FALSE   .equ    0
+TRUE    .equ    !FALSE
+
+; ---------------
+
+; labels (and some expressions) ignored
+
+label1  .if FALSE
+        .echo "Labels ignored on conditional pseudo-ops"
+label2  .elseif FALSE
+        .echo "Labels ignored on conditional pseudo-ops"
+label3  .else  expr3
+        .echo "Labels ignored on conditional pseudo-ops"
+        .echo "Expressions ignored on \"unconditional\" pseudo-ops"
+label4  .endif expr4
+        .echo "Labels ignored on conditional pseudo-ops"
+        .echo "Expressions ignored on \"unconditional\" pseudo-ops"
+
+; "ELSEIF" without "IF"
+
+        .elseif TRUE
+
+; "ELSE" without "IF"
+
+        .else
+
+; "ENDIF" without "IF"
+
+        .endif
+
+; no controlling expression
+
+        .if
+        .echo "Error results in no conditional block being opened"
+        .endif
+
+; no controlling expression
+
+        .if TRUE
+        .echo "PASS1"
+        .elseif             ; not evaulated, but expression has to be here !
+        .echo "Error results in unconditional processing of this branch"
+        .endif
+
+; no controlling expression
+
+        .if FALSE
+        .fatal "Not supposed to show"
+        .elseif
+        .echo "Error results in unconditional processing of this branch"
+        .endif
+
+; open block
+
+        .if TRUE
+        .if FALSE
+        fatal "Not supposed to show"
+        .endif
+
+; ---------------------
+
+       .end

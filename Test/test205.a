@@ -1,0 +1,152 @@
+; Hobby Cross-Assembler Test 205
+; Conditional Assembly\Deep Nesting
+; ok: recursive macros; depth = 128
+
+; by Anton Treuenfels
+
+; first created: 08/03/04
+; last revised:  03/12/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .maxdepth   129     ; trial-and-error: it works!
+        .maxputback 130     ; trial-and-error: it works!
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; define the macro (first attempt)
+
+        .macro  RECURSE, ?depth
+        .if ?depth
+        .byte   *
+        .onexpand   RECURSE ?depth - 1
+        .endif
+        .endm
+
+; try it
+
+        .starttimer recurse1
+
+        RECURSE 128
+
+        .showtimer  recurse1
+
+; note the line:
+
+; .onexpand RECURSE ?depth - 1
+
+; expands to
+
+; RECURSE 128 - 1
+
+; and then
+
+; RECURSE 128 - 1 - 1
+
+; and then
+
+; RECURSE 128 - 1 - 1 - 1
+
+; and so on...
+
+; While this particular example works, for a great enough depth some
+; internal limit would no doubt be exceeded
+; We can do better by using a variable label argument in our macro:
+
+        .undef  RECURSE
+
+; define the macro
+
+        .macro  RECURSE, ]DEPTH
+        .if ]DEPTH
+        .byte   *
+        .onexpand   RECURSE ]DEPTH - 1
+        .endif
+        .endm
+
+; try it
+
+        .starttimer recurse2
+
+        RECURSE 128
+
+        .showtimer   recurse2
+
+; -------------------------------
+
+; now try repeat block nesting
+
+        .macro  DEEP_REP, ]DEPTH
+        .if ]DEPTH
+        .repeat 2
+        .byte   ]DEPTH
+        .endr
+        .onexpand   DEEP_REP ]DEPTH-1
+        .endif
+        .endm
+
+; try it
+
+        .starttimer deeprep
+
+        DEEP_REP    128
+
+        .showtimer  deeprep
+
+; -------------------------------
+
+; now try local scope nesting
+
+        .macro  DEEP_LOC, ]DEPTH
+        .if ]DEPTH
+@HERE   =   *
+        .byte   @HERE               ; ascending
+        .onexpand   DEEP_LOC ]DEPTH-1
+        .byte   @HERE               ; descending
+        .endif
+        .endm
+
+; try it
+
+        .starttimer deeploc
+
+        DEEP_LOC    128
+
+        .showtimer  deeploc
+
+; -------------------------------
+
+; now we're going to be completely perverse...
+; - we're going to list only one line of this macro's expansion
+; but it should be quite long... :)
+
+        .macro  PERVERSE, ]DEPTH, ?text=.onexpand
+        .if ]DEPTH
+        .byte   *
+        .onexpand   PERVERSE ]DEPTH-1, .onexpand ?text
+        .else
+        .liston     macros
+        .onexpand   ?text   .str    "Made it!"
+        .listoff    macros
+        .endif
+        .endm
+
+; try it
+
+        .starttimer perverse
+
+        PERVERSE 128
+
+        .showtimer  perverse
+
+; -------------------------------
+
+        .end
