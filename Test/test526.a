@@ -1,0 +1,71 @@
+; Hobby Cross-Assembler Test 526
+; Functions\TIME$()
+; ok: time and date
+
+; by Anton Treuenfels
+
+; first created: 02/05/11
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; function value is a string
+; format: "WeekDay Month Day Hr:Mn:Sc Year"
+;     ex: "Sat Feb 05 18:30:45 2011"
+
+        .str    time$()
+
+; we can slice and splice the value
+
+tm$     =   time$()
+
+        .str    mid$( tm$, -4 )     ; year
+
+; just so we know what to look for
+
+        .str    "Jan"
+        .str    "Feb"
+        .str    "Mar"
+        .str    "Apr"
+        .str    "May"
+        .str    "Jun"
+        .str    "Jul"
+        .str    "Aug"
+        .str    "Sep"
+        .str    "Oct"
+        .str    "Nov"
+        .str    "Dec"
+
+        .str    mid$( tm$, 5, 3 )   ; month
+
+; re-arrangement to "Month Day, Year"
+
+        .str    mid$( tm$, 5, 6 ) ", " mid$( tm$, -4 )
+
+; just so we know what to look for
+
+        .str    "Sun"
+        .str    "Mon"
+        .str    "Tue"
+        .str    "Wed"
+        .str    "Thu"
+        .str    "Fri"
+        .str    "Sat"
+        
+        .str    mid$( tm$, 1, 3 )   ; weekday
+
+
+
+; -------------------------------
+
+        .end

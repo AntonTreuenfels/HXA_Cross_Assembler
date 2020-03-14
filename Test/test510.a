@@ -1,0 +1,128 @@
+; Hobby Cross-Assembler Test 510
+; Functions\STR$()
+; ok: evaluate numeric expression as string
+
+; by Anton Treuenfels
+
+; first created: 06/08/06
+; last revised:  03/14/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; simpler expressions
+
+        .str    str$( 1 )
+
+        .str    str$(1+1)
+
+        .str    str$( 3*1 )
+
+        .str    str$( ((8)/(2)) )
+
+        .str    str$( "ABC" != "ABC" )
+
+        .str    str$( "ABC" == "ABC" )
+
+g1lab   .str    str$( * )
+
+        .str    str$( g1lab )       ; should be the same as previous
+
+g2lab   .str    str$( * + 1 )
+
+        .str    str$( 1 + g2lab )   ; should be the same as previous
+
+        .str    str$( 0 )
+
+        .str    str$( 0000000 )
+
+        .str    str$( -1 )
+
+        .str    str$( 0-1 )
+
+; more complex expressions
+
+p1$     .equ    str$( 1 )
+
+        .str    p1$
+
+p2$     .equ    str$( 1+1 )
+
+        .str    p1$ p2$
+
+p3$     .equ    str$( val("3") )
+
+        .str    p1$ p2$ p3$
+
+p456$   .equ    str$( val("400+50+6") )
+
+p789$   .equ    str$( val(str$(3*3*3*3*3*3+2*2*3*5)) )
+
+        .str    p1$ p2$ p3$ p456$ p789$
+
+; forward reference is only possible in numeric contexts
+
+        .byte   str$( * + 1 ) == str$( glab3 )
+
+glab3   .word   glab3
+
+        .word   val( str$(glab4) )
+
+glab4   .word   glab4
+
+; boundary cases - maximum convertible
+
+                    ;  !-------!-------!-------!-------
+
+        .str    str$( 11111111111111111111111111111111b )
+
+        .str    str$( 4294967295d )
+
+        .str    str$( 0ffffffffh )
+
+maxBin  .equ    %11111111111111111111111111111111
+
+maxDec  .equ    4294967295
+
+maxHex  .equ    $ffffffff
+
+        .str    str$( maxBin )
+
+        .str    str$( maxDec )
+
+        .str    str$( maxHex )
+
+; boundary cases - minimum convertible
+
+                    ;  !-------!-------!-------!-------
+
+        .str    str$( -%10000000000000000000000000000000 )
+
+        .str    str$( -2147483648 )
+
+        .str    str$( -$80000000 )
+
+minBin  .equ    -%10000000000000000000000000000000
+
+minDec  .equ    -2147483648
+
+minHex  .equ    -$80000000
+
+        .str    str$( minBin )
+
+        .str    str$( minDec )
+
+        .str    str$( minHex )
+
+; -------------------------------
+
+        .end

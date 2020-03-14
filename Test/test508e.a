@@ -1,0 +1,75 @@
+; Hobby Cross-Assembler Error Test 508e
+; Functions\VAL()
+; error: strings not legal numeric expressions
+
+; by Anton Treuenfels
+
+; first created: 11/08/05
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 13
+; - null expression
+; - need string
+; - need number
+; - need BOE
+; - bad open parenthesis
+; - bad token
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; null string
+
+        .word   val( "" )
+
+        ; blank string
+
+        .word   val( "   " )
+
+        ; numeric argument
+
+        .word   val( $10 )      ; wrong type
+
+        .word   val( :++ )      ; wrong type - branch target
+
+        .word   val( 36 + )     ; incomplete - doesn't get to type error
+
+        ; regular expression argument
+
+        .word   val( /invalid/ )
+
+        ; bad termination
+
+        .word   val( "1 )
+
+        .word   val( "1\" )
+
+        .word   val( "1"
+
+        .word   val( "1",
+
+        ; out of range
+
+        .long   val( "%101111111111111111111111111111111" ) ; 33 bits
+
+        .long   val( "4294967295+1" )                       ; 33 bits
+
+        .long   val( "$87fffffff")                          ; 36 bits
+
+; -------------------------------
+
+        .end

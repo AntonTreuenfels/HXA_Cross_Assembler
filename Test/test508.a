@@ -1,0 +1,243 @@
+; Hobby Cross-Assembler Test 508
+; Functions\VAL()
+; ok: evaluate string expression as numeric
+
+; by Anton Treuenfels
+
+; first created: 10/22/05
+; last revised:  03/14/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; numeric literals
+
+        .word   val( "0" )
+        .word   val( "1" )
+        .word   val( "2" )
+
+        .word   val( "%00" )
+        .word   val( "%01" )
+        .word   val( "%10" )
+
+        .word   val( "$00" )
+        .word   val( "$01" )
+        .word   val( "$02" )
+
+        .word   val( "00B" )
+        .word   val( "01B" )
+        .word   val( "10B" )
+
+        .word   val( "00H" )
+        .word   val( "01H" )
+        .word   val( "02H" )
+
+; character literals
+
+        .word   val( "'A'" )
+        .word   val( "'B'" )
+        .word   val( "'C'" )
+
+        .word   val( "'\$80'" )
+        .word   val( "'\081H'" )
+        .word   val( "'\$82'" )
+
+; program counter
+
+        .word   val( "*" )
+        .word   val( "$" )
+
+; unary operators
+
+        .word   val( "+1" )
+        .word   val( "-1" )
+        .word   val( "~1" )
+        .word   val( "!1" )
+        .word   val( ">1" )
+        .word   val( "<1" )
+        .word   val( "^1" )
+
+; binary operators (arithmetic results)
+
+        .word   val("123 + 45") ;  168, $00A8
+        .word   val("123 - 45") ;   78, $004E
+        .word   val("123 * 45") ; 5535, $159F
+        .word   val("123 / 45") ;    2, $0002
+        .word   val("123 % 45") ;   33, $0021
+
+; binary operators (bitwise results)
+
+        .word   val("$a55a & $5555")
+        .word   val("$a55a ^ $5555")
+        .word   val("$a55a | $5555")
+
+        .word   val("$0001 << 15")
+        .word   val("$8000 >> 15")
+
+; binary operators (logical results)
+
+        .word   val("0 < 1")
+        .word   val("0 > 1")
+        .word   val("0 <= 1")
+        .word   val("0 >= 1")
+        .word   val("0 == 1")
+        .word   val("0 != 1")
+        .word   val("0 && 1")
+        .word   val("0 || 1")
+
+; string binary operators (logical results)
+
+        .word   val( "\"123\" == \"123\"" )
+        .word   val( "\"123\" != \"123\"" )
+        .word   val( "\"123\" == \"abc\"" )
+        .word   val( "\"123\" != \"abc\"" )
+
+        .word   val( "\"String w/ blanks\" == \"String w/ blanks\"" )
+        .word   val( "\" String w/ blanks \" != \" String w/ blanks \"" )
+
+; regular expression operators (logical results)
+
+        .word   val( "\"123\" ~ /123/" )
+        .word   val( "\"123\" !~ /123/" )
+        .word   val( "\"123\" ~ /abc/" )
+        .word   val( "\"123\" !~ /abc/" )
+
+        .word   val( "\"abc\" ~ /abc/i" )
+        .word   val( "\"abc\" ~ /ABC/i" )
+        .word   val( "\"ABC\" ~ /abc/i" )
+        .word   val( "\"ABC\" ~ /ABC/i" )
+
+; ternary operator
+
+        .word   val(  0  ? "1" : "2" )
+        .word   val(  1  ? "1" : "2" )
+        .word   val( ""  ? "1" : "2" )
+        .word   val( "1" ? "1" : "2" )
+
+        .word   val( 0 || 0 ? "1+2" : "3+3" )
+        .word   val( 0 || 1 ? "1+2" : "3+3" )
+        .word   val( 1 || 0 ? "1+2" : "3+3" )
+        .word   val( 1 || 1 ? "1+2" : "3+3" )
+
+        .word   val( ""  && ""  ? "1+2" : "3+3" )
+        .word   val( ""  && "1" ? "1+2" : "3+3" )
+        .word   val( "1" && ""  ? "1+2" : "3+3" )
+        .word   val( "1" && "1" ? "1+2" : "3+3" )
+
+; backward reference
+
+backRefVal  .equ    $12345678
+
+        .word   val( "<backRefVal" )
+        .word   val( " >backRefVal" )
+        .word   val( "<^backRefVal " )
+        .word   val( " >^backRefVal " )
+
+        .word   val( "<backRefVal" ) + 256
+        .word   val( " >backRefVal" ) + 512
+        .word   val( "<^backRefVal " ) + 768
+        .word   val( " >^backRefVal " ) + 1024
+
+        .word   $100 + val( "<backRefVal" )
+        .word   $200 + val( " >backRefVal" )
+        .word   $300 + val( "<^backRefVal " )
+        .word   $400 + val( " >^backRefVal " )
+
+; forward reference
+
+        .word   val( "<fwdRefVal" )
+        .word   val( " >fwdRefVal" )
+        .word   val( "<^fwdRefVal " )
+        .word   val( " >^fwdRefVal " )
+
+        .word   val( "<fwdRefVal" ) + 256
+        .word   val( " >fwdRefVal" ) + 512
+        .word   val( "<^fwdRefVal " ) + 768
+        .word   val( " >^fwdRefVal " ) + 1024
+
+        .word   $100 + val( "<fwdRefVal" )
+        .word   $200 + val( " >fwdRefVal" )
+        .word   $300 + val( "<^fwdRefVal " )
+        .word   $400 + val( " >^fwdRefVal " )
+
+fwdRefVal   .equ    $78563412
+
+; backward reference
+
+]val        .equ    $12345678
+
+        .word   val( "<]val" )
+        .word   val( " >]val" )
+        .word   val( "<^]val " )
+        .word   val( " >^]val " )
+
+]val        .equ    $78563412
+
+        .word   val( "<]val" )
+        .word   val( " >]val" )
+        .word   val( "<^]val " )
+        .word   val( " >^]val " )
+
+; built-in numeric functions
+
+        .word   val( "len(\"A\")" )
+        .word   val( "len(\"AB\")" )
+        .word   val( "len(\"ABC\")" )
+
+        .word   val( "index(\"ABC\", \"A\")" )
+        .word   val( "index(\"ABC\", \"B\")" )
+        .word   val( "index(\"ABC\", \"C\")" )
+
+        .word   val( "xlate('A')" )
+        .word   val( "xlate('B')" )
+        .word   val( "xlate('C')" )
+
+        .xlate  "A-C=\$80-\$82"
+
+        .word   val( "xlate('A')" )
+        .word   val( "xlate('B')" )
+        .word   val( "xlate('C')" )
+
+        .xlate  "A-C=A-C"
+
+; built-in string functions
+
+        .word   val( mid$("gar0bage", 4, 1) )
+        .word   val( mid$("gar1bage", 4, 1) )
+        .word   val( mid$("gar2bage", 4, 1) )
+
+        ; backward reference
+
+b_start .equ    4
+b_len   .equ    1
+
+        .word   val( mid$("gar0bage", b_start, 1) )
+        .word   val( mid$("gar1bage", 4, b_len) )
+        .word   val( mid$("gar2bage", b_start, b_len) )
+
+        ; forward reference
+
+        .word   val( mid$("gar0bage", f_start, 1) )
+        .word   val( mid$("gar1bage", 4, f_len) )
+        .word   val( mid$("gar2bage", f_start, f_len) )
+
+f_start .equ    4
+f_len   .equ    1
+
+; recursion (beyond what val() normally does !)
+
+        .word   val( "val( \"$1234\" )" )
+        .word   val( "val( \"val( \\\"5678H\\\" )\" )" )
+
+; -------------------------------
+
+        .end

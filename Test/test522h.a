@@ -1,0 +1,115 @@
+; Hobby Cross-Assembler Error Test 522h
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; error: uninitialized segments have no segment offset
+
+; by Anton Treuenfels
+
+; first created: 01/28/08
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 3
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first let's test explicitly "uninitialized" segments
+
+        .segment    test_uninit
+
+        .org        $1000       ; at least one segment must be absolute
+
+        .nodata                 ; alias for "uninitialized"
+
+        .ds 256
+
+        .ends
+
+; let's test "common" segments
+
+        .segment    test_common ; relative or absolute; doesn't matter
+
+        .common                 ; implicitly makes segment "uninitialized"
+
+        .ds 256
+
+        .ends
+
+; let's test "ds-only" segments
+
+        .segment    test_ds     ; relative or absolute; doesn't matter
+
+        .ds 256                 ; implicitly makes segment "uninitialized"
+
+        .ends
+
+; -------------------------------
+
+; now the actual test
+
+; another segment (could use an existing one; doesn't matter)
+
+        .segment    results     ; relative or absolute; doesn't matter
+
+        ; -------------------------------
+
+        ; legal and correct useage (uninitialized segments have these)
+
+        .word   segbeg( test_uninit )
+
+        .word   segend( test_uninit )
+
+        .word   seglen( test_uninit )
+
+        ; ...but not this (uninitialized segments do not have this)
+
+        .word   segoff( test_uninit )   ; error
+
+        ; -------------------------------
+
+        ; legal and correct useage (common segments have these)
+
+        .word   segbeg( test_common )
+
+        .word   segend( test_common )
+
+        .word   seglen( test_common )
+
+        ; ...but not this (common segments do not have this)
+
+        .word   segoff( test_common )   ; error
+
+        ; -------------------------------
+
+        ; legal and correct useage (ds-only segments have these)
+
+        .word   segbeg( test_ds )
+
+        .word   segend( test_ds )
+
+        .word   seglen( test_ds )
+
+        ; ...but not this (ds-only segments do not have this)
+
+        .word   segoff( test_ds )       ; error
+
+        ; all done (for now, anyway)
+
+        .ends
+
+; --------------------
+
+        .end

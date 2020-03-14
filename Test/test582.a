@@ -1,0 +1,200 @@
+; Hobby Cross-Assembler Test 582
+; Nonstandard Byte\32-bit String Literals
+; ok: 16-bit PC, 32-bit Byte
+
+; by Anton Treuenfels
+
+; first created: 06/18/11
+; last revised:  06/18/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L32"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; all (or most) printable ASCII characters
+
+        .string " !\"#$%&'()*+,-./"
+
+        .string "0123456789:;<=>?"
+
+        .string "@ABCDEFGHIJKLMNO"
+
+        .string "PQRSTUVWXYZ[\\]^_"
+
+        .byte   $60         ; char needed next not on keyboard...
+
+        .string "abcdefghijklmno"
+
+        .string "pqrstuvwxyz{|}~"
+
+        .byte   $00
+
+; Literal strings are...
+
+        .string "delimited by quote marks"
+
+        .byte   $00
+
+; ...that delimiters are required at all is because sometimes...
+
+        .string "   strings require leading or trailing spaces   "
+
+        .byte   $00
+
+; If desired...
+
+        .stringr    "strings may be reversed in the object code"
+
+        .byte   $00
+
+; ...though perhaps this test is easier to verify...
+
+        .stringr "@ABCDEFGHIJKLMNO"
+
+; Quote marks can be included in strings by...
+
+        .string "preceeding them with the \"escape\" character"
+
+        .byte   $00
+
+; In quoted strings...
+
+        .byte   "an embedded ','" == "need not be escaped"
+
+; The escape character is...
+
+        .string "a \"backslash\" (\"\\\", ASCII $5C)"
+
+        .byte   $00
+
+; escape code tests
+
+        .string "\,"        ; comma
+
+        .string "\'"        ; single quote mark
+
+        .string "\""        ; double quote mark
+
+        .string "\\"        ; backslash
+
+        .string "\0"        ; null
+
+        .string "\b"        ; backspace
+
+        .string "\f"        ; formfeed
+
+        .string "\n"        ; newline
+
+        .string "\r"        ; carriage return
+
+        .string "\s"        ; space
+
+        .string "\t"        ; tab
+
+        .string "\v"        ; vertical tab
+
+        .byte   $00
+
+        .string "\,\'\"\\\0\b\f\n\r\s\t\v"
+
+        .byte   $00
+
+        .string "\$0d"      ; carriage return
+
+        .string "\0DH"      ; carriage return
+
+        .string "\0x0d"     ; carriage return
+
+        .string "\x0"       ; carriage return
+
+        .string "\$d"       ; carriage return
+
+        .string "\0DH"      ; carriage return
+
+        .string "\0xd"      ; carriage return
+
+        .string "\xd"       ; carriage return
+
+        .byte   $00
+
+        ; this creates a string of chars in the range $80-FF
+
+        .str "\$81\82h\83H\0b4h\0xc5\0XD6\xe7\XF8"
+
+        ; this does NOT place ASCII numeric chars ($30-39) around
+        ; each char in the range $80-FF because hexadecimal escape
+        ; codes are as long as chars are legal (but only the last
+        ; two chars of the code are used in this implementation)
+
+        .str "0\$811\82h2\83H3\0b4h4\0xc55\0XD66\xe77\xF88"
+
+        ; this does place ASCII numeric chars ($30-39) around
+        ; each char in the range $80-FF by preventing the escape
+        ; codes from having more than two hexadecimal characters each
+
+        .str "0\$81" "1\82h2\83H3\0b4h4\0xc5" "5\0XD6" "6\xe7" "7\xF8" "8"
+
+        .byte   $00
+
+; escape chars before terminal double quote mark
+; - each meant on purpose must be doubled (ie., must have an even number)
+
+        .string "\\"                ; one dropped
+
+        .string "Doubled\\"         ; one dropped
+
+        .string "\\\\"              ; two dropped
+
+        .string "Quadrupled\\\\"    ; two dropped
+
+        .string "\\\\\\"            ; three dropped
+
+        .string "Six times\\\\\\"   ; three dropped
+
+; strings with terminal backslash in expressions
+
+        .byte   "Backslashed\\" != "No backslash"
+
+        .byte   "No backslash" == "Backslashed\\"
+
+        .byte   "Backslashed\\" == "Backslashed\\"
+
+; multiple mixed arguments
+
+numericH    =   $48
+
+        .string "@","A"
+        .string "B",$43
+        .string $044,"E"
+        .string $146,$1247
+        .string numericH,numericH+1
+        .string (numericH+2), (numericH) + (3)
+        
+        .string $50,"\$51",52H,"\53H",0x54,"\0x55",0X56,"\x57"
+
+        .string "Hello, World!",$00
+
+        ; show concatenation occurs before reversal
+
+        .stringr "@","A"
+        .stringr "B",$43
+        .stringr $044,"E"
+        .stringr $146,$1247
+        .stringr numericH,numericH+1
+        .stringr (numericH+2), (numericH) + (3)
+        
+        .stringr $50,"\$51",52H,"\53H",0x54,"\0x55",0X56,"\x57"
+
+        .stringr "Hello, World!",$00
+
+; -------------------------------
+
+        .end

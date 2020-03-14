@@ -1,0 +1,75 @@
+; Hobby Cross-Assembler Test 514
+; Functions\TOLOWER$() and TOUPPER$()
+; ok: convert string case
+
+; by Anton Treuenfels
+
+; first created: 06/19/06
+; last revised:  08/01/13
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+alpha$  .equ    "AbCdEfGhIjKlMnOpQrStUvWxYz"
+
+        .str    alpha$
+
+        .str    tolower$( alpha$ )
+
+        .str    toupper$( alpha$ )
+
+        .byte   tolower$( alpha$ ) == toupper$( alpha$ )
+
+        .byte   tolower$( alpha$ ) != toupper$( alpha$ )
+
+; -------------------------------
+
+la$     .equ    "a"
+lb$     .equ    "b"
+ua$     .equ    "A"
+ub$     .equ    "B"
+
+        .byte   tolower$( "A" "B" ) == "ab"
+
+        .byte   "AB" == toupper$( "a" "b" )
+
+        .byte   tolower$( ua$ ub$ ) == la$ lb$
+
+        .byte   ua$ ub$ == toupper$( la$ lb$ )
+
+; -------------------------------
+
+num$    .equ    "0123456789"
+
+        .str    num$
+
+        .str    tolower$( num$ )
+
+        .str    toupper$( num$ )
+
+        .byte   tolower$( num$ ) == toupper$( num$ )
+
+        .byte   tolower$( num$ ) != toupper$( num$ )
+
+; -------------------------------
+
+        ; not found
+
+        .byte   index( alpha$, "B" )
+
+        ; found
+
+        .byte   index( toupper$(alpha$), "B" )
+
+; -------------------------------
+
+        .end

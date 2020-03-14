@@ -1,0 +1,156 @@
+; Hobby Cross-Assembler Test 522c
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; ok: correct segment data (32-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/12/08
+; last revised:  01/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_32_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $10000000   ; ORG before any data makes segment absolute
+
+        .bit32  segbeg(abs1)
+        .bit32  segend(abs1)
+        .bit32  seglen(abs1)
+        .bit32  segoff(abs1)
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .org    $20000000   ; absolute
+
+        .bit32  segbeg(abs2)
+        .bit32  segend(abs2)
+        .bit32  seglen(abs2)
+        .bit32  segoff(abs2)
+
+        .bit32  segbeg(rel2_1)
+        .bit32  segend(rel2_1)
+        .bit32  seglen(rel2_1)
+        .bit32  segoff(rel2_1)
+
+        ; size of combined segments
+
+        .bit32  segend(rel2_1) - segbeg(abs2)
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment	rel2_1
+
+        .bit32  segbeg(abs2)
+        .bit32  segend(abs2)
+        .bit32  seglen(abs2)
+        .bit32  segoff(abs2)
+
+        .bit32  segbeg(rel2_1)
+        .bit32  segend(rel2_1)
+        .bit32  seglen(rel2_1)
+        .bit32  segoff(rel2_1)
+
+        ; size of combined segments
+
+        .bit32  segend(rel2_1) - segbeg(abs2)
+
+        .ends	REL2_1
+
+; another segment
+
+        .segment	abs3
+
+        .org    $30000000   ; absolute
+
+        .bit32  segbeg(abs3)
+        .bit32  segend(abs3)
+        .bit32  seglen(abs3)
+        .bit32  segoff(abs3)
+
+        .bit32  segbeg(rel3_1)
+        .bit32  segend(rel3_1)
+        .bit32  seglen(rel3_1)
+        .bit32  segoff(rel3_1)
+
+        .bit32  segbeg(rel3_2)
+        .bit32  segend(rel3_2)
+        .bit32  seglen(rel3_2)
+        .bit32  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit32  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .bit32  segbeg(abs3)
+        .bit32  segend(abs3)
+        .bit32  seglen(abs3)
+        .bit32  segoff(abs3)
+
+        .bit32  segbeg(rel3_1)
+        .bit32  segend(rel3_1)
+        .bit32  seglen(rel3_1)
+        .bit32  segoff(rel3_1)
+
+        .bit32  segbeg(rel3_2)
+        .bit32  segend(rel3_2)
+        .bit32  seglen(rel3_2)
+        .bit32  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit32  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .bit32  segbeg(abs3)
+        .bit32  segend(abs3)
+        .bit32  seglen(abs3)
+        .bit32  segoff(abs3)
+
+        .bit32  segbeg(rel3_1)
+        .bit32  segend(rel3_1)
+        .bit32  seglen(rel3_1)
+        .bit32  segoff(rel3_1)
+
+        .bit32  segbeg(rel3_2)
+        .bit32  segend(rel3_2)
+        .bit32  seglen(rel3_2)
+        .bit32  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit32  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; -------------------------------
+
+        .end

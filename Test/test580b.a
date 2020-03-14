@@ -1,0 +1,144 @@
+; Hobby Cross-Assembler Test 580b
+; Nonstandard Byte\32-bit BYTE
+; ok: 20-Bit PC, 32-Bit Byte
+
+; by Anton Treuenfels
+
+; first created: 06/18/11
+; last revised:  06/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_20_M32"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; binary numbers (Motorola format)
+
+        .bit32  %0
+        .bit32  %1
+
+        .byte   %10
+        .byte   %11
+
+        .bit32  %0, %1, %10, %11
+        .byte   %100, %101, %110, %111
+
+        .bit32  %01000, %01001, %01010 ,%01011
+        .byte   %01100, %01101, %01110, %01111
+
+        .bit32  %0
+        .bit32  %1
+
+        .byte   %10
+        .byte   %11
+
+        .bit32  %0, %1, %10, %11
+        .byte   %100, %101, %110, %111
+
+        .bit32  %01000, %01001, %01010 ,%01011
+        .byte   %01100, %01101, %01110, %01111
+
+        .byte   %00, %000, %0000, %00000
+
+                ;---!---!---!---!---!---!---!---!
+
+        .ubit32 %01111111111111111111111111111110
+        .ubyte  %01111111111111111111111111111111
+        .ubit32 %10000000000000000000000000000000
+        .ubyte  %10000000000000000000000000000001
+        .ubit32 %11111111111111111111111111111110
+        .ubyte  %11111111111111111111111111111111
+
+; decimal numbers (Motorola format)
+
+        .byte   0
+        .byte   1
+        .byte   2
+        .byte   3
+        .byte   4
+        .byte   5
+        .byte   6
+        .byte   7
+        .byte   8
+        .byte   9
+
+        .byte   1,12,123,1234
+        .byte   5, 56, 567, 5678
+        .byte   01 ,012 ,0123 ,01234
+        .byte   05 , 0056 , 000567 , 0005678
+
+        .byte   00, 000, 0000, 00000
+
+        .bit32  2147483646
+        .bit32  2147483647
+        .bit32  2147483648
+        .bit32  2147483649
+        .bit32  4294967294
+        .bit32  4294967295
+
+; hexadecimal numbers (Motorola format)
+
+        .byte    $0
+        .byte    $1
+        .byte    $2
+        .byte    $3
+        .byte    $4
+        .byte    $5
+        .byte    $6
+        .byte    $7
+        .byte    $8
+        .byte    $9
+        .byte    $a
+        .byte    $b
+        .byte    $c
+        .byte    $d
+        .byte    $e
+        .byte    $f
+
+        .bit32   $1,$2,$3,$4
+        .bit32   $05, $06, $07, $08
+        .bit32   $9 ,$9a ,$9ab ,$9abc
+        .bit32   $0c , $00cd , $000cde , $0000cdef
+
+        .ubit32  $00, $000, $0000, $00000
+
+        .ubit32  $7ffffffe
+        .ubit32  $7fffffff
+        .ubit32  $80000000
+        .ubit32  $80000001
+        .ubit32  $FFFFFFFE
+        .ubit32  $FFFFFFFF
+
+; -------------------------------
+
+        ; "byte" extraction
+
+intMin  .equ    -2147483648     ; -2^31
+intMax  .equ     2147483647     ; 2^31 -1
+
+uintMin .equ     0
+uintMax .equ     4294967295     ;  2^32 - 1
+
+extractVal  = $12345678
+
+        .bit32  <1, >1, ^1
+        .bit32  <-1, >-1, ^-1
+
+        .bit32  <intMin, >intMin, ^intMin
+        .bit32  <intMax, >intMax, ^intMax
+
+        .bit32  <uintMin, >uintMin, ^uintMin
+        .bit32  <uintMax, >uintMax, ^uintMax
+
+        .bit32   <extractVal, >extractVal, ^extractVal
+
+; -------------------------------
+
+        .end

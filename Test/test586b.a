@@ -1,0 +1,159 @@
+; Hobby Cross-Assembler Test 586b
+; Nonstandard Byte\32-bit FILL and PADTO
+; ok: 24-bit PC, 32-bit Byte
+
+; by Anton Treuenfels
+
+; first created: 06/27/11
+; last revised:  06/27/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_24_M32"
+
+        .if cpu$() ~ /_16_/
+factor  = $1
+        .elseif cpu$() ~ /_24_/
+factor  = $100
+        .elseif cpu$() ~ /_32_/
+factor  = $10000
+        .else
+        .fatal "Unknown CPU"
+        .endif
+
+; -------------------------------
+; Testing FILL pseudo op
+; -------------------------------
+
+; expressions must have no forward reference
+; - optional fill values are hexidecimal opt-strings
+
+            .org    $1000*factor
+
+global1     .fill 2
+global2:    .fill 62, 01
+]var1       .fill 64
+]var2:      .fill 128, 0001
+@local1     .fill 256
+@local2:    .fill 512, "$AA55"
+
+; a label is optional
+
+            .fill 1024
+whereami:
+            .fill 1024, 0011223344556677
+
+; -------------------------------
+; Testing PADTO pseudo op
+; -------------------------------
+
+; a test macro built to force padding to happen
+
+        .macro  TEST_PADTO, ?boundary
+
+        .byte   ?boundary           ; pad to this
+
+        .if !(* % ?boundary)        ; make sure there's something to do
+        .byte   $ff                 ; (if we're on boundary now, get off it)
+        .endif
+
+        .padto  ?boundary
+
+        .byte   * % ?boundary       ; should be zero
+
+        .endm
+
+; ---------------
+
+; we're currently at $1000 (evenly divisible by all powers of two up to 2^9),
+; so these shouldn't generate any data at all
+
+        .org    $1000
+
+]BOUND  = 1                         ; '1' accepted but never does anything
+
+        repeat 9
+        .padto ]BOUND
+]BOUND  = ]BOUND * 2                ; 2, 4, 8, etc
+        .endr
+
+; two to sixteen
+
+]BOUND  = 2
+
+        .repeat 15
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND + 1
+        .endr
+
+; some powers of two we haven't covered yet
+
+]BOUND  = 32
+
+        .repeat 3
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND * 2
+        .endr
+
+; ---------------
+
+; verify modular behavior when pc < boundary
+; - also easier to see if stopped at right byte offset !
+
+; two to sixteen
+
+]BOUND  = 2
+
+        .repeat 15
+        .org $0000                  ; start at zero every time
+        TEST_PADTO ]BOUND
+]BOUND  =  ]BOUND + 1
+        .endr
+
+; ---------------
+
+; pad with specified values
+
+        .macro TEST_GIVEN, ?value
+
+        ; first test
+
+        .org    $1000*factor
+
+        .padto  $1000*factor+$10, ?value
+
+        .byte   *                   ; let's see where we are !
+
+        ; second test
+
+        .org    $cdef*factor
+
+        .padto  $cdef*factor+$21, ?value
+
+        .byte   *
+
+        .endm
+
+; ---------------
+
+        TEST_GIVEN  $00             ; 8-bit
+
+        TEST_GIVEN  $FF             ; 8-bit
+
+        TEST_GIVEN  $FF00           ; 16-bit
+
+        TEST_GIVEN  $0088FF         ; 24-bit
+
+        TEST_GIVEN  $FFBB7733       ; 32-bit
+
+        TEST_GIVEN  $0022446688     ; 40-bit
+
+
+; -------------------------------
+
+        .end

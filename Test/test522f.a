@@ -1,0 +1,61 @@
+; Hobby Cross-Assembler Error Test 522f
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; error: reference to unknown segments (segmented source)
+
+; by Anton Treuenfels
+
+; first created: 01/12/08
+; last revised:  01/28/08
+
+; warning(s): 0
+
+; error(s): 4
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+        ; legal and correct useage
+
+        .word   segbeg( abs1 )
+
+        .word   segend( abs1 )
+
+        .word   seglen( abs1 )
+
+        .word   segoff( abs1 )
+
+        ; legal useage but refers to unknown segments
+
+        .word   segbeg( unknownseg )
+
+        .word   segend( unknownseg )
+
+        .word   seglen( unknownseg )
+
+        .word   segoff( unknownseg )
+
+        ; all done (for now, anyway)
+
+        .ends
+
+; --------------------
+
+        .end

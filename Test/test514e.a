@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 514e
+; Functions\TOLOWER$() and TOUPPER$()
+; error: tests should fail; check response to incorrect input
+
+; by Anton Treuenfels
+
+; first created: 08/01/13
+; last revised:  08/01/13
+
+; warning(s): 0
+
+; error(s): 2
+; - need number
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; these should work
+
+]temp$  .equ    tolower$( "AbCdEfGh" )
+
+]temp$  .equ    toupper$( "AbCdEfGh" )
+
+        ; these should not
+
+]temp   .equ    tolower$( "AbCdEfGh" )
+
+]temp   .equ    toupper$( "AbCdEfGh" )
+
+; -------------------------------
+
+        .end

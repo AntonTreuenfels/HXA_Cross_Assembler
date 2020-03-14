@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Error Test 560e
+; Custom Byte Order\Assume Non-Default Order
+; warn\error: bad useage
+
+; by Anton Treuenfels
+
+; first created: 06/18/11
+; last revised:  06/26/11
+
+; warning(s): 7
+; - ignored
+; - already set
+
+; error(s): 1
+; - blank field
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .assume bit16=21    ; not accepted before cpu is set (but see below)
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .assume word=10     ; alias not accepted (passed through)
+
+        .assume bit16=      ; missing order
+
+        .assume bit16=by    ; illegal chars
+
+        .assume bit16=04    ; illegal char
+
+        .assume bit16=3     ; bad length
+
+        .assume bit16=321   ; bad length
+
+        .assume bit16=01231 ; bad length
+
+        .assume bit16=21    ; ok
+
+        .assume bit16=03    ; already set
+
+; -------------------------------
+
+        .end

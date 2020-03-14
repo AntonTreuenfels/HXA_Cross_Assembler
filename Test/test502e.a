@@ -1,0 +1,61 @@
+; Hobby Cross-Assembler Error Test 502e
+; Functions\LEN()
+; error: mis-use
+
+; by Anton Treuenfels
+
+; first created: 10/01/05
+; last revised:  06/28/09
+
+; warning(s): 0
+
+; error(s): 13
+; - need string
+; - unmatched open parenthesis
+; - unexpected comma
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   len                 ; malformed
+
+        .byte   len(                ; malformed
+
+        .byte   len)                ; malformed
+
+        .byte   len()               ; no argument
+
+        .byte   len "ABC"           ; no parenthesis
+        
+        .byte   len( "ABC"          ; no close parenthesis
+
+        .byte   len "ABC" )         ; no open parenthesis
+
+        .byte   len( 100 )          ; numeric argument
+
+        .byte   len( "ABC", "DEF" ) ; too many arguments
+
+        .byte   len( , "ABC" )      ; unexpected comma
+
+        .byte   len( "ABC", )       ; unexpected comma
+
+        .byte   len(,)              ; unexpected comma
+
+; -------------------------------
+
+        .string "ABC" len("DEF")    ; type mis-match
+
+; -------------------------------
+
+        .end

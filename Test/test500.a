@@ -1,0 +1,56 @@
+; Hobby Cross-Assembler Test 500
+; Functions\VER() and VER$()
+; ok: HXA version number
+
+; by Anton Treuenfels
+
+; first created: 08/03/04
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; - version number is 32 bits long (in theory)
+; - each nybble stands for one decimal digit (aka BCD)
+; - decimal point is between the third and fourth nybbles
+
+; bits 0 - 3   : minor release number, thousandths place (aka bug fix number)
+; bits 4 - 7   : minor release number, hundredths place
+; bits 8 - 11  : minor release number, tenths place
+; bits 12 - 31 : major release number
+
+; -------------------------------
+
+; putting the version number in the object code
+
+        .long   ver()
+
+; ...or possibly just ('cause it'll be a long time before we need more !)
+
+        .word   ver()
+
+; checking the version number at assembly time
+
+        .if ver() < $0100
+        .fatal  "Non-existent version number not supported"
+        .endif
+
+; -------------------------------
+
+; - version string is a decorated form including assembler name
+; - "HXA v" major release# "." minor release#
+
+        .string ver$()
+
+; -------------------------------
+
+        .end

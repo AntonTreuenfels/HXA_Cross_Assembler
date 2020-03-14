@@ -1,0 +1,44 @@
+; Hobby Cross-Assembler Test 524
+; Functions\CPU$()
+; ok: name of current CPU
+
+; by Anton Treuenfels
+
+; first created: 02/05/11
+; last revised:  02/05/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+; at this point there should be no cpu name
+
+        .if CPU$()
+        .fatal "CPU name not set yet!"
+        .endif
+
+; -------------------------------
+
+        .if !cpu$()
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+        .endif
+
+; -------------------------------
+
+; is name set ?
+
+        .if     cpu$() != "T_16_M"
+        .fatal  "Unexpected CPU name!"
+        .endif
+
+; embed name in output file
+
+        .string cpu$()
+
+; -------------------------------
+
+        .end

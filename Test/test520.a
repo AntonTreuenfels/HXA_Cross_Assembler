@@ -1,0 +1,68 @@
+; Hobby Cross-Assembler Test 520
+; Functions\MATCH$()
+; ok: substring extraction (by pattern match)
+
+; by Anton Treuenfels
+
+; first created: 08/09/06
+; last revised:  11/08/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; in numeric context
+
+        .byte   match$( "abcdef", /def/ ) == "def"
+
+        .byte   match$( "abcdef", /ABC/i ) == "abc"
+
+        .byte   match$( "abcdef", /ef/, 5 ) == "ef"
+
+        ; negative start positions offset from end of string
+
+        .byte   match$( "abcdef", /bc|de/ ) == "bc"
+
+        .byte   match$( "abcdef", /bc|de/, 3 ) == "de"
+
+        .byte   match$( "abcdef", /bc|de/, -4 ) == "de"
+
+        .byte   match$( "abcdef", /bc|de/, -5 ) == "bc"
+
+        ; odd arguments
+
+        .byte   match$( "abcdef", /ghi/ ) == ""
+
+        .byte   match$( "abcdef", /abc/, -1 ) == ""
+
+        .byte   match$( "abcdef", /bcd/, 100 ) == ""
+
+        .byte   match$( "", /abc/ ) == ""
+
+; in string context
+
+        .string match$( "abcdef", /abc/ )       ; "abc"
+
+        .string match$( "abcdef", /[bdf]./ )    ; "bc"
+
+        .string match$( "abcdef", /[bdf]./, 3 ) ; "de"
+
+        .string match$( "abcdef", /bc|de/ )     ; "bc"
+
+        .string match$( "abcdef", /bc|de/, 3 )  ; "de"
+
+        .string match$( "abcdef", /bc|de/, -4 ) ; "de"
+
+        .string match$( "abcdef", /bc|de/, -5 ) ; "bc"
+
+; -------------------------------
+
+        .end

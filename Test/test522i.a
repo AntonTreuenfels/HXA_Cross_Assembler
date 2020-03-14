@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Error Test 522i
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; error: bad segment names
+
+; by Anton Treuenfels
+
+; first created: 06/27/09
+; last revised:  06/23/12
+
+; warning(s): 0
+
+; error(s): 8
+; - need global name
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+        .segment    goodname
+
+        .org    $1000
+
+        ; arguments that are not global names
+
+        .word   segbeg( ]badname )
+
+        .word   segend( @badname )
+
+        .word   seglen( :+++ )
+
+        .word   segoff( 1+2 )
+
+        ; same for bad names specified in string expressions...
+
+        .word   segbeg( "]badname" )    
+
+        .word   segend( "@badname" )
+
+        .word   seglen( ":+++" )
+
+        .word   segoff( "1+2" )
+
+        .ends
+
+; --------------------
+
+        .end

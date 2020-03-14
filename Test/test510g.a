@@ -1,0 +1,47 @@
+; Hobby Cross-Assembler Error Test 510g
+; Functions\STR$()
+; error: out of range conversion
+
+; by Anton Treuenfels
+
+; first created: 02/09/08
+; last revised:  03/14/10
+
+; warning(s): 0
+
+; error(s): 4
+; - out of range
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+maxDec  .equ    4294967295
+
+        .str    str$(maxDec)    ; max value (positive)
+
+        .str    str$(maxDec+1)  ; a little too big...
+
+        .str    str$(maxDec*10) ; ...way big !
+
+minDec  .equ    -2147483648
+
+        .str    str$(minDec)    ; min value (negative) 
+
+        .str    str$(minDec-1)  ; a little too small... 
+
+        .str    str$(minDec*10) ; ...way small ! 
+
+; -------------------------------
+
+        .end

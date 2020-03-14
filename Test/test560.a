@@ -1,0 +1,66 @@
+; Hobby Cross-Assembler Test 560
+; Custom Byte Order\Assume Non-Default Order
+; ok: non-default BIT16
+
+; by Anton Treuenfels
+
+; first created: 06/18/11
+; last revised:  06/18/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; reverse the two least significant bytes of all members of
+; the "BIT16" family
+; - but not the "BIT16R" family (so now the two should match)
+; - it doesn't matter when we do this, as its effect will be applied
+; globally at output time
+
+        .assume bit16=10
+
+bkwd_target
+
+        .bit08   $bbaa9988      ; default: 0
+        .ubit08  $00000044
+        .sbit08  $00000000
+        .rbit08  bkwd_target
+        .rbit08  fwd_target
+
+        .bit16   $bbaa9988      ; non-default: 1 0
+        .ubit16  $00005544
+        .sbit16  $00001100
+        .rbit16  bkwd_target
+        .rbit16  fwd_target
+
+        .bit16r  $bbaa9988      ; default: 1 0
+        .ubit16r $00005544
+        .sbit16r $00001100
+        .rbit16r bkwd_target
+        .rbit16r fwd_target
+
+        .bit32   $bbaa9988      ; default: 0 1 2 3
+        .ubit32  $77665544
+        .sbit32  $33221100
+        .rbit32  bkwd_target
+        .rbit32  fwd_target
+
+        .bit32r  $bbaa9988      ; default: 3 2 1 0
+        .ubit32r $77665544
+        .sbit32r $33221100
+        .rbit32r bkwd_target
+        .rbit32r fwd_target
+
+fwd_target
+
+; -------------------------------
+
+        .end

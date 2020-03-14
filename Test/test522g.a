@@ -1,0 +1,66 @@
+; Hobby Cross-Assembler Error Test 522g
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; error: reference to unknown segments (monolithic source)
+
+; by Anton Treuenfels
+
+; first created: 01/12/08
+; last revised:  01/28/08
+
+; warning(s): 0
+
+; error(s): 8
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+; - but this test is for monolithic source, so we comment these out
+
+;        .segment    abs1
+
+;        .org    $1000       ; ORG before any data makes segment absolute
+
+; in monolithic source these functions are simply noted as "unresolved"
+; during the first pass - when they remain unresolved during the
+; second pass (because no segments exist) they are flagged as errors
+
+        ; legal useage but refers to unknown segments
+
+        .word   segbeg( abs1 )
+
+        .word   segend( abs1 )
+
+        .word   seglen( abs1 )
+
+        .word   segoff( abs1 )
+
+        ; legal useage but refers to unknown segments
+
+        .word   segbeg( unknownseg )
+
+        .word   segend( unknownseg )
+
+        .word   seglen( unknownseg )
+
+        .word   segoff( unknownseg )
+
+        ; all done (for now, anyway)
+
+;        .ends
+
+; --------------------
+
+        .end

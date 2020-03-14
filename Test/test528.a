@@ -1,0 +1,53 @@
+; Hobby Cross-Assembler Test 528
+; Functions\MESG$()
+; ok: internal message texts
+
+; by Anton Treuenfels
+
+; first created: 02/05/11
+; last revised:  05/28/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; a message index known to exist
+
+c$      .equ    cpu$()
+t$      .equ    time$()
+m$      .equ    mesg$( "InsSet" )
+
+        .str    "Assembled at " t$ " using " c$ m$
+
+        .if m$ != mesg$( "InsSet" )
+        .fatal  "Equality test one failed"
+        .endif
+
+        ; message index known not to exist
+        ; - in fact the text of the message that actually is returned,
+        ; with the unfound index flagged as part of that message
+
+        .echo   "*** " mesg$( "Expanded text not found" ) " ***"
+
+        ; another message text known not to exist
+
+aui$   .equ    "Another unfound index"
+
+        ; because unfound indices are flagged in the returned string,
+        ; argument values in this test have to match
+
+        .if mesg$( "Another " "unfound " "index" ) != mesg$( aui$ )
+        .fatal  "Equality test two failed"
+        .endif
+
+; -------------------------------
+
+        .end

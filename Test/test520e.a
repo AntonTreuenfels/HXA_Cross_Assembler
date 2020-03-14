@@ -1,0 +1,113 @@
+; Hobby Cross-Assembler Error Test 520e
+; Functions\MATCH$()
+; error: substring position
+
+; by Anton Treuenfels
+
+; first created: 08/10/06
+; last revised:  06/28/09
+
+; warning(s): 1
+; - no effect
+
+; error(s): 33
+; - unexpected EOE
+; - expecting open parenthesis
+; - need string
+; - unmatched open parenthesis
+; - unexpected close parenthesis
+; - need regex
+; - need number
+; - unexpected comma
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 50
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; no-argument problems
+
+        .str    match$              ; malformed
+
+        .str    match$(             ; malformed
+
+        .str    match$)             ; malformed
+
+        ; one argument problems
+
+        .str    match$()            ; no argument
+
+        .str    match$ "ABC"        ; no parenthesis
+        
+        .str    match$( "ABC"       ; no close parenthesis
+
+        .str    match$ "ABC" )      ; no open parenthesis
+
+        .str    match$( "ABC" )     ; too few arguments
+
+        .str    match$( 100 )       ; numeric argument
+
+        .str    match$( /abc/ )     ; regex argument
+
+        ; two argument problems
+
+        .str    match$( , )         ; missing arguments
+
+        .str    match$( "ABC", )    ; missing argument
+
+        .str    match$( , /ABC/ )   ; missing argument
+
+        .str    match$ "ABC", /DEF/ )   ; no open parenthesis
+
+        .str    match$( "ABC", /DEF/    ; no close parenthesis
+
+        .str    match$( "ABC", "DEF" )  ; string-string arguments
+
+        .str    match$( "ABC", 100 )    ; string-numeric arguments
+
+        .str    match$( 100, "ABC" )    ; numeric-string arguments
+
+        .str    match$( 100, 100 )      ; numeric-numeric arguments
+
+        .str    match$( "ABC", /DEF/ )  ; string-regex arguments (okay)
+
+        .str    match$( /DEF/, "ABC" )  ; regex-string arguments
+
+        .str    match$( /DEF/, /ABC/ )  ; regex-regex arguments
+
+        ; three argument problems
+
+        .str    match$( , , )           ; no arguments
+
+        .str    match$ "ABC", /B/, 3 )  ; no open parenthesis
+
+        .str    match$( "ABC", /B/, 3   ; no close parenthesis
+
+        .str    match$( "ABC", /B/, )   ; missing argument
+
+        .str    match$( "ABC", , 3 )    ; missing argument
+
+        .str    match$( , /B/, 3 )      ; missing argument
+
+        .str    match$( "ABC", /B/, "C" )    ; string argument
+
+        .str    match$( "ABC", /B/, /C/ )    ; regex argument
+
+        ; four argument problems
+
+        .str    match$( "ABC", /B/, 2, 3 ) ; too many arguments
+
+; -------------------------------
+
+        .end

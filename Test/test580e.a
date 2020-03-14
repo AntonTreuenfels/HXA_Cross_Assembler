@@ -1,0 +1,137 @@
+; Hobby Cross-Assembler Error Test 580e
+; Nonstandard Byte\32-bit BYTE
+; error:non-existent data storage pseudo ops
+
+; by Anton Treuenfels
+
+; first created: 06/18/11
+; last revised:  06/18/11
+
+; warning(s): 0
+
+; error(s): 50
+; - need opcode
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+        .maxerr 100
+
+; -------------------------------
+
+        .cpu    T_16_L32    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; 12 "family" groups of five (four, really) = 60 pseudo ops (w/ 8-bit bytes)
+;  2 legal "family" groups of five = 10 pseudo ops (w/ 16-bit bytes)
+; = 60 - 10 = 50 errors expected
+
+bkwd_target
+
+        ; "BIT08" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit08   $00
+        .ubit08  $01
+        .sbit08  $02
+        .rbit08  bkwd_target
+        .rbit08  fwd_target
+
+        ; "BIT16" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit16   $00
+        .ubit16  $01
+        .sbit16  $02
+        .rbit16  bkwd_target
+        .rbit16  fwd_target
+
+        ; "BIT16R" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit16r  $00
+        .ubit16r $01
+        .sbit16r $02
+        .rbit16r bkwd_target
+        .rbit16r fwd_target
+
+        ; "BIT24" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit24   $00
+        .ubit24  $01
+        .sbit24  $02
+        .rbit24  bkwd_target
+        .rbit24  fwd_target
+
+        ; "BIT24R" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit24r  $00
+        .ubit24r $01
+        .sbit24r $02
+        .rbit24r bkwd_target
+        .rbit24r fwd_target
+
+        ; "BIT32" family (ok; aka "BYTE")
+
+        .bit32   $00
+        .ubit32  $01
+        .sbit32  $02
+        .rbit32  bkwd_target
+        .rbit32  fwd_target
+
+        ; "BIT32R" family (error; non-existent w/ 32-bit BYTEs)
+
+        .bit32r  $00
+        .ubit32r $01
+        .sbit32r $02
+        .rbit32r bkwd_target
+        .rbit32r fwd_target
+
+        ; "BYTE" family (ok; aka "BIT32")
+
+        .byte    $00
+        .ubyte   $01
+        .sbyte   $02
+        .rbyte   bkwd_target
+        .rbyte   fwd_target
+
+        ; "WORD" family (error: non-existent w/ 32-bit BYTEs)
+
+        .word   $00
+        .uword  $01
+        .sword  $02
+        .rword  bkwd_target
+        .rword  fwd_target
+
+        ; "REVWORD" family (error: non-existent w/ 32-bit BYTEs)
+
+        .revword  $00
+        .urevword $01
+        .srevword $02
+        .rrevword bkwd_target
+        .rrevword fwd_target
+
+        ; "LONG" family (error: non-existent w/ 32-bit BYTEs)
+
+        .long   $00
+        .ulong  $01
+        .slong  $02
+        .rlong  bkwd_target
+        .rlong  fwd_target
+
+        ; "REVLONG" family (error: non-existent w/ 32-bit BYTEs)
+
+        .revlong  $00
+        .urevlong $01
+        .srevlong $02
+        .rrevlong bkwd_target
+        .rrevlong fwd_target
+
+fwd_target
+
+; -------------------------------
+
+        .end

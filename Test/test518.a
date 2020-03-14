@@ -1,0 +1,84 @@
+; Hobby Cross-Assembler Test 518
+; Functions\CHR$() and ORD()
+; ok: convert numeric value to single-character string and vice-versa
+
+; by Anton Treuenfels
+
+; first created: 07/05/06
+; last revised:  02/10/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .liston stats
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; special cases
+        ; for chr$() - out-of-range; should be $FF
+        ; for ord()  - null string;  should be $00
+
+        .str chr$( -1 )
+        .byte   ord( "" )
+
+; -------------------------------
+
+        ; for chr$() - in-range expressions ( <256 )
+        ; for ord()  - single char string
+
+]temp   =   0
+
+        .repeat 256
+]temp$  =   chr$( ]temp )
+        .str    ]temp$
+        .byte   ord( ]temp$ )
+]temp   = ]temp + 1
+        .endr
+
+        ; for chr$() - out-of-range expressions ( >255 )
+        ; for ord()  - multiple char string
+        ; - should have same result as first repeat loop above
+
+]temp   =   0
+
+        .repeat 256
+]temp$  =   chr$( ]temp + 512 ) "multi-char appendage"
+        .str    mid$( ]temp$, 1, 1 )
+        .byte   ord( ]temp$ )
+]temp   = ]temp + 1
+        .endr
+
+        ; for chr$() - in-range expressions; check other than first char
+        ; for ord()  - multiple char strings; check other than first char
+        ; - should have same result as first repeat loop above
+
+]temp   = 0
+]temp$  = ""
+
+        .repeat 256
+]temp$  = ]temp$ chr$( ]temp )
+]temp   = ]temp + 1
+        .str    mid$( ]temp$, ]temp, 1 )
+        .byte   ord( ]temp$, ]temp )
+        .endr
+
+        ; now go down (check negative start positions)
+
+]temp   = -1
+
+        .repeat 256
+        .str    mid$( ]temp$, ]temp, 1 )
+        .byte   ord( ]temp$, ]temp )
+]temp   = ]temp - 1
+        .endr            
+
+; -------------------------------
+
+        .end

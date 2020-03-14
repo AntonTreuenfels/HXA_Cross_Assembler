@@ -1,0 +1,76 @@
+; Hobby Cross-Assembler Error Test 510e
+; Functions\STR$()
+; error: malformed and mis-applied
+
+; by Anton Treuenfels
+
+; first created: 07/06/06
+; last revised:  05/02/09
+
+; warning(s): 0
+
+; error(s): 14
+; - need open parenthesis
+; - need numeric expression
+; - unmatched open parenthesis
+; - unexpected EOE
+; - unexpected comma
+; - expecting string operator
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; missing pieces
+
+        .string str$ 123 )  ; no open parenthesis
+
+        .string str$( )     ; no expression
+
+        .string str$( 123   ; no close parenthesis
+
+        ; string argument
+
+        .string str$( "123" )
+
+        ; multiple arguments
+
+        .string str$( 123, 456 )
+
+        .string str$( 123, "456" )
+
+        .string str$( "123", 456 )
+
+        .string str$( "123", "456" )
+
+        ; multiple and missing arguments
+
+        .string str$( 123, )
+
+        .string str$( , 123 )
+
+        .string str$( , )
+
+; -------------------------------
+
+        ; type mis-match
+
+        .word   str$( 123 )
+
+        .word   1 + str$( 123 )
+
+        .word   "1" str$( 123 )
+
+; -------------------------------
+
+        .end

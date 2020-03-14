@@ -1,0 +1,88 @@
+; Hobby Cross-Assembler Test 502
+; Functions\LEN()
+; ok: string length
+
+; by Anton Treuenfels
+
+; first created: 09/20/05
+; last revised:  03/11/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        .byte   len( "" )
+        .byte   len( "A" )
+        .byte   len( "AB" )
+        .byte   len( "ABC" )
+
+        .byte   len( "A" )
+        .byte   len( "A" "B" )
+        .byte   len( "A" "B" "C" )
+
+        .byte   len( "A" ) + 1
+        .byte   len( "AB" ) + 2
+        .byte   len( "ABC" ) + 3
+
+        .byte   1 + len( "A" )
+        .byte   2 + len( "AB" )
+        .byte   3 + len( "ABC" )
+
+; -------------------------------
+
+null$   .equ    ""
+a$      .equ    "A"
+b$      .equ    "B"
+c$      .equ    "C"
+ab$     .equ    "AB"
+abc$    .equ    "ABC"
+
+        .byte   len( null$ )
+        .byte   len( a$ )
+        .byte   len( ab$ )
+        .byte   len( abc$ )
+
+        .byte   len( a$ )
+        .byte   len( a$ b$ )
+        .byte   len( a$ b$ c$ )
+
+        .byte   len( a$ ) + 1
+        .byte   len( ab$ ) + 2
+        .byte   len( abc$ ) + 3
+
+        .byte   1 + len( a$ )
+        .byte   2 + len( ab$ )
+        .byte   3 + len( abc$ )
+
+; -------------------------------
+
+; a string with a preceeding length byte
+
+        .macro  PSTR, ]text$
+        .byte   len(]text$)
+        .string ]text$
+        .endm
+
+        PSTR    "A"
+
+        PSTR    a$
+
+        PSTR    "Hello, World!"
+
+        PSTR    "A" "B"
+
+        PSTR    a$ b$
+
+        PSTR    "Hello," " " "World!"
+
+; -------------------------------
+
+        .end

@@ -1,0 +1,56 @@
+; Hobby Cross-Assembler Test 578
+; Nonstandard Byte\16-bit HEX and INCBIN
+; ok: 16-bit PC, 16-bit Byte
+
+; by Anton Treuenfels
+
+; first created: 06/27/11
+; last revised:  06/27/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M16"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+; HEX pseudo op
+; -------------------------------
+
+; what we're looking for is (zero) padding of hex strings that are not
+; integer multiples of the byte size to byte size
+
+]hex$   .equ    "1F2E3D4C5B6A79"
+
+        .while ]hex$
+        .hex   ]hex$
+]hex$   .equ    mid$( ]hex$, 3 )
+        .endw
+
+; -------------------------------
+; INCBIN pseudo op
+; -------------------------------
+
+; what we're looking for is (zero) padding of file inclusions that are not
+; integer multiples of the byte size to byte size
+
+; - we're using this source file itself as a binary inclusion, which
+; looks strange (and is of limited practical use), but works because only
+; one file at a time is ever open for reading
+
+        .liston macros          ; so listing will show data
+
+]cnt    .equ    32
+
+        .while  ]cnt
+        .incbin file$(), ]cnt
+]cnt    .equ    ]cnt - 1
+        .endw
+
+; -------------------------------
+
+        .end

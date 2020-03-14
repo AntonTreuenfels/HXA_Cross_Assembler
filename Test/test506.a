@@ -1,0 +1,108 @@
+; Hobby Cross-Assembler Test 520
+; Functions\MID$()
+; ok: substring extraction (by numeric index)
+
+; by Anton Treuenfels
+
+; first created: 10/15/05
+; last revised:  03/11/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; some useful strings
+
+null$   .equ    ""
+f$      .equ    "f"
+cd$     .equ    "cd"
+ef$     .equ    "ef"
+abc$    .equ    "abc"
+def$    .equ    "def"
+abcdef$ .equ    "abcdef"
+
+; -------------------------------
+
+; in numeric context
+
+        .byte   mid$( "abcdef", 4 ) == "def"
+
+        .byte   mid$( abcdef$, 4 ) == def$
+
+        .byte   mid$( "abcdef", 1, 3 ) == "abc"
+
+        .byte   mid$( abcdef$, 1, 3 ) == abc$
+
+        .byte   mid$( "abcdef", 5, 100 ) == "ef"
+
+        .byte   mid$( abcdef$, 5, 100 ) == ef$
+
+        ; negative start positions offset from end of string
+
+        .byte   mid$( "abcdef", -1 ) == "f"
+
+        .byte   mid$( abcdef$, -1 ) == f$
+
+        .byte   mid$( "abcdef", -4, 2 ) == "cd"
+
+        .byte   mid$( abcdef$, -4, 2 ) == cd$
+
+        ; odd arguments
+
+        .byte   mid$( "abcdef", 0 ) == ""
+
+        .byte   mid$( abcdef$, 0 ) == null$
+
+        .byte   mid$( "abcdef", 3, 0 ) == ""
+
+        .byte   mid$( abcdef$, 3, 0 ) == null$
+
+        .byte   mid$( "abcdef", -10, 10 ) == ""
+
+        .byte   mid$( abcdef$, -10, 10 ) == null$
+
+        .byte   mid$( "abcdef", -100, -10 ) == ""
+
+        .byte   mid$( abcdef$, -100, -10 ) == null$
+
+        .byte   mid$( "abcdef", 3, -10 ) == ""
+
+        .byte   mid$( abcdef$, 3, -10 ) == null$
+
+        .byte   mid$( "", 1 ) == ""
+
+        .byte   mid$( null$, 1 ) == null$
+
+; in string context
+
+        .string mid$( "abcdef", 4 )         ; "def"
+
+        .string mid$( abcdef$, 4 )          ; "def"
+
+        .string mid$( "abcdef", 1, 3 )      ; "abc"
+
+        .string mid$( abcdef$, 1, 3 )       ; "abc"
+
+        .string mid$( "abcdef", 5, 100 )    ; "ef"
+
+        .string mid$( abcdef$, 5, 100 )     ; "ef"
+
+        .string mid$( "abcdef", -1 )        ; "f"
+
+        .string mid$( abcdef$, -1 )         ; "f"
+
+        .string mid$( "abcdef", -4, 2 )     ; "cd"
+
+        .string mid$( abcdef$, -4, 2 )      ; "cd"
+
+; -------------------------------
+
+        .end

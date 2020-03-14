@@ -1,0 +1,185 @@
+; Hobby Cross-Assembler Test 532
+; Functions\LABEL()
+; ok: symbol name existence testing
+
+; by Anton Treuenfels
+
+; first created: 09/29/12
+; last revised:  09/29/12
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; symbol NOT defined
+
+        .echo "*** symbols not defined ***"
+
+        .if     label(_thissymbol_)
+        .fatal "_thissymbol_ detected"
+        .endif
+
+        .if     !label(_thissymbol_)
+        .echo "_thissymbol_ *NOT* detected"
+        .endif
+
+        .if     label(_thatsymbol_)
+        .fatal "_thatsymbol_ detected"
+        .else
+        .echo "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .if     !label(_othersymbol_)
+        .echo   "_othersymbol_ *NOT* detected"
+        .else
+        .fatal   "_othersymbol_ detected"
+        .endif
+
+        ; symbol defined
+
+        .echo " *** defined symbols *** "
+
+_thissymbol_:   .equ    0
+_thatsymbol_:   .equ    1
+_othersymbol_:
+
+        .if     label(_thissymbol_)
+        .echo "_thissymbol_ detected"
+        .endif
+
+        .if     !label(_thissymbol_)
+        .fatal "_thissymbol_ *NOT* detected"
+        .endif
+
+        .if     label(_thatsymbol_)
+        .echo "_thatsymbol_ detected"
+        .else
+        .fatal "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .if     !label(_othersymbol_)
+        .fatal   "_othersymbol_ *NOT* detected"
+        .else
+        .echo   "_othersymbol_ detected"
+        .endif
+
+        ; string expression arguments
+
+        .echo   "*** defined symbols in string expressions ***"
+
+sym1$   .equ    "_thissymbol_"
+]sym2$  .equ    "_thatsymbol_"
+@sym3$  .equ    "other"
+
+        .if     label( sym1$ )
+        .echo "_thissymbol_ detected"
+        .endif
+
+        .if     !label( sym1$ )
+        .fatal "_thissymbol_ *NOT* detected"
+        .endif
+
+        .if     label( ]sym2$ )
+        .echo "_thatsymbol_ detected"
+        .else
+        .fatal "_thatsymbol_ *NOT* detected"
+        .endif
+
+        .if     !label( "_" @sym3$ "symbol_" )
+        .fatal   "_othersymbol_ *NOT* detected"
+        .else
+        .echo   "_othersymbol_ detected"
+        .endif
+
+; -------------------------------
+
+        ; IF..ELSEIF
+
+        .echo "*** IF..ELSEIF not defined ***"
+
+        ; symbol NOT defined
+
+        .if     label(nested0)
+        .fatal "nested0 detected"
+        .elseif !label( nested0 )
+        .echo "nested0 *NOT* detected"
+        .endif
+
+        .if     !label( nested1 )
+        .echo "nested1 *NOT* detected"
+        .elseif label(nested1)
+        .fatal "nested1 detected"
+        .endif
+
+; -------------------------------
+
+        ; nested blocks
+
+        .echo "*** nested symbols not defined ***"
+
+        .if 0                           ; skip everything
+        .if     label( nested3 )
+        .fatal "nested3 detected in false branch"
+        .elseif !label(nested3)
+        .fatal "nested3 *NOT* detected in false branch"
+        .endif
+        .endif
+
+        .if 1
+        .if     !label(nested4)
+        .echo "nested4 *NOT* detected"
+        .elseif label( nested4 )
+        .fatal "nested4 detected"
+        .endif
+        .endif
+
+        ; symbol defined
+
+nested0 .equ 0
+nested1 .equ 1
+nested3 .equ 3
+nested4 .equ 4
+
+        .echo "*** IF..ELSEIF defined ***"
+
+        .if     label( nested0 )
+        .echo "nested0 detected"
+        .elseif !label(nested0)
+        .fatal "nested0 *NOT* detected"
+        .endif
+
+        .if     !label( nested1 )
+        .fatal "nested1 *NOT* detected"
+        .elseif label( nested1 )
+        .echo "nested1 detected"
+        .endif
+
+        .echo "*** defined nested symbols ***"
+
+        .if 0                           ; skip everything
+        .if     label( nested3 )
+        .fatal "nested3 detected in false branch"
+        .elseif !label( nested3 )
+        .fatal "nested3 *NOT* detected in false branch"
+        .endif
+        .endif
+
+        .if 1
+        .if     !label( nested4 )
+        .fatal "nested4 *NOT* detected"
+        .elseif label( nested4 )
+        .echo "nested4 detected"
+        .endif
+        .endif
+
+; -------------------------------
+
+        .end

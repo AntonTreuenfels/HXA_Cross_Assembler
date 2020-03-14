@@ -1,0 +1,25 @@
+; Hobby Cross-Assembler Test 584c
+; Nonstandard Byte\32-bit Motorola Basic SRecord
+; ok: 32-bit PC, 32-bit Byte
+
+; by Anton Treuenfels
+
+; first created: 06/25/11
+; last revised:  06/25/11
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+        .srecfile           ; create an object file
+
+; -------------------------------
+
+        .cpu    "T_32_M32"
+
+        .include "ihexdata.a"
+
+; -------------------------------
+
+        .end

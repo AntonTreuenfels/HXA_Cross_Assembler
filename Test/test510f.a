@@ -1,0 +1,43 @@
+; Hobby Cross-Assembler Error Test 508f
+; Functions\STR$()
+; error: forward reference in string context
+
+; by Anton Treuenfels
+
+; first created: 07/06/06
+; last revised:  07/06/06
+
+; warning(s): 0
+
+; error(s): 1
+; - name not found
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; numeric context is okay (pseudo-op allocates a known size)
+
+        .long   val( str$(glab1) )
+
+glab1
+
+        ; string context is not okay (pseudo-op allocates a variable size)
+
+        .str    str$( glab2 )
+
+glab2
+
+; -------------------------------
+
+        .end

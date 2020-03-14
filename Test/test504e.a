@@ -1,0 +1,89 @@
+; Hobby Cross-Assembler Error Test 504e
+; Functions\INDEX()
+; error: substring position
+
+; by Anton Treuenfels
+
+; first created: 05/23/06
+; last revised:  04/29/07
+
+; warning(s): 0
+
+; error(s): 21
+; - unexpected EOE
+; - expecting open parenthesis
+; - need string
+; - expecting argument
+; - unexpected close parenthesis
+; - need number
+; - unexpected argument separator
+
+; fatal: 0
+
+; -------------------------------
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_L"    ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; no argument problems
+
+        .byte   index               ; malformed
+
+        .byte   index(              ; malformed
+
+        .byte   index)              ; malformed
+
+        .byte   index()             ; no argument
+
+        ; one argument problems
+
+        .byte   index "ABC"         ; no parenthesis
+        
+        .byte   index( "ABC"        ; missing argument/close parenthesis
+
+        .byte   index "ABC" )       ; no open parenthesis
+
+        .byte   index( "ABC" )      ; too few arguments
+
+        ; two argument problems
+
+        .byte   index( "ABC",       ; missing argument/close parenthesis
+
+        .byte   index( "ABC", )     ; missing argument
+
+        .byte   index( , "ABC" )    ; missing argument
+
+        .byte   index( , )          ; missing arguments
+
+        .byte   index( 100, 100 )   ; numeric arguments
+
+        .byte   index( "ABC", 100 ) ; numeric argument
+
+        .byte   index( 100, "ABC" ) ; numeric argument
+
+        ; three argument problems
+
+        .byte   index( "ABC", "B", )    ; missing argument
+
+        .byte   index( "ABC", "B", "C" )    ; string argument
+
+        .byte   index( , , )            ; no arguments
+
+        .byte   index( "ABC", , 3 )     ; missing argument
+
+        .byte   index( "ABC", "B", 1+ ) ; malformed numeric argument
+
+        ; four argument problems
+
+        .byte   index( "ABC", "DEF", 2, 3 ) ; too many arguments
+
+; -------------------------------
+
+        .end

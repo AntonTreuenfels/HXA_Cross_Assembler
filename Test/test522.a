@@ -1,0 +1,212 @@
+; Hobby Cross-Assembler Test 522
+; Functions\SEGBEG(), SEGEND(), SEGLEN() and SEGOFF()
+; ok: correct segment data (16-bit)
+
+; by Anton Treuenfels
+
+; first created: 01/12/08
+; last revised:  06/27/09
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "T_16_M"    ; required psop
+;        .org    $1000       ; can't use outside of explicit segment
+
+; -------------------------------
+
+; first explicit segment *must* be absolute
+
+        .segment	abs1
+
+        .org    $1000       ; ORG before any data makes segment absolute
+
+        .bit16  segbeg(abs1)
+        .bit16  segend(abs1)
+        .bit16  seglen(abs1)
+        .bit16  segoff(abs1)
+
+        .endsegment	abs1
+
+; another segment
+
+        .segment	abs2
+
+        .org    $2000       ; absolute
+
+        .bit16  segbeg(abs2)
+        .bit16  segend(abs2)
+        .bit16  seglen(abs2)
+        .bit16  segoff(abs2)
+
+        .bit16  segbeg(rel2_1)
+        .bit16  segend(rel2_1)
+        .bit16  seglen(rel2_1)
+        .bit16  segoff(rel2_1)
+
+        ; size of combined segments
+
+        .bit16  segend(rel2_1) - segbeg(abs2)
+
+        .ends               ; alias for ENDSEGMENT
+
+; another segment
+
+        .segment	rel2_1
+
+        .bit16  segbeg(abs2)
+        .bit16  segend(abs2)
+        .bit16  seglen(abs2)
+        .bit16  segoff(abs2)
+
+        .bit16  segbeg(rel2_1)
+        .bit16  segend(rel2_1)
+        .bit16  seglen(rel2_1)
+        .bit16  segoff(rel2_1)
+
+        ; size of combined segments
+
+        .bit16  segend(rel2_1) - segbeg(abs2)
+
+        .ends	REL2_1
+
+; another segment
+
+        .segment	abs3
+
+        .org    $3000       ; absolute
+
+        .bit16  segbeg(abs3)
+        .bit16  segend(abs3)
+        .bit16  seglen(abs3)
+        .bit16  segoff(abs3)
+
+        .bit16  segbeg(rel3_1)
+        .bit16  segend(rel3_1)
+        .bit16  seglen(rel3_1)
+        .bit16  segoff(rel3_1)
+
+        .bit16  segbeg(rel3_2)
+        .bit16  segend(rel3_2)
+        .bit16  seglen(rel3_2)
+        .bit16  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit16  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_1
+
+        .bit16  segbeg(abs3)
+        .bit16  segend(abs3)
+        .bit16  seglen(abs3)
+        .bit16  segoff(abs3)
+
+        .bit16  segbeg(rel3_1)
+        .bit16  segend(rel3_1)
+        .bit16  seglen(rel3_1)
+        .bit16  segoff(rel3_1)
+
+        .bit16  segbeg(rel3_2)
+        .bit16  segend(rel3_2)
+        .bit16  seglen(rel3_2)
+        .bit16  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit16  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; another segment
+
+        .segment	rel3_2
+
+        .bit16  segbeg(abs3)
+        .bit16  segend(abs3)
+        .bit16  seglen(abs3)
+        .bit16  segoff(abs3)
+
+        .bit16  segbeg(rel3_1)
+        .bit16  segend(rel3_1)
+        .bit16  seglen(rel3_1)
+        .bit16  segoff(rel3_1)
+
+        .bit16  segbeg(rel3_2)
+        .bit16  segend(rel3_2)
+        .bit16  seglen(rel3_2)
+        .bit16  segoff(rel3_2)
+
+        ; size of combined segments
+
+        .bit16  segend(rel3_2) - segbeg(abs3)
+
+        .ends
+
+; -------------------------------
+
+        ; a macro for determining segment data
+
+        .macro  segdata, ?name
+        .bit16  segbeg(?name)
+        .bit16  segend(?name)
+        .bit16  seglen(?name)
+        .bit16  segoff(?name)
+        .endm
+
+; another segment
+
+        .segment    abs_4
+
+        .org        $4000   ; absolute
+
+        segdata abs1
+
+        segdata abs2
+
+        segdata rel2_1
+
+        segdata abs3
+
+        ; just to show we can (even if actual utility is suspect)
+
+        segdata 0 ? rel3_2 : rel3_1
+
+        segdata 1 ? rel3_2 : rel3_1
+
+        ; now try it with string expressions
+
+SA1$    =   "abs1"
+SA2$    =   "abs2"
+SA3$    =   "abs3"
+SR2_1$  =   "rel2_1"
+SR3_1$  =   "rel3_1"
+SR3_2$  =   "rel3_2"
+
+        segdata SA1$
+
+        segdata SA2$
+
+        segdata SR2_1$
+
+        segdata SA3$
+
+        ; just to show we can (even if actual utility is suspect)
+
+        segdata "" ? SR3_2$ : SR3_1$
+
+        segdata ".T." ? SR3_2$ : SR3_1$
+
+        .ends
+
+; -------------------------------
+
+        .end
