@@ -1,0 +1,156 @@
+; Hobby Cross-Assembler "Hello, World!" Test 003
+; Commodore\With BASIC Stub Header and Code Relocation
+; ok: for C64, C128
+
+; by Anton Treuenfels
+
+; first created: 01/12/08
+; last revised:  01/26/08
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ------------------
+
+        .cpu    "6502"      ; required psop
+
+; ------------------
+; we'll create two absolute segments in this demonstration:
+; - first will be a "loader" stub that looks like a BASIC program
+; - second will be the "actual" program that gets relocated before running
+; ------------------
+
+; Commodore 64 Kernel character output routine
+
+CHROUT  .equ    $FFD2
+
+; simple "PETASCII" charset (not complete in all details)
+
+        .xlate  "a-z=A-Z", "A-Z=a-z"
+
+; ------------------
+
+; here's where we'll decide which machine to produce code for
+
+; set one (and only one) of the following equates to one and
+; the other to zero:
+
+FOR_C64     .equ    1
+FOR_C128    .equ    0
+
+        .if FOR_C64+FOR_C128 != 1
+        .fatal  "Can't tell which machine to produce code for!"
+        .endif
+
+; ------------------
+
+; here's where we'll account for most of the differences between machines
+
+        .if FOR_C64
+LODADR  .equ    $0801
+RUNADR  .equ    $C000
+FNAME$  .equ    "hello64.bas"
+
+        .elseif FOR_C128
+LODADR  .equ    $1C01
+RUNADR  .equ    $1300
+FNAME$  .equ    "hello128.bas"
+
+        .else
+        .fatal  "Can't happen"
+
+        .endif
+
+; let user know name and how to use
+
+        .echo
+        .echo   "LOAD \"" FNAME$ "\",8 then RUN to use"
+        .echo
+
+; set object file
+
+        .objfile    FNAME$
+
+; ------------------
+
+; we need to produce an output file in Commodore's "PRG" format.
+; This is simply the code for our program preceeded by two bytes
+; indicating the load address of that code.
+; We can produce those bytes with a data-storage pseudo op,
+; and we can derive their values from the assembly address:
+
+        .segment    BASICSTUB
+
+        .org    LODADR-2    ; account for load address bytes in object file
+                            ; - this also makes segment absolute
+
+        .word   LODADR      ; the load address bytes
+
+; ------------------
+
+; our BASIC stub:
+
+        .word   +           ; link to next BASIC line
+        .word   10          ; BASIC line#
+        .byte   $9E         ; 'SYS' token
+
+SYSADR  =  * + 7            ; where to SYS to (end of BASIC program)
+
+        .str    str$( SYSADR )
+
+        .byte   $00         ; end of line
+ +
+        .word   $00         ; end of program
+
+; check that our SYS value is correct
+
+        .if     * != SYSADR
+        .fatal  "Can't get here from there!"
+        .endif
+
+; relocate the "actual" program to its execution address
+; - because it's so short we don't have to be terribly elaborate here
+
+        LDX #seglen(HELLOCODE)
+ -      LDA segbeg(BASICSTUB) + segoff(HELLOCODE) - 1,x
+        STA segbeg(HELLOCODE) - 1,x
+        DEX
+        BNE -
+
+; execute "actual" program
+
+        JMP segbeg(HELLOCODE)
+
+        .ends
+
+; ------------------
+
+        .segment    HELLOCODE
+
+        .org    RUNADR      ; make segment absolute
+
+; our assembly-language message printer:
+
+        LDY     #-1
+ -      INY
+        LDA     MESG,Y
+        BEQ     +           ; b: end of text
+        JSR     CHROUT
+        BCC     -           ; b: no error
+ +      RTS
+
+; the text of the message
+
+MESG
+        .byte   14          ; switch to upper/lower case charset
+
+        .str    "Hello, world!\n"
+        .byte   $00
+
+        .ends
+
+; ------------------
+
+        .end

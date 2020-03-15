@@ -1,0 +1,94 @@
+; Hobby Cross-Assembler "Hello, World!" Test 001
+; Commodore\All-Machine Language
+; ok: for C64, C128, VIC20
+
+; by Anton Treuenfels
+
+; first created: 04/26/03
+; last revised:  06/14/06
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; ------------------
+
+        .cpu    "6502"      ; required psop
+
+; ------------------
+
+; Commodore 64/128, VIC-20 Kernel character output routine
+
+CHROUT  .equ    $FFD2
+
+; simple "PETASCII" charset (not complete in all details)
+
+        .xlate  "a-z=A-Z", "A-Z=a-z"
+
+; ------------------
+
+; here's where we'll account for most of the differences between machines
+; - a simple conditional flag will control which version gets assembled
+; Non-zero= C64/VIC-20, zero= C128
+; - we want to put our program in RAM not normally used by
+; the BASIC interpreter.
+; Our routine is short, so we can use the cassette tape buffer
+; on each machine
+; - we'll give each version a different output file name as well
+
+        .if 1               ; for C64, VIC20
+ASMADR  .equ    $033C
+FNAME$  .equ    "hello.o"
+
+        .else               ; for C128
+ASMADR  .equ    $0B00
+FNAME$  .equ    "hello128.o"
+
+        .endif
+
+; let user know name and how to use
+
+        .echo
+        .echo   "LOAD \"" FNAME$ "\",8,1 then SYS " STR$(ASMADR) " to use"
+        .echo
+
+; set object file
+
+        .objfile    FNAME$
+
+; ------------------
+
+; we need to produce an output file in Commodore's "PRG" format.
+; This is simply the code for our program preceeded by two bytes
+; indicating the load address of that code.
+; We can produce those bytes with a data-storage pseudo op,
+; and we can derive their values from the assembly address:
+
+        .org    ASMADR-2    ; account for load address bytes in object file
+
+        .word   ASMADR      ; the load address bytes
+
+; ------------------
+
+; now we start the actual program code with the program counter at ASMADR
+
+        LDY     #-1
+ -      INY
+        LDA     MESG,Y
+        BEQ     :+          ; b: end of text
+        JSR     CHROUT
+        BCC     :-          ; b: no error
+ +      RTS
+
+; the text of the message
+
+MESG
+        .byte   14          ; switch to upper/lower case charset
+
+        .str    "Hello, world!\n"
+        .byte   $00
+
+; ------------------
+
+        .end
