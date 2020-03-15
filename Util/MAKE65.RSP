@@ -1,0 +1,22 @@
+# main loops
+a_main.awk
+# pseudo-ops
+a_pseudo.awk
+# macros
+a_macro.awk
+# symbol table
+a_symbol.awk
+# program counter
+a_prgctr.awk
+# expression evalution
+a_eval.awk
+# code generation
+a_codgen.awk
+# user messages
+a_mesg.awk
+# source management
+a_source.awk
+# common knowledge
+a_common.awk
+# instruction set
+a_ins65x.awk
