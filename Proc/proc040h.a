@@ -1,0 +1,139 @@
+; Hobby Cross-Assembler Processor Error Test 040h
+; W65C816S\Instruction Set
+; error: bad ASSUME expressions
+
+; by Anton Treuenfels
+
+; first created: 07/20/07
+; last revision: 03/14/10
+
+; warning(s): 2
+; - token ignored
+
+; error(s): 24
+; - blank field
+; - bad token
+; - null expression
+; - name not found
+; - out of range
+
+; fatal:
+
+; -------------------------------
+
+		.listfile
+		.errfile
+
+        .maxerr 50          ; raise default
+
+; -------------------------------
+
+        .cpu    "W65C816S"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; ADDR assumption
+
+        ; blank field
+
+        .assume addr:
+
+        ; no expression
+
+        .assume addr
+
+        ; incorrect expression
+
+        .assume addr:unknown
+
+; -------------------------------
+
+        ; ZEROPAGE assumption
+
+        ; blank field
+
+        .assume zeropage:
+
+        ; no expression
+
+        .assume zeropage
+
+        ; incorrect expression (unknown label)
+
+        .assume zeropage:unknown
+
+        ; out of range
+
+        .assume zeropage:$100       ; too high
+        .assume zeropage:20-21      ; too low
+
+; -------------------------------
+
+        ; INDEX and ACCUM assumptions
+
+        ; blank field
+
+        .assume index:
+        .assume accum:
+
+        ; no expression
+
+        .assume index
+        .assume accum
+
+        ; incorrect expression (unknown label)
+
+        .assume index:eight
+        .assume accum:sixteen
+
+        ; out of range
+
+        .assume index:34
+        .assume accum:$100-53
+
+; -------------------------------
+
+        ; DIRECTPAGE assumption
+
+        ; blank field
+
+        .assume directpage:
+
+        ; no expression
+
+        .assume directpage
+
+        ; incorrect expression (unknown label)
+
+        .assume directpage:unknown
+
+        ; out of range
+
+        .assume directpage:$FF01    ; too high
+        .assume directpage:20-21    ; too low
+
+; -------------------------------
+
+        ; DATABANK assumption
+
+        ; blank field
+
+        .assume databank:
+
+        ; no expression
+
+        .assume databank
+
+        ; incorrect expression (unknown label)
+
+        .assume databank:unknown
+
+        ; out of range
+
+        .assume databank:$100       ; too high
+        .assume databank:20-21      ; too low
+
+; -------------------------------
+
+		.end

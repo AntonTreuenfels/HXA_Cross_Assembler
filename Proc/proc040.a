@@ -1,0 +1,861 @@
+; Hobby Cross-Assembler Processor Test 040
+; W65C816S\Instruction Set
+; ok: W65C816S instruction set
+
+; by Anton Treuenfels
+
+; first created: 01/27/05
+; last revised:  07/11/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "W65C816S"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; backward reference
+
+bakbyt  .equ    $12
+bakwrd  .equ    $1234
+bak24   .equ    $123456
+bak24b  .equ    $789ABC
+
+; a simple test of all legal instructions using legal address modes
+; - no complicated expressions
+; - forward references in contexts where multiple address modes
+; modes are possible are resolved as the largest of them
+; - an artificial distinction between "acc" (with 'A' operand) and
+; "acc_i" (with no operand) address modes is used here so the
+; test-generator program can easily distinguish between them
+
+; some instructions produce the same code but use
+; a different mnemonic or syntax:
+; - "(wdc)" = WDC-recommended (fairly portable)
+; - "(hxa)" = HXA-specific (not portable)
+
+        ADC     $1234       ; ab
+        ADC     bakwrd
+        ADC     fwdwrd
+        ADC     $1234,x     ; abx
+        ADC     bakwrd,x
+        ADC     fwdwrd,x
+        ADC     $1234,y     ; aby
+        ADC     bakwrd,y
+        ADC     fwdwrd,y
+        ADC     #$12        ; imm
+        ADC     #bakbyt
+        ADC     #fwdbyt
+        ADC     $123456     ; lab
+        ADC     bak24
+        ADC     fwd24
+        ADC     $123456,x   ; labx
+        ADC     bak24,x
+        ADC     fwd24,x
+        ADC     [$12]       ; lzpi
+        ADC     [bakbyt]
+        ADC     [fwdbyt]
+        ADC     [$12],y     ; lzpiy
+        ADC     [bakbyt],y
+        ADC     [fwdbyt],y
+        ADC     $12,s       ; sr
+        ADC     bakbyt,s
+        ADC     fwdbyt,s
+        ADC     ($12,s),y   ; sriy
+        ADC     (bakbyt,s),y
+        ADC     (fwdbyt,s),y
+        ADC     $12         ; zp
+        ADC     bakbyt
+        ADC     fwdbyt
+        ADC     ($12)       ; zpi
+        ADC     (bakbyt)
+        ADC     (fwdbyt)
+        ADC     ($12),y     ; zpiy
+        ADC     (bakbyt),y
+        ADC     (fwdbyt),y
+        ADC     $12,x       ; zpx
+        ADC     bakbyt,x
+        ADC     fwdbyt,x
+        ADC     ($12,x)     ; zpxi
+        ADC     (bakbyt,x)
+        ADC     (fwdbyt,x)
+
+        AND     $1234       ; ab
+        AND     bakwrd
+        AND     fwdwrd
+        AND     $1234,x     ; abx
+        AND     bakwrd,x
+        AND     fwdwrd,x
+        AND     $1234,y     ; aby
+        AND     bakwrd,y
+        AND     fwdwrd,y
+        AND     #$12        ; imm
+        AND     #bakbyt
+        AND     #fwdbyt
+        AND     $123456     ; lab
+        AND     bak24
+        AND     fwd24
+        AND     $123456,x   ; labx
+        AND     bak24,x
+        AND     fwd24,x
+        AND     [$12]       ; lzpi
+        AND     [bakbyt]
+        AND     [fwdbyt]
+        AND     [$12],y     ; lzpiy
+        AND     [bakbyt],y
+        AND     [fwdbyt],y
+        AND     $12,s       ; sr
+        AND     bakbyt,s
+        AND     fwdbyt,s
+        AND     ($12,s),y   ; sriy
+        AND     (bakbyt,s),y
+        AND     (fwdbyt,s),y
+        AND     $12         ; zp
+        AND     bakbyt
+        AND     fwdbyt
+        AND     ($12)       ; zpi
+        AND     (bakbyt)
+        AND     (fwdbyt)
+        AND     ($12),y     ; zpiy
+        AND     (bakbyt),y
+        AND     (fwdbyt),y
+        AND     $12,x       ; zpx
+        AND     bakbyt,x
+        AND     fwdbyt,x
+        AND     ($12,x)     ; zpxi
+        AND     (bakbyt,x)
+        AND     (fwdbyt,x)
+
+        ASL     $1234       ; ab
+        ASL     bakwrd
+        ASL     fwdwrd
+        ASL     $1234,x     ; abx
+        ASL     bakwrd,x
+        ASL     fwdwrd,x
+        ASL     A           ; acc
+        ASL     a
+        ASL                 ; acc_i
+        ASL     $12         ; zp
+        ASL     bakbyt
+        ASL     fwdbyt
+        ASL     $12,x       ; zpx
+        ASL     bakbyt,x
+        ASL     fwdbyt,x
+
+ -                          ; backward target
+
+        BCC     -           ; pcr
+        BCC     +
+
+        BCS     -           ; pcr
+        BCS     +
+
+        BEQ     -           ; pcr
+        BEQ     +
+
+        BGE     -           ; pcr (wdc)
+        BGE     +
+
+        BIT     $1234       ; ab
+        BIT     bakwrd
+        BIT     fwdwrd
+        BIT     $1234,x     ; abx
+        BIT     bakwrd,x
+        BIT     fwdwrd,x
+        BIT     #$12        ; imm
+        BIT     #bakbyt
+        BIT     #fwdbyt
+        BIT     $12         ; zp
+        BIT     bakbyt
+        BIT     fwdbyt
+        BIT     $12,x       ; zpx
+        BIT     bakbyt,x
+        BIT     fwdbyt,x
+
+        BLT     -           ; pcr (wdc)
+        BLT     +
+
+        BMI     -           ; pcr
+        BMI     +
+
+        BNE     -           ; pcr
+        BNE     +
+
+        BPL     -           ; pcr
+        BPL     +
+
+        BRA     -           ; pcr
+        BRA     +
+
+        BRK     #$12        ; imm (hxa)
+        BRK     #bakbyt
+        BRK     #fwdbyt
+        BRK                 ; imp
+        BRK     $12         ; zp (hxa)
+        BRK     bakbyt
+        BRK     fwdbyt
+
+        BRL     -           ; lpcr
+        BRL     +
+
+        BVC     -           ; pcr
+        BVC     +
+
+        BVS     -           ; pcr
+        BVS     +
+
+ +                          ; forward target
+
+        CLC                 ; imp
+
+        CLD                 ; imp
+
+        CLI                 ; imp
+
+        CLV                 ; imp
+
+        CMP     $1234       ; ab
+        CMP     bakwrd
+        CMP     fwdwrd
+        CMP     $1234,x     ; abx
+        CMP     bakwrd,x
+        CMP     fwdwrd,x
+        CMP     $1234,y     ; aby
+        CMP     bakwrd,y
+        CMP     fwdwrd,y
+        CMP     #$12        ; imm
+        CMP     #bakbyt
+        CMP     #fwdbyt
+        CMP     $123456     ; lab
+        CMP     bak24
+        CMP     fwd24
+        CMP     $123456,x   ; labx
+        CMP     bak24,x
+        CMP     fwd24,x
+        CMP     [$12]       ; lzpi
+        CMP     [bakbyt]
+        CMP     [fwdbyt]
+        CMP     [$12],y     ; lzpiy
+        CMP     [bakbyt],y
+        CMP     [fwdbyt],y
+        CMP     $12,s       ; sr
+        CMP     bakbyt,s
+        CMP     fwdbyt,s
+        CMP     ($12,s),y   ; sriy
+        CMP     (bakbyt,s),y
+        CMP     (fwdbyt,s),y
+        CMP     $12         ; zp
+        CMP     bakbyt
+        CMP     fwdbyt
+        CMP     ($12)       ; zpi
+        CMP     (bakbyt)
+        CMP     (fwdbyt)
+        CMP     ($12),y     ; zpiy
+        CMP     (bakbyt),y
+        CMP     (fwdbyt),y
+        CMP     $12,x       ; zpx
+        CMP     bakbyt,x
+        CMP     fwdbyt,x
+        CMP     ($12,x)     ; zpxi
+        CMP     (bakbyt,x)
+        CMP     (fwdbyt,x)
+
+        COP     #$12        ; imm (hxa)
+        COP     #bakbyt
+        COP     #fwdbyt
+        COP     $12         ; zp
+        COP     bakbyt
+        COP     fwdbyt
+
+        CPX     $1234       ; ab
+        CPX     bakwrd
+        CPX     fwdwrd
+        CPX     #$12        ; imm
+        CPX     #bakbyt
+        CPX     #fwdbyt
+        CPX     $12         ; zp
+        CPX     bakbyt
+        CPX     fwdbyt
+
+        CPY     $1234       ; ab
+        CPY     bakwrd
+        CPY     fwdwrd
+        CPY     #$12        ; imm
+        CPY     #bakbyt
+        CPY     #fwdbyt
+        CPY     $12         ; zp
+        CPY     bakbyt
+        CPY     fwdbyt
+
+        DEA                 ; imp (wdc)
+
+        DEC     $1234       ; ab
+        DEC     bakwrd
+        DEC     fwdwrd
+        DEC     $1234,x     ; abx
+        DEC     bakwrd,x
+        DEC     fwdwrd,x
+        DEC     A           ; acc
+        DEC     a
+        DEC                 ; acc_i
+        DEC     $12         ; zp
+        DEC     bakbyt
+        DEC     fwdbyt
+        DEC     $12,x       ; zpx
+        DEC     bakbyt,x
+        DEC     fwdbyt,x
+        
+        DEX                 ; imp
+
+        DEY                 ; imp
+
+        EOR     $1234       ; ab
+        EOR     bakwrd
+        EOR     fwdwrd
+        EOR     $1234,x     ; abx
+        EOR     bakwrd,x
+        EOR     fwdwrd,x
+        EOR     $1234,y     ; aby
+        EOR     bakwrd,y
+        EOR     fwdwrd,y
+        EOR     #$12        ; imm
+        EOR     #bakbyt
+        EOR     #fwdbyt
+        EOR     $123456     ; lab
+        EOR     bak24
+        EOR     fwd24
+        EOR     $123456,x   ; labx
+        EOR     bak24,x
+        EOR     fwd24,x
+        EOR     [$12]       ; lzpi
+        EOR     [bakbyt]
+        EOR     [fwdbyt]
+        EOR     [$12],y     ; lzpiy
+        EOR     [bakbyt],y
+        EOR     [fwdbyt],y
+        EOR     $12,s       ; sr
+        EOR     bakbyt,s
+        EOR     fwdbyt,s
+        EOR     ($12,s),y   ; sriy
+        EOR     (bakbyt,s),y
+        EOR     (fwdbyt,s),y
+        EOR     $12         ; zp
+        EOR     bakbyt
+        EOR     fwdbyt
+        EOR     ($12)       ; zpi
+        EOR     (bakbyt)
+        EOR     (fwdbyt)
+        EOR     ($12),y     ; zpiy
+        EOR     (bakbyt),y
+        EOR     (fwdbyt),y
+        EOR     $12,x       ; zpx
+        EOR     bakbyt,x
+        EOR     fwdbyt,x
+        EOR     ($12,x)     ; zpxi
+        EOR     (bakbyt,x)
+        EOR     (fwdbyt,x)
+
+        INA                 ; imp (wdc)
+
+        INC     $1234       ; ab
+        INC     bakwrd
+        INC     fwdwrd
+        INC     $1234,x     ; abx
+        INC     bakwrd,x
+        INC     fwdwrd,x
+        INC     A           ; acc
+        INC     a
+        INC                 ; acc_i
+        INC     $12         ; zp
+        INC     bakbyt
+        INC     fwdbyt
+        INC     $12,x       ; zpx
+        INC     bakbyt,x
+        INC     fwdbyt,x
+        
+        INX                 ; imp
+
+        INY                 ; imp
+
+        JML     ($1234)     ; abi
+        JML     (bakwrd)
+        JML     (fwdwrd)
+        JML     $123456     ; lab
+        JML     bak24
+        JML     fwd24
+
+        JMP     $1234       ; ab
+        JMP     bakwrd
+        JMP     fwdwrd
+        JMP     ($1234)     ; abi
+        JMP     (bakwrd)
+        JMP     (fwdwrd)
+        JMP     ($1234,x)   ; abxi
+        JMP     (bakwrd,x)
+        JMP     (fwdwrd,x)
+        JMP     $123456     ; lab (wdc)
+        JMP     bak24
+        JMP     fwd24
+
+        JSL     $123456     ; lab
+        JSL     bak24
+        JSL     fwd24
+
+        JSR     $1234       ; ab
+        JSR     bakwrd
+        JSR     fwdwrd
+        JSR     ($1234,x)   ; abxi
+        JSR     (bakwrd,x)
+        JSR     (fwdwrd,x)
+        JSR     $123456     ; lab
+        JSR     bak24
+        JSR     fwd24
+
+        LDA     $1234       ; ab
+        LDA     bakwrd
+        LDA     fwdwrd
+        LDA     $1234,x     ; abx
+        LDA     bakwrd,x
+        LDA     fwdwrd,x
+        LDA     $1234,y     ; aby
+        LDA     bakwrd,y
+        LDA     fwdwrd,y
+        LDA     #$12        ; imm
+        LDA     #bakbyt
+        LDA     #fwdbyt
+        LDA     $123456     ; lab
+        LDA     bak24
+        LDA     fwd24
+        LDA     $123456,x   ; labx
+        LDA     bak24,x
+        LDA     fwd24,x
+        LDA     [$12]       ; lzpi
+        LDA     [bakbyt]
+        LDA     [fwdbyt]
+        LDA     [$12],y     ; lzpiy
+        LDA     [bakbyt],y
+        LDA     [fwdbyt],y
+        LDA     $12,s       ; sr
+        LDA     bakbyt,s
+        LDA     fwdbyt,s
+        LDA     ($12,s),y   ; sriy
+        LDA     (bakbyt,s),y
+        LDA     (fwdbyt,s),y
+        LDA     $12         ; zp
+        LDA     bakbyt
+        LDA     fwdbyt
+        LDA     ($12)       ; zpi
+        LDA     (bakbyt)
+        LDA     (fwdbyt)
+        LDA     ($12),y     ; zpiy
+        LDA     (bakbyt),y
+        LDA     (fwdbyt),y
+        LDA     $12,x       ; zpx
+        LDA     bakbyt,x
+        LDA     fwdbyt,x
+        LDA     ($12,x)     ; zpxi
+        LDA     (bakbyt,x)
+        LDA     (fwdbyt,x)
+
+        LDX     $1234       ; ab
+        LDX     bakwrd
+        LDX     fwdwrd
+        LDX     $1234,y     ; aby
+        LDX     bakwrd,y
+        LDX     fwdwrd,y
+        LDX     #$12        ; imm
+        LDX     #bakbyt
+        LDX     #fwdbyt
+        LDX     $12         ; zp
+        LDX     bakbyt
+        LDX     fwdbyt
+        LDX     $12,y       ; zpy
+        LDX     bakbyt,y
+        LDX     fwdbyt,y
+
+        LDY     $1234       ; ab
+        LDY     bakwrd
+        LDY     fwdwrd
+        LDY     $1234,x     ; abx
+        LDY     bakwrd,x
+        LDY     fwdwrd,x
+        LDY     #$12        ; imm
+        LDY     #bakbyt
+        LDY     #fwdbyt
+        LDY     $12         ; zp
+        LDY     bakbyt
+        LDY     fwdbyt
+        LDY     $12,x       ; zpx
+        LDY     bakbyt,x
+        LDY     fwdbyt,x
+
+        LSR     $1234       ; ab
+        LSR     bakwrd
+        LSR     fwdwrd
+        LSR     $1234,x     ; abx
+        LSR     bakwrd,x
+        LSR     fwdwrd,x
+        LSR     A           ; acc
+        LSR     a
+        LSR                 ; acc_i
+        LSR     $12         ; zp
+        LSR     bakbyt
+        LSR     fwdbyt
+        LSR     $12,x       ; zpx
+        LSR     bakbyt,x
+        LSR     fwdbyt,x
+
+        MVN     $123456, $789ABC    ; bmv
+        MVN     bak24, bak24b
+        MVN     fwd24, fwd24b
+
+        MVP     $123456, $789ABC    ; bmv
+        MVP     bak24, bak24b
+        MVP     fwd24, fwd24b
+
+        NOP                 ; imp
+
+        ORA     $1234       ; ab
+        ORA     bakwrd
+        ORA     fwdwrd
+        ORA     $1234,x     ; abx
+        ORA     bakwrd,x
+        ORA     fwdwrd,x
+        ORA     $1234,y     ; aby
+        ORA     bakwrd,y
+        ORA     fwdwrd,y
+        ORA     #$12        ; imm
+        ORA     #bakbyt
+        ORA     #fwdbyt
+        ORA     $123456     ; lab
+        ORA     bak24
+        ORA     fwd24
+        ORA     $123456,x   ; labx
+        ORA     bak24,x
+        ORA     fwd24,x
+        ORA     [$12]       ; lzpi
+        ORA     [bakbyt]
+        ORA     [fwdbyt]
+        ORA     [$12],y     ; lzpiy
+        ORA     [bakbyt],y
+        ORA     [fwdbyt],y
+        ORA     $12,s       ; sr
+        ORA     bakbyt,s
+        ORA     fwdbyt,s
+        ORA     ($12,s),y   ; sriy
+        ORA     (bakbyt,s),y
+        ORA     (fwdbyt,s),y
+        ORA     $12         ; zp
+        ORA     bakbyt
+        ORA     fwdbyt
+        ORA     ($12)       ; zpi
+        ORA     (bakbyt)
+        ORA     (fwdbyt)
+        ORA     ($12),y     ; zpiy
+        ORA     (bakbyt),y
+        ORA     (fwdbyt),y
+        ORA     $12,x       ; zpx
+        ORA     bakbyt,x
+        ORA     fwdbyt,x
+        ORA     ($12,x)     ; zpxi
+        ORA     (bakbyt,x)
+        ORA     (fwdbyt,x)
+
+        PEA     $1234       ; ab
+        PEA     bakwrd
+        PEA     fwdwrd
+        PEA     #$1234      ; imm (hxa)
+        PEA     #bakwrd
+        PEA     #fwdwrd
+
+        PEI     $12         ; zp (hxa)
+        PEI     bakbyt
+        PEI     fwdbyt
+        PEI     ($12)       ; zpi
+        PEI     (bakbyt)
+        PEI     (fwdbyt)
+
+ -
+        PER     -           ; lpcr
+        PER     +
+ +
+
+        PHA                 ; imp
+
+        PHB                 ; imp
+
+        PHD                 ; imp
+
+        PHP                 ; imp
+
+        PHK                 ; imp
+
+        PHX                 ; imp
+
+        PHY                 ; imp
+
+        PLA                 ; imp
+
+        PLB                 ; imp
+
+        PLD                 ; imp
+
+        PLP                 ; imp
+
+        PLX                 ; imp
+
+        PLY                 ; imp
+
+        REP     #$12        ; imm
+        REP     #bakbyt
+        REP     #fwdbyt
+
+        ROL     $1234       ; ab
+        ROL     bakwrd
+        ROL     fwdwrd
+        ROL     $1234,x     ; abx
+        ROL     bakwrd,x
+        ROL     fwdwrd,x
+        ROL     A           ; acc
+        ROL     a
+        ROL                 ; acc_i
+        ROL     $12         ; zp
+        ROL     bakbyt
+        ROL     fwdbyt
+        ROL     $12,x       ; zpx
+        ROL     bakbyt,x
+        ROL     fwdbyt,x
+
+        ROR     $1234       ; ab
+        ROR     bakwrd
+        ROR     fwdwrd
+        ROR     $1234,x     ; abx
+        ROR     bakwrd,x
+        ROR     fwdwrd,x
+        ROR     A           ; acc
+        ROR     a
+        ROR                 ; acc_i
+        ROR     $12         ; zp
+        ROR     bakbyt
+        ROR     fwdbyt
+        ROR     $12,x       ; zpx
+        ROR     bakbyt,x
+        ROR     fwdbyt,x
+
+        RTI                 ; imp
+
+        RTL                 ; imp
+
+        RTS                 ; imp
+
+        SBC     $1234       ; ab
+        SBC     bakwrd
+        SBC     fwdwrd
+        SBC     $1234,x     ; abx
+        SBC     bakwrd,x
+        SBC     fwdwrd,x
+        SBC     $1234,y     ; aby
+        SBC     bakwrd,y
+        SBC     fwdwrd,y
+        SBC     #$12        ; imm
+        SBC     #bakbyt
+        SBC     #fwdbyt
+        SBC     $123456     ; lab
+        SBC     bak24
+        SBC     fwd24
+        SBC     $123456,x   ; labx
+        SBC     bak24,x
+        SBC     fwd24,x
+        SBC     [$12]       ; lzpi
+        SBC     [bakbyt]
+        SBC     [fwdbyt]
+        SBC     [$12],y     ; lzpiy
+        SBC     [bakbyt],y
+        SBC     [fwdbyt],y
+        SBC     $12,s       ; sr
+        SBC     bakbyt,s
+        SBC     fwdbyt,s
+        SBC     ($12,s),y   ; sriy
+        SBC     (bakbyt,s),y
+        SBC     (fwdbyt,s),y
+        SBC     $12         ; zp
+        SBC     bakbyt
+        SBC     fwdbyt
+        SBC     ($12),y     ; zpiy
+        SBC     (bakbyt),y
+        SBC     (fwdbyt),y
+        SBC     ($12)       ; zpi
+        SBC     (bakbyt)
+        SBC     (fwdbyt)
+        SBC     $12,x       ; zpx
+        SBC     bakbyt,x
+        SBC     fwdbyt,x
+        SBC     ($12,x)     ; zpxi
+        SBC     (bakbyt,x)
+        SBC     (fwdbyt,x)
+
+        SEC                 ; imp
+
+        SED                 ; imp
+
+        SEI                 ; imp
+
+        SEP     #$12        ; imm
+        SEP     #bakbyt
+        SEP     #fwdbyt
+
+        STA     $1234       ; ab
+        STA     bakwrd
+        STA     fwdwrd
+        STA     $1234,x     ; abx
+        STA     bakwrd,x
+        STA     fwdwrd,x
+        STA     $1234,y     ; aby
+        STA     bakwrd,y
+        STA     fwdwrd,y
+        STA     $123456     ; lab
+        STA     bak24
+        STA     fwd24
+        STA     $123456,x   ; labx
+        STA     bak24,x
+        STA     fwd24,x
+        STA     [$12]       ; lzpi
+        STA     [bakbyt]
+        STA     [fwdbyt]
+        STA     [$12],y     ; lzpiy
+        STA     [bakbyt],y
+        STA     [fwdbyt],y
+        STA     $12,s       ; sr
+        STA     bakbyt,s
+        STA     fwdbyt,s
+        STA     ($12,s),y   ; sriy
+        STA     (bakbyt,s),y
+        STA     (fwdbyt,s),y
+        STA     $12         ; zp
+        STA     bakbyt
+        STA     fwdbyt
+        STA     ($12)       ; zpi
+        STA     (bakbyt)
+        STA     (fwdbyt)
+        STA     ($12),y     ; zpiy
+        STA     (bakbyt),y
+        STA     (fwdbyt),y
+        STA     $12,x       ; zpx
+        STA     bakbyt,x
+        STA     fwdbyt,x
+        STA     ($12,x)     ; zpxi
+        STA     (bakbyt,x)
+        STA     (fwdbyt,x)
+
+        STP                 ; imp
+
+        STX     $1234       ; ab
+        STX     bakwrd
+        STX     fwdwrd
+        STX     $12         ; zp
+        STX     bakbyt
+        STX     fwdbyt
+        STX     $12,y       ; zpy
+        STX     bakbyt,y
+        STX     fwdbyt,y
+
+        STY     $1234       ; ab
+        STY     bakwrd
+        STY     fwdwrd
+        STY     $12         ; zp
+        STY     bakbyt
+        STY     fwdbyt
+        STY     $12,x       ; zpx
+        STY     bakbyt,x
+        STY     fwdbyt,x
+
+        STZ     $1234       ; ab
+        STZ     bakwrd
+        STZ     fwdwrd
+        STZ     $1234,x     ; abx
+        STZ     bakwrd,x
+        STZ     fwdwrd,x
+        STZ     $12         ; zp
+        STZ     bakbyt
+        STZ     fwdbyt
+        STZ     $12,x       ; zpx
+        STZ     bakbyt,x
+        STZ     fwdbyt,x
+
+        SWA                 ; imp (wdc)
+
+        TAD                 ; imp (wdc)
+
+        TAS                 ; imp (wdc)
+
+        TAX                 ; imp
+
+        TAY                 ; imp
+
+        TCD                 ; imp
+
+        TCS                 ; imp
+
+        TDA                 ; imp (wdc)
+
+        TDC                 ; imp
+
+        TRB     $1234       ; ab
+        TRB     bakwrd
+        TRB     fwdwrd
+        TRB     $12         ; zp
+        TRB     bakbyt
+        TRB     fwdbyt
+
+        TSA                 ; imp (wdc)
+
+        TSB     $1234       ; ab
+        TSB     bakwrd
+        TSB     fwdwrd
+        TSB     $12         ; zp
+        TSB     bakbyt
+        TSB     fwdbyt
+
+        TSC                 ; imp
+
+        TSX                 ; imp
+
+        TXA                 ; imp
+
+        TXS                 ; imp
+
+        TXY                 ; imp
+
+        TYA                 ; imp
+
+        TYX                 ; imp
+
+        WAI                 ; imp
+
+        WDM     #$12        ; imm (hxa)
+        WDM     #bakbyt
+        WDM     #fwdbyt
+        WDM                 ; imp
+        WDM     $12         ; zp (hxa)
+        WDM     bakbyt
+        WDM     fwdbyt
+
+        XBA                 ; imp
+
+        XCE                 ; imp
+
+; forward reference
+
+fwdbyt  .equ    $12
+fwdwrd  .equ    $1234
+fwd24   .equ    $003456     ; 16 bits here, 24 bits in other tests
+fwd24b  .equ    $789ABC
+
+; -------------------------------
+
+        .end

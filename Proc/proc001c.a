@@ -1,0 +1,57 @@
+; Hobby Cross-Assembler Processor Test 001c
+; 6502\Instruction Set
+; ok: ASSUME "zeropage:"
+
+; by Anton Treuenfels
+
+; first created: 07/24/07
+; last revised:  07/24/07
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "6502"      ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+        ; test "zeropage" assumption
+        ; - only checking situations in which multiple address modes
+        ; are possible and which one applies can be decided during
+        ; the first pass
+
+bakbyt  .equ    $12
+bakwrd  .equ    $1234
+
+        ; default zero page = $0000 (same as 6502, 65c02, etc)
+
+        lda bakbyt                  ; zeropage
+        lda bakwrd                  ; absolute
+
+        .assume zeropage:$10        ; $1000-$10FF
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; absolute
+
+        .assume zeropage:$12        ; $1200-$12FF
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; zeropage
+
+        .assume zeropage:$80        ; $8000-$80FF
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; absolute
+
+        .assume zeropage:$00        ; $0000-$00FF
+
+        lda bakbyt                  ; zeropage
+        lda bakwrd                  ; absolute
+
+; -------------------------------
+
+        .end

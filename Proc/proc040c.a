@@ -1,0 +1,285 @@
+; Hobby Cross-Assembler Processor Test 040c
+; W65C816S\Instruction Set
+; ok: ASSUME "accum:", "index:", "directpage:", "databank:"
+
+; by Anton Treuenfels
+
+; first created: 01/27/05
+; last revised:  03/24/10
+
+; no errors to detect
+
+        .listfile
+        .errfile
+
+; -------------------------------
+
+        .cpu    "W65C816S"  ; required psop
+        .org    $1000       ; required psop
+
+; -------------------------------
+
+; exercise immediate mode accumulator and index register size control
+; - cpu is informed of sizes by REP and SEP instructions
+; - assembler is informed of sizes by 'assume' pseudo op
+; - it is up to programmer to keep the two in sync (which it is *not* in
+; this test; the cpu is not informed of anything but the assembler is)
+; - the default state for both is 8-bit sizes
+; - note most memory-read/write instructions are affected by the cpu setting,
+; but only the immediate mode ones must be treated specially by the assembler
+; - note immediate mode versions of BRK, COP, PEA and WDM are HXA extensions
+
+; acc = 8, ndx = 8
+
+        ADC     #$1234      ; 8
+        AND     #$1234      ; 8
+        BIT     #$1234      ; 8
+        CMP     #$1234      ; 8
+        CPX     #$1234      ; 8
+        CPY     #$1234      ; 8
+        EOR     #$1234      ; 8
+        LDA     #$1234      ; 8
+        LDX     #$1234      ; 8
+        LDY     #$1234      ; 8
+        ORA     #$1234      ; 8
+        SBC     #$1234      ; 8
+
+        BRK     #$1234      ; 8,  unaffected
+        COP     #$1234      ; 8,  unaffected
+        PEA     #$1234      ; 16, unaffected
+        REP     #$1234      ; 8,  unaffected
+        SEP     #$1234      ; 8,  unaffected
+        WDM     #$1234      ; 8,  unaffected
+
+; acc = 8, ndx = 16
+
+        .assume index:16
+        ADC     #$1234      ; 8
+        AND     #$1234      ; 8
+        BIT     #$1234      ; 8
+        CMP     #$1234      ; 8
+        CPX     #$1234      ; 16
+        CPY     #$1234      ; 16
+        EOR     #$1234      ; 8
+        LDA     #$1234      ; 8
+        LDX     #$1234      ; 16
+        LDY     #$1234      ; 16
+        ORA     #$1234      ; 8
+        SBC     #$1234      ; 8
+
+        BRK     #$1234      ; 8,  unaffected
+        COP     #$1234      ; 8,  unaffected
+        PEA     #$1234      ; 16, unaffected
+        REP     #$1234      ; 8,  unaffected
+        SEP     #$1234      ; 8,  unaffected
+        WDM     #$1234      ; 8,  unaffected
+
+; acc = 16, ndx = 16
+
+        .assume accum:16
+        ADC     #$1234      ; 16
+        AND     #$1234      ; 16
+        BIT     #$1234      ; 16
+        CMP     #$1234      ; 16
+        CPX     #$1234      ; 16
+        CPY     #$1234      ; 16
+        EOR     #$1234      ; 16
+        LDA     #$1234      ; 16
+        LDX     #$1234      ; 16
+        LDY     #$1234      ; 16
+        ORA     #$1234      ; 16
+        SBC     #$1234      ; 16
+
+        BRK     #$1234      ; 8,  unaffected
+        COP     #$1234      ; 8,  unaffected
+        PEA     #$1234      ; 16, unaffected
+        REP     #$1234      ; 8,  unaffected
+        SEP     #$1234      ; 8,  unaffected
+        WDM     #$1234      ; 8,  unaffected
+
+; acc = 16, ndx = 8
+
+        .assume index:8
+        ADC     #$1234      ; 16
+        AND     #$1234      ; 16
+        BIT     #$1234      ; 16
+        CMP     #$1234      ; 16
+        CPX     #$1234      ; 8
+        CPY     #$1234      ; 8
+        EOR     #$1234      ; 16
+        LDA     #$1234      ; 16
+        LDX     #$1234      ; 8
+        LDY     #$1234      ; 8
+        ORA     #$1234      ; 16
+        SBC     #$1234      ; 16
+
+        BRK     #$1234      ; 8,  unaffected
+        COP     #$1234      ; 8,  unaffected
+        PEA     #$1234      ; 16, unaffected
+        REP     #$1234      ; 8,  unaffected
+        SEP     #$1234      ; 8,  unaffected
+        WDM     #$1234      ; 8,  unaffected
+
+; -------------------------------
+
+; now repeat test using other forms than decimal literals
+
+; acc = 8, ndx = 8
+
+        .assume accum:$08
+        .assume index:4+4
+
+        ADC     #$1234
+        AND     #$1234
+        BIT     #$1234
+        CMP     #$1234
+        CPX     #$1234
+        CPY     #$1234
+        EOR     #$1234
+        LDA     #$1234
+        LDX     #$1234
+        LDY     #$1234
+        ORA     #$1234
+        SBC     #$1234
+
+; acc = 8, ndx = 16
+
+        .assume accum:16/2
+        .assume index:$10
+
+        ADC     #$1234
+        AND     #$1234
+        BIT     #$1234
+        CMP     #$1234
+        CPX     #$1234
+        CPY     #$1234
+        EOR     #$1234
+        LDA     #$1234
+        LDX     #$1234
+        LDY     #$1234
+        ORA     #$1234
+        SBC     #$1234
+
+; acc = 16, ndx = 16
+
+        .assume accum:20-4
+        .assume index:%1000 + 24/3
+
+        ADC     #$1234
+        AND     #$1234
+        BIT     #$1234
+        CMP     #$1234
+        CPX     #$1234
+        CPY     #$1234
+        EOR     #$1234
+        LDA     #$1234
+        LDX     #$1234
+        LDY     #$1234
+        ORA     #$1234
+        SBC     #$1234
+
+; acc = 16, ndx = 8
+
+        .assume accum:8 + 4 + 2 + 1 + 1
+        .assume index:2 * 2 * 2
+
+        ADC     #$1234
+        AND     #$1234
+        BIT     #$1234
+        CMP     #$1234
+        CPX     #$1234
+        CPY     #$1234
+        EOR     #$1234
+        LDA     #$1234
+        LDX     #$1234
+        LDY     #$1234
+        ORA     #$1234
+        SBC     #$1234
+
+; -------------------------------
+
+        ; test "directpage" assumption
+        ; - only checking situations in which multiple address modes
+        ; are possible and which one applies can be decided during
+        ; the first pass
+
+bakbyt  .equ    $12
+bakwrd  .equ    $1234
+baklng  .equ    $123456
+
+        ; default direct page = $0000 (same as 6502, 65c02, etc)
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+        .assume directpage:$0010
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+        .assume directpage:$1200
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; direct
+        lda baklng                  ; long
+
+        .assume directpage:$1230
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; direct
+        lda baklng                  ; long
+
+        .assume directpage:$8000
+
+        lda bakbyt                  ; absolute
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+        .assume directpage:$0000
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+; -------------------------------
+
+        ; test "databank" assumption
+        ; - only checking situations in which multiple address modes
+        ; are possible and which one applies can be decided during
+        ; the first pass
+
+        ; default direct bank = $00 (same as 6502, 65c02, etc)
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+        .assume databank:$10        ; $100000-$10FFFF
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; long
+        lda baklng                  ; long
+
+        .assume databank:$12        ; $120000-$12FFFF
+    
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; long
+        lda baklng                  ; absolute
+
+        .assume databank:$80        ; $800000-$80FFFF
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; long
+        lda baklng                  ; long
+
+        .assume databank:$00        ; $0000000-$00FFFF
+
+        lda bakbyt                  ; direct
+        lda bakwrd                  ; absolute
+        lda baklng                  ; long
+
+; -------------------------------
+
+        .end
