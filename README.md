@@ -14,4 +14,6 @@ Currently Supported Processors:
 
 Currently Supported Operating Systems:
 - Win95 or higher 
-- the Windows version is reported to run under WINE for Linux as well 
+- the Windows version is reported to run under WINE for Linux as well
+
+This version of HXA is written in [Thompson AWK](http://www.tasoft.com/index.html), a compiled version of the normally interpreted [AWK](https://en.wikipedia.org/wiki/AWK) language.
